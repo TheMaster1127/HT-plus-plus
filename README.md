@@ -1,1 +1,1 @@
-"This is a new project called HT-plus-plus"
+###HT++ is a transpiled programming lang that transpiles ahk like syntax to c++
