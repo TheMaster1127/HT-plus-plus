@@ -1,0 +1,10 @@
+
+
+
+
+str var1 := "hello asdfdxg aesdf asdfg cdfxcgv"
+
+Loop, Parse, var1, " "
+{
+ msgbox, % A_LoopField
+}

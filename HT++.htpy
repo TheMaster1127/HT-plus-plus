@@ -252,14 +252,15 @@ Loop, Parse, params, `n, `r
 if (A_Index = 1)
 {
 MsgBox, % A_LoopField
-code := FileRead(A_LoopField)
+filePathOfCode := A_LoopField
+code := FileRead(filePathOfCode)
 }
 if (A_Index = 2)
 {
 MsgBox, % A_LoopField
 }
 }
-MsgBox, % code
+;MsgBox, % code
 
 codeTrimBeggining := ""
 Loop, Parse, code, `n, `r
@@ -383,7 +384,9 @@ filereadCommand2path := StrSplit(filereadCommand, ", ", 2)
 
 filereadCommand2path := StrReplace(filereadCommand2path, "\\", "\\\\")
 
-cppCode .= "variables[" . Chr(34) . filereadCommand1varname . Chr(34) . "] = FileRead(" . Chr(34) . filereadCommand2path . Chr(34) . ");`n"
+filereadCommand2path := varTranspiler(filereadCommand2path, funcNames, allVarsChars, allVarsInts)
+filereadCommand1varname := varTranspiler(filereadCommand1varname, funcNames, allVarsChars, allVarsInts)
+cppCode .= filereadCommand1varname . " = FileRead(" . filereadCommand2path . ");`n"
 
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 12) = "fileappend, ")
@@ -395,8 +398,9 @@ fileAppendCommand2path := StrSplit(fileAppendCommand, ", ", 2)
 fileAppendCommand2path := StrReplace(fileAppendCommand2path, "\\", "\\\\")
 
 fileAppendCommand1varname := varTranspiler(fileAppendCommand1varname, funcNames, allVarsChars, allVarsInts)
+fileAppendCommand2path := varTranspiler(fileAppendCommand2path, funcNames, allVarsChars, allVarsInts)
 
-cppCode .= "FileAppend(" . fileAppendCommand1varname . ", " . Chr(34) . fileAppendCommand2path . Chr(34) . ");`n"
+cppCode .= "FileAppend(" . fileAppendCommand1varname . ", " . fileAppendCommand2path . ");`n"
 
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 12) = "filedelete, ")
@@ -406,9 +410,9 @@ StringTrimLeft, fileDeleteCommand, A_LoopField, 12
 fileDeleteCommand2path := StrSplit(fileDeleteCommand, ", ", 1)
 
 fileDeleteCommand2path := StrReplace(fileDeleteCommand2path, "\\", "\\\\")
+fileDeleteCommand2path := varTranspiler(fileDeleteCommand2path, funcNames, allVarsChars, allVarsInts)
 
-
-cppCode .= "FileDelete(" . Chr(34) . fileDeleteCommand2path . Chr(34) . ");`n"
+cppCode .= "FileDelete(" . fileDeleteCommand2path . ");`n"
 
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = "int ")
@@ -1516,7 +1520,11 @@ downCode := "`nreturn 0;`n}"
 
 cppCode := uperCode . upCode . cppCode . downCode
 
-MsgBox, % cppCode
+;MsgBox, % cppCode
+StringTrimRight, filePathOfCode, filePathOfCode, 4
+filePathOfCode := filePathOfCode . "cpp"
+FileDelete, filePathOfCode
+FileAppend, cppCode, filePathOfCode
 
 
 

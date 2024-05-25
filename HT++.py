@@ -104,6 +104,29 @@ def FileRead(path):
     except Exception as e:
         raise RuntimeError(f"Error: Could not open the file. {e}")
 import os
+def FileAppend(content, path):
+    # Check if the path is absolute
+    if not os.path.isabs(path):
+        path = os.path.join(os.getcwd(), path)
+    try:
+        with open(path, 'a') as file:
+            file.write(content)
+    except Exception as e:
+        raise RuntimeError(f"Error: Could not open the file for appending. {e}")
+import os
+def FileDelete(path):
+    # Check if the path is absolute
+    if not os.path.isabs(path):
+        path = os.path.join(os.getcwd(), path)
+    try:
+        if os.path.exists(path):
+            os.remove(path)
+            print("File successfully deleted.")
+        else:
+            raise RuntimeError("Error: File does not exist.")
+    except Exception as e:
+        raise RuntimeError(f"Error: Failed to delete the file. {e}")
+import os
 import sys
 def GetParams():
     # Check if any command line arguments are provided
@@ -272,10 +295,11 @@ for A_Index11, A_LoopField11 in enumerate(items, start=1):
     variables['A_LoopField11'] = A_LoopField11
     if (variables['A_Index11'] == 1):
         print(variables['A_LoopField11'])
-        variables['code'] = FileRead(variables['A_LoopField11'])
+        variables['filePathOfCode'] = variables['A_LoopField11']
+        variables['code'] = FileRead(variables['filePathOfCode'])
     if (variables['A_Index11'] == 2):
         print(variables['A_LoopField11'])
-print(variables['code'])
+#MsgBox, % code
 variables['codeTrimBeggining'] = ""
 items = LoopParseFunc(variables['code'], "\n", "\r")
 for A_Index12, A_LoopField12 in enumerate(items, start=1):
@@ -344,19 +368,23 @@ for A_Index16, A_LoopField16 in enumerate(items, start=1):
         variables['filereadCommand1varname'] = StrSplit(variables['filereadCommand'] , ", " , 1)
         variables['filereadCommand2path'] = StrSplit(variables['filereadCommand'] , ", " , 2)
         variables['filereadCommand2path'] = StrReplace(variables['filereadCommand2path'] , "\\" , "\\\\")
-        variables['cppCode'] += "variables["  +  Chr(34) +  variables['filereadCommand1varname']  +  Chr(34) +  "] = FileRead("  +  Chr(34) +  variables['filereadCommand2path']  +  Chr(34) +  ");\n"
+        variables['filereadCommand2path'] = varTranspiler(variables['filereadCommand2path'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
+        variables['filereadCommand1varname'] = varTranspiler(variables['filereadCommand1varname'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
+        variables['cppCode'] += variables['filereadCommand1varname']  +  " = FileRead("  +  variables['filereadCommand2path']  +  ");\n"
     elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 12)== "fileappend, "):
         variables['fileAppendCommand'] = StringTrimLeft(variables['A_LoopField16'], 12)
         variables['fileAppendCommand1varname'] = StrSplit(variables['fileAppendCommand'] , ", " , 1)
         variables['fileAppendCommand2path'] = StrSplit(variables['fileAppendCommand'] , ", " , 2)
         variables['fileAppendCommand2path'] = StrReplace(variables['fileAppendCommand2path'] , "\\" , "\\\\")
         variables['fileAppendCommand1varname'] = varTranspiler(variables['fileAppendCommand1varname'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
-        variables['cppCode'] += "FileAppend("  +  variables['fileAppendCommand1varname']  +  ", "  +  Chr(34) +  variables['fileAppendCommand2path']  +  Chr(34) +  ");\n"
+        variables['fileAppendCommand2path'] = varTranspiler(variables['fileAppendCommand2path'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
+        variables['cppCode'] += "FileAppend("  +  variables['fileAppendCommand1varname']  +  ", "  +  variables['fileAppendCommand2path']  +  ");\n"
     elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 12)== "filedelete, "):
         variables['fileDeleteCommand'] = StringTrimLeft(variables['A_LoopField16'], 12)
         variables['fileDeleteCommand2path'] = StrSplit(variables['fileDeleteCommand'] , ", " , 1)
         variables['fileDeleteCommand2path'] = StrReplace(variables['fileDeleteCommand2path'] , "\\" , "\\\\")
-        variables['cppCode'] += "FileDelete("  +  Chr(34) +  variables['fileDeleteCommand2path']  +  Chr(34) +  ");\n"
+        variables['fileDeleteCommand2path'] = varTranspiler(variables['fileDeleteCommand2path'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
+        variables['cppCode'] += "FileDelete("  +  variables['fileDeleteCommand2path']  +  ");\n"
     elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 4)== "int "):
         variables['intVar'] = StringTrimLeft(variables['A_LoopField16'], 4)
         variables['intVar'] = Trim(variables['intVar'])
@@ -889,5 +917,9 @@ if (InStr(variables['cppCode'] , "FileDelete(")):
     variables['uperCode'] = variables['uperCode']  +  "\nbool FileDelete(const std::string& path) {\n    std::filesystem::path file_path(path);\n\n    // Check if the file exists\n    if (!std::filesystem::exists(file_path)) {\n        std::cerr << "  +  Chr(34) +  "Error: File does not exist."  +  Chr(34) +  " << std::endl;\n        return false;\n    }\n\n    // Attempt to remove the file\n    if (!std::filesystem::remove(file_path)) {\n        std::cerr << "  +  Chr(34) +  "Error: Failed to delete the file."  +  Chr(34) +  " << std::endl;\n        return false;\n    }\n\n    return true;\n}\n"
 variables['downCode'] = "\nreturn 0;\n}"
 variables['cppCode'] = variables['uperCode']  +  variables['upCode']  +  variables['cppCode']  +  variables['downCode']
-print(variables['cppCode'])
+#MsgBox, % cppCode
+variables['filePathOfCode'] = StringTrimRight(variables['filePathOfCode'], 4)
+variables['filePathOfCode'] = variables['filePathOfCode']  +  "cpp"
+FileDelete(variables['filePathOfCode'])
+FileAppend(variables['cppCode'], variables['filePathOfCode'])
 
