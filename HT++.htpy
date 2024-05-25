@@ -120,10 +120,19 @@ return "std::any(" . varInVarTranspiler . ")"
 
 Loop, Parse, funcNames, "|"
 {
-if (Trim(varInVarTranspiler) = Trim(A_LoopField))
+
+if (varInVarTranspiler = A_LoopField)
 {
 return varInVarTranspiler
 }
+
+
+if (InStr(Trim(varInVarTranspiler), A_LoopField . "("))
+{
+return varInVarTranspiler
+}
+
+
 }
 
 
@@ -174,6 +183,12 @@ var123out := ""
 
 lastType := ""
 typeMode := 0
+
+var123 := StrReplace(var123, ",", " , ")
+var123 := StrReplace(var123, "(", " ( ")
+var123 := StrReplace(var123, ")", " ) ")
+
+
 Loop, Parse, var123, " "
 {
 
@@ -244,7 +259,9 @@ out := ""
 HTpyCodeD1 := ""
 skipLeftCuleyForFuncPLS := 0
 eavbnsalvbaslv := 0
-
+theMainFuncDec := 0
+upCode := ""
+removeNextCurlyBraceCpp := 0
 
 params := GetParams()
 Loop, Parse, params, `n, `r
@@ -332,11 +349,23 @@ Loop, % theIdNumOfThe34
 theIdNumOfThe34theVar%A_Index% .= Chr(34)
 }
 
-
-
 allVarsChars := ""
 allVarsInts := ""
-funcNames := "InStr|convertToStr|convertToInt"
+funcNames := "convertToInt|convertToStr|InStr|LoopParseFunc|print|FileRead|FileAppend|FileDelete|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|StrLower|RegExReplace|StrSplit|Chr|Mod|Floor|A_TickCount"
+
+; func
+Loop, Parse, code, `n, `r
+{
+if (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "func ")
+{
+StringTrimLeft, funcName123, A_LoopField, 5
+funcName123 := Trim(StrSplit(funcName123, "(", 1))
+funcNames .= "|" . funcName123
+}
+}
+
+
+
 
 cppCode := ""
 Loop, Parse, code, `n, `r
@@ -414,6 +443,105 @@ fileDeleteCommand2path := varTranspiler(fileDeleteCommand2path, funcNames, allVa
 
 cppCode .= "FileDelete(" . fileDeleteCommand2path . ");`n"
 
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 17) = StrLower("StringTrimRight, "))
+{
+varr1 := StrSplit(A_LoopField, ",", 2)
+varr2 := StrSplit(A_LoopField, ",", 3)
+varr3 := StrSplit(A_LoopField, ",", 4)
+
+outt1 := Trim(varTranspiler(varr1, funcNames, allVarsChars, allVarsInts))
+outt2 := Trim(varTranspiler(varr2, funcNames, allVarsChars, allVarsInts))
+outt3 := Trim(varTranspiler(varr3, funcNames, allVarsChars, allVarsInts))
+
+out := outt1 . " = " . "StringTrimRight(" . outt2 . ", " . outt3 . ");"
+
+cppCode .= out . "`n"
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 16) = StrLower("StringTrimLeft, "))
+{
+varr1 := StrSplit(A_LoopField, ",", 2)
+varr2 := StrSplit(A_LoopField, ",", 3)
+varr3 := StrSplit(A_LoopField, ",", 4)
+
+outt1 := Trim(varTranspiler(varr1, funcNames, allVarsChars, allVarsInts))
+outt2 := Trim(varTranspiler(varr2, funcNames, allVarsChars, allVarsInts))
+outt3 := Trim(varTranspiler(varr3, funcNames, allVarsChars, allVarsInts))
+
+out := outt1 . " = " . "StringTrimLeft(" . outt2 . ", " . outt3 . ");"
+
+cppCode .= out . "`n"
+}
+else if (A_LoopField = "main:")
+{
+theMainFuncDec := 1
+cppCode .= "`nint main()`n{`n"
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "func ")
+{
+StringTrimLeft, funcTranspile, A_LoopField, 5
+funcName123 := Trim(StrSplit(funcTranspile, "(", 1))
+funcName123Num := 1
+Loop, Parse, funcName123
+{
+funcName123Num++
+}
+StringTrimLeft, funcTranspile, funcTranspile, funcName123Num
+StringTrimRight, funcTranspile, funcTranspile, 1
+;MsgBox, ||%funcTranspile%||
+
+intOrStrTypeFuncDec := ""
+intOrStrTypeFuncDecMode := 0
+funcDecArgsNum := 0
+Loop, Parse, funcTranspile, " "
+{
+if (A_LoopField = "int")
+{
+intOrStrTypeFuncDec := "int"
+intOrStrTypeFuncDecMode := 1
+}
+if (A_LoopField = "str")
+{
+intOrStrTypeFuncDec := "str"
+intOrStrTypeFuncDecMode := 1
+}
+
+if (intOrStrTypeFuncDecMode = 1) && (A_LoopField != "int") && (A_LoopField != "str")
+{
+intOrStrTypeFuncDecMode := 0
+funcDecArgsNum++
+
+funcArg%funcDecArgsNum% := intOrStrTypeFuncDec . "|" . Trim(A_LoopField)
+}
+}
+funcAllArgs := ""
+Loop, % funcDecArgsNum
+{
+theVarForFuncDec := Trim(StrSplit(funcArg%A_Index%, "|", 2))
+funcAllArgs .= "const std::any& " . theVarForFuncDec . ", "
+}
+StringTrimRight, funcAllArgs, funcAllArgs, 2
+
+funcGetParamsToVars := "{`n"
+Loop, % funcDecArgsNum
+{
+theVarForFuncDec1 := Trim(StrSplit(funcArg%A_Index%, "|", 1))
+theVarForFuncDec2 := Trim(StrSplit(funcArg%A_Index%, "|", 2))
+
+if (theVarForFuncDec1 = "int")
+{
+theVarForFuncDec1 := "convertToInt("
+}
+else
+{
+theVarForFuncDec1 := "convertToStr("
+}
+
+funcGetParamsToVars .= "variables[" . Chr(34) . theVarForFuncDec2 . Chr(34) . "] = " . theVarForFuncDec1 . theVarForFuncDec2 . ");`n"
+}
+
+removeNextCurlyBraceCpp := 1
+cppCode .= "std::any " . funcName123 . "(" . funcAllArgs . ")" . "`n" . funcGetParamsToVars . "`n"
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = "int ")
 {
@@ -893,9 +1021,30 @@ else if (StrLower(A_LoopField) = "break")
 {
 cppCode .= A_LoopField . ";`n"
 }
+else if (StrLower(A_LoopField) = "continue")
+{
+cppCode .= A_LoopField . ";`n"
+}
+else if (StrLower(A_LoopField) = "return") or (SubStr(Trim(StrLower(A_LoopField)), 1, 7) = "return ")
+{
+if (StrLower(A_LoopField) = "return")
+{
+cppCode .= A_LoopField . ";`n"
+}
+else
+{
+StringTrimLeft, varTranspiledReturn, A_LoopField, 7
+varTranspiledReturn := varTranspiler(varTranspiledReturn, funcNames, allVarsChars, allVarsInts)
+cppCode .= "return " . varTranspiledReturn . ";`n"
+}
+}
 else
 {
 ; this is THE else
+
+if (removeNextCurlyBraceCpp != 1)
+{
+removeNextCurlyBraceCpp := 0
 
 if (skipLeftCuleyForFuncPLS != 1)
 {
@@ -932,7 +1081,21 @@ skipLeftCuleyForFuncPLS := 0
 }
 
 }
+else
+{
 
+if (Trim(A_LoopField) = "{") && (removeNextCurlyBraceCpp = 1)
+{
+removeNextCurlyBraceCpp := 0
+}
+else
+{
+cppCode .= A_LoopField . "`n"
+}
+
+
+}
+}
 
 }
 
@@ -1452,28 +1615,26 @@ cppCodeFixCharRemoveStd .= A_LoopField . "`n"
 }
 StringTrimRight, cppCode, cppCodeFixCharRemoveStd, 1
 
-upCode := "`nint main()`n{`n"
 
-if (InStr(cppCode, "variables["))
+if (theMainFuncDec = 0)
 {
-upCode := upCode . "// Define a map to store dynamic variables`n" . "std::unordered_map<std::string, std::any> variables;`n"
+upCode := "`nint main()`n{`n"
 }
 
+uperCode := "#include <iostream>`n#include <sstream>`n#include <vector>`n#include <unordered_map>`n#include <string>`n#include <any>`n#include <cstdint>`n#include <regex>`n#include <fstream>`n#include <filesystem>`n#include <cctype>`n#include <algorithm>`n#include <cmath>`n#include <limits>`n#include <chrono>`n`n// Define a map to store dynamic variables`n" . "std::unordered_map<std::string, std::any> variables;`n"
 
-uperCode := "#include <iostream>`n#include <sstream>`n#include <vector>`n#include <unordered_map>`n#include <string>`n#include <any>`n#include <cstdint>`n#include <regex>`n#include <fstream>`n#include <filesystem>`n"
 
-
-if (InStr(cppCode, "convertToInt("))
+if (InStr(cppCode, "convertToInt(")) or (InStr(cppCode, "convertToInt ("))
 {
 uperCode := uperCode . "`n// Function to convert std::any to int`nint convertToInt(const std::any& value) {`n    if (value.type() == typeid(std::string)) {`n        try {`n            return std::stoi(std::any_cast<std::string>(value));`n        } catch (const std::invalid_argument&) {`n            return 0; // Return 0 if conversion fails`n        }`n    } else if (value.type() == typeid(int)) {`n        return std::any_cast<int>(value);`n    } else {`n        return 0; // Return 0 for other types`n    }`n}`n"
 }
-if (InStr(cppCode, "convertToStr("))
+if (InStr(cppCode, "convertToStr(")) or (InStr(cppCode, "convertToStr ("))
 {
 uperCode := uperCode . "`n// Function to convert std::any to std::string`nstd::string convertToStr(const std::any& value) {`n    if (value.type() == typeid(std::string)) {`n        return std::any_cast<std::string>(value);`n    } else if (value.type() == typeid(int)) {`n        return std::to_string(std::any_cast<int>(value));`n    } else if (value.type() == typeid(int8_t)) {`n        return std::to_string(static_cast<int>(std::any_cast<int8_t>(value)));`n    } else {`n        return " . Chr(34) . "" . Chr(34) . "; // Return empty string for other types`n    }`n}`n"
 }
 
 
-if (InStr(cppCode, "InStr("))
+if (InStr(cppCode, "InStr(")) or (InStr(cppCode, "InStr ("))
 {
 uperCode := uperCode . "`n// Function to check if needle exists in haystack (std::string overload)`nbool InStr(const std::string& haystack, const std::string& needle) {`n    return haystack.find(needle) != std::string::npos;`n}`n"
 }
@@ -1483,7 +1644,7 @@ if (InStr(cppCode, "LoopParseFunc("))
 uperCode := uperCode . "`n// Function to escape special characters for regex`nstd::string escapeRegex(const std::string& str) {`n    static const std::regex specialChars{R" . Chr(34) . "([-[\]{}()*+?.,\^$|#\s])" . Chr(34) . "};`n    return std::regex_replace(str, specialChars, R" . Chr(34) . "(\$&)" . Chr(34) . ");`n}`n`n// Function to split a string based on delimiters`nstd::vector<std::string> LoopParseFunc(const std::string& var, const std::string& delimiter1 = " . Chr(34) . "" . Chr(34) . ", const std::string& delimiter2 = " . Chr(34) . "" . Chr(34) . ") {`n    std::vector<std::string> items;`n    if (delimiter1.empty() && delimiter2.empty()) {`n        // If no delimiters are provided, return a list of characters`n        for (char c : var) {`n            items.push_back(std::string(1, c));`n        }`n    } else {`n        // Escape delimiters for regex`n        std::string escapedDelimiters = escapeRegex(delimiter1 + delimiter2);`n        // Construct the regular expression pattern for splitting the string`n        std::string pattern = " . Chr(34) . "[" . Chr(34) . " + escapedDelimiters + " . Chr(34) . "]+" . Chr(34) . ";`n        std::regex regexPattern(pattern);`n        std::sregex_token_iterator iter(var.begin(), var.end(), regexPattern, -1);`n        std::sregex_token_iterator end;`n        while (iter != end) {`n            items.push_back(*iter++);`n        }`n    }`n    return items;`n}`n"
 }
 
-if (InStr(cppCode, "print("))
+if (InStr(cppCode, "print(")) or (InStr(cppCode, "print ("))
 {
 uperCode := uperCode . "`n// Function to print the value stored in std::any`nvoid print(const std::any& value) {`n    if (value.has_value()) {`n        if (value.type() == typeid(std::string)) {`n            std::cout << std::any_cast<std::string>(value) << std::endl;`n        } else if (value.type() == typeid(int)) {`n            std::cout << std::any_cast<int>(value) << std::endl;`n        }`n    } else {`n        std::cout << " . Chr(34) . "Value is not set" . Chr(34) . " << std::endl;`n    }`n}`n"
 }
@@ -1509,6 +1670,68 @@ if (InStr(cppCode, "FileDelete("))
 uperCode := uperCode . "`nbool FileDelete(const std::string& path) {`n    std::filesystem::path file_path(path);`n`n    // Check if the file exists`n    if (!std::filesystem::exists(file_path)) {`n        std::cerr << " . Chr(34) . "Error: File does not exist." . Chr(34) . " << std::endl;`n        return false;`n    }`n`n    // Attempt to remove the file`n    if (!std::filesystem::remove(file_path)) {`n        std::cerr << " . Chr(34) . "Error: Failed to delete the file." . Chr(34) . " << std::endl;`n        return false;`n    }`n`n    return true;`n}`n"
 }
 
+;;;;;;;;;;;;;;;
+
+if (InStr(cppCode, "SubStr(")) or (InStr(cppCode, "SubStr ("))
+{
+uperCode := uperCode . "`n// Function to extract a substring`nstd::string SubStr(const std::string &str, int startPos, int length = -1) {`n    if (str.empty()) return " . Chr(34) . "" . Chr(34) . ";`n`n    if (startPos < 1) {`n        startPos = str.length() + startPos + 1;`n    }`n`n    if (length == -1) {`n        length = str.length() - startPos + 1;`n    }`n`n    return str.substr(startPos - 1, length);`n}`n"
+}
+
+if (InStr(cppCode, "Trim(")) or (InStr(cppCode, "Trim ("))
+{
+uperCode := uperCode . "`n// Function to trim leading and trailing whitespace from a string`nstd::string Trim(const std::string &inputString) {`n    if (inputString.empty()) return " . Chr(34) . "" . Chr(34) . ";`n`n    size_t start = inputString.find_first_not_of(" . Chr(34) . " " . Chr(92) . "t" . Chr(92) . "n" . Chr(92) . "r" . Chr(92) . "f" . Chr(92) . "v" . Chr(34) . ");`n    size_t end = inputString.find_last_not_of(" . Chr(34) . " " . Chr(92) . "t" . Chr(92) . "n" . Chr(92) . "r" . Chr(92) . "f" . Chr(92) . "v" . Chr(34) . ");`n`n    return (start == std::string::npos) ? " . Chr(34) . "" . Chr(34) . " : inputString.substr(start, end - start + 1);`n}`n"
+}
+
+if (InStr(cppCode, "StrReplace(")) or (InStr(cppCode, "StrReplace ("))
+{
+uperCode := uperCode . "`n// Function to replace all occurrences of a substring with another substring`nstd::string StrReplace(const std::string &originalString, const std::string &find, const std::string &replaceWith) {`n    std::string result = originalString;`n    size_t pos = 0;`n`n    while ((pos = result.find(find, pos)) != std::string::npos) {`n        result.replace(pos, find.length(), replaceWith);`n        pos += replaceWith.length();`n    }`n`n    return result;`n}`n"
+}
+
+if (InStr(cppCode, "StringTrimLeft(")) or (InStr(cppCode, "StringTrimLeft ("))
+{
+uperCode := uperCode . "`n// Function to trim characters from the left of the string`nstd::string StringTrimLeft(const std::string &input, int numChars) {`n    return (numChars <= input.length()) ? input.substr(numChars) : input;`n}`n"
+}
+
+if (InStr(cppCode, "StringTrimRight(")) or (InStr(cppCode, "StringTrimRight ("))
+{
+uperCode := uperCode . "`n// Function to trim characters from the right of the string`nstd::string StringTrimRight(const std::string &input, int numChars) {`n    return (numChars <= input.length()) ? input.substr(0, input.length() - numChars) : input;`n}`n"
+}
+
+if (InStr(cppCode, "StrLower(")) or (InStr(cppCode, "StrLower ("))
+{
+uperCode := uperCode . "`n// Function to convert a string to lowercase`nstd::string StrLower(const std::string &string) {`n    std::string result = string;`n    std::transform(result.begin(), result.end(), result.begin(), ::tolower);`n    return result;`n}`n"
+}
+
+if (InStr(cppCode, "RegExReplace(")) or (InStr(cppCode, "RegExReplace ("))
+{
+uperCode := uperCode . "`n// Function to perform a regex replacement`nstd::string RegExReplace(const std::string &inputStr, const std::string &regexPattern, const std::string &replacement) {`n    std::regex regex(regexPattern);`n    return std::regex_replace(inputStr, regex, replacement);`n}`n"
+}
+
+if (InStr(cppCode, "StrSplit(")) or (InStr(cppCode, "StrSplit ("))
+{
+uperCode := uperCode . "`n// Function to split a string by a delimiter and return the nth part`nstd::string StrSplit(const std::string &inputStr, const std::string &delimiter, int num) {`n    size_t start = 0, end = 0, count = 0;`n`n    while ((end = inputStr.find(delimiter, start)) != std::string::npos) {`n        if (++count == num) {`n            return inputStr.substr(start, end - start);`n        }`n        start = end + delimiter.length();`n    }`n`n    if (count + 1 == num) {`n        return inputStr.substr(start);`n    }`n`n    return " . Chr(34) . "" . Chr(34) . ";`n}`n"
+}
+
+if (InStr(cppCode, "Chr(")) or (InStr(cppCode, "Chr ("))
+{
+uperCode := uperCode . "`n// Function to convert a number to a character`nstd::string Chr(int number) {`n    return (number >= 0 && number <= 0x10FFFF) ? std::string(1, static_cast<char>(number)) : " . Chr(34) . "" . Chr(34) . ";`n}`n"
+}
+
+if (InStr(cppCode, "Mod(")) or (InStr(cppCode, "Mod ("))
+{
+uperCode := uperCode . "`n// Custom Mod function`nint Mod(int dividend, int divisor) {`n    return dividend % divisor;`n}`n"
+}
+
+if (InStr(cppCode, "Floor(")) or (InStr(cppCode, "Floor ("))
+{
+uperCode := uperCode . "`ndouble Floor(double num) {`n    if (std::isnan(num)) {`n        return std::numeric_limits<double>::quiet_NaN();`n    }`n    return std::floor(num);`n}`n"
+}
+
+
+if (InStr(cppCode, "A_TickCount(")) or (InStr(cppCode, "A_TickCount ("))
+{
+uperCode := uperCode . "`nauto start_timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();`n`n// Function to calculate tick count in milliseconds`nstd::string A_TickCount() {`n    auto current_timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();`n    return std::to_string(current_timestamp - start_timestamp);`n}`n"
+}
 
 
 
@@ -1519,6 +1742,8 @@ uperCode := uperCode . "`nbool FileDelete(const std::string& path) {`n    std::f
 downCode := "`nreturn 0;`n}"
 
 cppCode := uperCode . upCode . cppCode . downCode
+
+cppCode := StrReplace(cppCode, "std::string()", "")
 
 ;MsgBox, % cppCode
 StringTrimRight, filePathOfCode, filePathOfCode, 4

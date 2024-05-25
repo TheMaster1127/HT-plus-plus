@@ -216,7 +216,9 @@ def isVarAfuncOrWhat(varInVarTranspiler, funcNames, allVarsChars, allVarsInts):
     for A_Index9, A_LoopField9 in enumerate(items, start=1):
         variables['A_Index9'] = A_Index9
         variables['A_LoopField9'] = A_LoopField9
-        if (Trim(variables['varInVarTranspiler'])== Trim(variables['A_LoopField9'])):
+        if (variables['varInVarTranspiler'] == variables['A_LoopField9']):
+            return variables['varInVarTranspiler']
+        if (InStr(Trim(variables['varInVarTranspiler']), variables['A_LoopField9']  +  "(")):
             return variables['varInVarTranspiler']
     if (varDetect(variables['varInVarTranspiler'])):
         return "variables["  +  Chr(34) +  variables['varInVarTranspiler']  +  Chr(34) +  "]"
@@ -242,6 +244,9 @@ def varTranspiler(var123, funcNames, allVarsChars, allVarsInts):
     variables['var123out'] = ""
     variables['lastType'] = ""
     variables['typeMode'] = 0
+    variables['var123'] = StrReplace(variables['var123'] , "," , " , ")
+    variables['var123'] = StrReplace(variables['var123'] , "(" , " ( ")
+    variables['var123'] = StrReplace(variables['var123'] , ")" , " ) ")
     items = LoopParseFunc(variables['var123'], " ")
     for A_Index10, A_LoopField10 in enumerate(items, start=1):
         variables['A_Index10'] = A_Index10
@@ -288,6 +293,9 @@ variables['out'] = ""
 variables['HTpyCodeD1'] = ""
 variables['skipLeftCuleyForFuncPLS'] = 0
 variables['eavbnsalvbaslv'] = 0
+variables['theMainFuncDec'] = 0
+variables['upCode'] = ""
+variables['removeNextCurlyBraceCpp'] = 0
 variables['params'] = GetParams()
 items = LoopParseFunc(variables['params'], "\n", "\r")
 for A_Index11, A_LoopField11 in enumerate(items, start=1):
@@ -340,53 +348,130 @@ for A_Index15 in range(1, variables['theIdNumOfThe34'] + 1):
     variables[f'theIdNumOfThe34theVar{variables["A_Index15"]}'] += Chr(34)
 variables['allVarsChars'] = ""
 variables['allVarsInts'] = ""
-variables['funcNames'] = "InStr|convertToStr|convertToInt"
-variables['cppCode'] = ""
+variables['funcNames'] = "convertToInt|convertToStr|InStr|LoopParseFunc|print|FileRead|FileAppend|FileDelete|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|StrLower|RegExReplace|StrSplit|Chr|Mod|Floor|A_TickCount"
+# func
 items = LoopParseFunc(variables['code'], "\n", "\r")
 for A_Index16, A_LoopField16 in enumerate(items, start=1):
     variables['A_Index16'] = A_Index16
     variables['A_LoopField16'] = A_LoopField16
-    if (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 10)== "msgbox, % "):
-        variables['msgboxCode'] = StringTrimLeft(variables['A_LoopField16'], 10)
+    if (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 5)== "func "):
+        variables['funcName123'] = StringTrimLeft(variables['A_LoopField16'], 5)
+        variables['funcName123'] = Trim(StrSplit(variables['funcName123'] , "(" , 1))
+        variables['funcNames'] += "|"  +  variables['funcName123']
+variables['cppCode'] = ""
+items = LoopParseFunc(variables['code'], "\n", "\r")
+for A_Index17, A_LoopField17 in enumerate(items, start=1):
+    variables['A_Index17'] = A_Index17
+    variables['A_LoopField17'] = A_LoopField17
+    if (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 10)== "msgbox, % "):
+        variables['msgboxCode'] = StringTrimLeft(variables['A_LoopField17'], 10)
         variables['msgboxCode'] = varTranspiler(variables['msgboxCode'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
         variables['cppCode'] += "print("  +  variables['msgboxCode']  +  ");"  +  "\n"
-    elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 8)== "msgbox, "):
-        variables['msgboxCode'] = StringTrimLeft(variables['A_LoopField16'], 8)
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 8)== "msgbox, "):
+        variables['msgboxCode'] = StringTrimLeft(variables['A_LoopField17'], 8)
         variables['cppCode'] += "print(std::string("  +  Chr(34) +  variables['msgboxCode']  +  Chr(34) +  "));"  +  "\n"
-    elif (SubStr(variables['A_LoopField16'] , -1)== "++"):
-        variables['str123'] = Trim(variables['A_LoopField16'])
+    elif (SubStr(variables['A_LoopField17'] , -1)== "++"):
+        variables['str123'] = Trim(variables['A_LoopField17'])
         variables['str123'] = StringTrimRight(variables['str123'], 2)
         variables['out'] = "variables["  +  Chr(34) +  variables['str123']  +  Chr(34) +  "] = convertToInt(variables["  +  Chr(34) +  variables['str123']  +  Chr(34) +  "]) + 1;"
         variables['cppCode'] += variables['out']  +  "\n"
-    elif (SubStr(variables['A_LoopField16'] , -1)== "--"):
-        variables['str123'] = Trim(variables['A_LoopField16'])
+    elif (SubStr(variables['A_LoopField17'] , -1)== "--"):
+        variables['str123'] = Trim(variables['A_LoopField17'])
         variables['str123'] = StringTrimRight(variables['str123'], 2)
         variables['out'] = "variables["  +  Chr(34) +  variables['str123']  +  Chr(34) +  "] = convertToInt(variables["  +  Chr(34) +  variables['str123']  +  Chr(34) +  "]) - 1;"
         variables['cppCode'] += variables['out']  +  "\n"
-    elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 10)== "fileread, "):
-        variables['filereadCommand'] = StringTrimLeft(variables['A_LoopField16'], 10)
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 10)== "fileread, "):
+        variables['filereadCommand'] = StringTrimLeft(variables['A_LoopField17'], 10)
         variables['filereadCommand1varname'] = StrSplit(variables['filereadCommand'] , ", " , 1)
         variables['filereadCommand2path'] = StrSplit(variables['filereadCommand'] , ", " , 2)
         variables['filereadCommand2path'] = StrReplace(variables['filereadCommand2path'] , "\\" , "\\\\")
         variables['filereadCommand2path'] = varTranspiler(variables['filereadCommand2path'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
         variables['filereadCommand1varname'] = varTranspiler(variables['filereadCommand1varname'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
         variables['cppCode'] += variables['filereadCommand1varname']  +  " = FileRead("  +  variables['filereadCommand2path']  +  ");\n"
-    elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 12)== "fileappend, "):
-        variables['fileAppendCommand'] = StringTrimLeft(variables['A_LoopField16'], 12)
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 12)== "fileappend, "):
+        variables['fileAppendCommand'] = StringTrimLeft(variables['A_LoopField17'], 12)
         variables['fileAppendCommand1varname'] = StrSplit(variables['fileAppendCommand'] , ", " , 1)
         variables['fileAppendCommand2path'] = StrSplit(variables['fileAppendCommand'] , ", " , 2)
         variables['fileAppendCommand2path'] = StrReplace(variables['fileAppendCommand2path'] , "\\" , "\\\\")
         variables['fileAppendCommand1varname'] = varTranspiler(variables['fileAppendCommand1varname'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
         variables['fileAppendCommand2path'] = varTranspiler(variables['fileAppendCommand2path'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
         variables['cppCode'] += "FileAppend("  +  variables['fileAppendCommand1varname']  +  ", "  +  variables['fileAppendCommand2path']  +  ");\n"
-    elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 12)== "filedelete, "):
-        variables['fileDeleteCommand'] = StringTrimLeft(variables['A_LoopField16'], 12)
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 12)== "filedelete, "):
+        variables['fileDeleteCommand'] = StringTrimLeft(variables['A_LoopField17'], 12)
         variables['fileDeleteCommand2path'] = StrSplit(variables['fileDeleteCommand'] , ", " , 1)
         variables['fileDeleteCommand2path'] = StrReplace(variables['fileDeleteCommand2path'] , "\\" , "\\\\")
         variables['fileDeleteCommand2path'] = varTranspiler(variables['fileDeleteCommand2path'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
         variables['cppCode'] += "FileDelete("  +  variables['fileDeleteCommand2path']  +  ");\n"
-    elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 4)== "int "):
-        variables['intVar'] = StringTrimLeft(variables['A_LoopField16'], 4)
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 17)== StrLower("StringTrimRight, ")):
+        variables['varr1'] = StrSplit(variables['A_LoopField17'] , "," , 2)
+        variables['varr2'] = StrSplit(variables['A_LoopField17'] , "," , 3)
+        variables['varr3'] = StrSplit(variables['A_LoopField17'] , "," , 4)
+        variables['outt1'] = Trim(varTranspiler(variables['varr1'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts']))
+        variables['outt2'] = Trim(varTranspiler(variables['varr2'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts']))
+        variables['outt3'] = Trim(varTranspiler(variables['varr3'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts']))
+        variables['out'] = variables['outt1']  +  " = "  +  "StringTrimRight("  +  variables['outt2']  +  ", "  +  variables['outt3']  +  ");"
+        variables['cppCode'] += variables['out']  +  "\n"
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 16)== StrLower("StringTrimLeft, ")):
+        variables['varr1'] = StrSplit(variables['A_LoopField17'] , "," , 2)
+        variables['varr2'] = StrSplit(variables['A_LoopField17'] , "," , 3)
+        variables['varr3'] = StrSplit(variables['A_LoopField17'] , "," , 4)
+        variables['outt1'] = Trim(varTranspiler(variables['varr1'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts']))
+        variables['outt2'] = Trim(varTranspiler(variables['varr2'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts']))
+        variables['outt3'] = Trim(varTranspiler(variables['varr3'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts']))
+        variables['out'] = variables['outt1']  +  " = "  +  "StringTrimLeft("  +  variables['outt2']  +  ", "  +  variables['outt3']  +  ");"
+        variables['cppCode'] += variables['out']  +  "\n"
+    elif (variables['A_LoopField17'] == "main:"):
+        variables['theMainFuncDec'] = 1
+        variables['cppCode'] += "\nint main()\n{\n"
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 5)== "func "):
+        variables['funcTranspile'] = StringTrimLeft(variables['A_LoopField17'], 5)
+        variables['funcName123'] = Trim(StrSplit(variables['funcTranspile'] , "(" , 1))
+        variables['funcName123Num'] = 1
+        items = LoopParseFunc(variables['funcName123'])
+        for A_Index18, A_LoopField18 in enumerate(items, start=1):
+            variables['A_Index18'] = A_Index18
+            variables['A_LoopField18'] = A_LoopField18
+            variables['funcName123Num'] += 1
+        variables['funcTranspile'] = StringTrimLeft(variables['funcTranspile'], variables['funcName123Num'])
+        variables['funcTranspile'] = StringTrimRight(variables['funcTranspile'], 1)
+        #MsgBox, ||%funcTranspile%||
+        variables['intOrStrTypeFuncDec'] = ""
+        variables['intOrStrTypeFuncDecMode'] = 0
+        variables['funcDecArgsNum'] = 0
+        items = LoopParseFunc(variables['funcTranspile'], " ")
+        for A_Index19, A_LoopField19 in enumerate(items, start=1):
+            variables['A_Index19'] = A_Index19
+            variables['A_LoopField19'] = A_LoopField19
+            if (variables['A_LoopField19'] == "int"):
+                variables['intOrStrTypeFuncDec'] = "int"
+                variables['intOrStrTypeFuncDecMode'] = 1
+            if (variables['A_LoopField19'] == "str"):
+                variables['intOrStrTypeFuncDec'] = "str"
+                variables['intOrStrTypeFuncDecMode'] = 1
+            if (variables['intOrStrTypeFuncDecMode'] == 1)and(variables['A_LoopField19']  != "int")and(variables['A_LoopField19']  != "str"):
+                variables['intOrStrTypeFuncDecMode'] = 0
+                variables['funcDecArgsNum'] += 1
+                variables[f'funcArg{variables["funcDecArgsNum"]}'] = variables['intOrStrTypeFuncDec']  +  "|"  +  Trim(variables['A_LoopField19'])
+        variables['funcAllArgs'] = ""
+        for A_Index20 in range(1, variables['funcDecArgsNum'] + 1):
+            variables['A_Index20'] = A_Index20
+            variables['theVarForFuncDec'] = Trim(StrSplit(variables[f'funcArg{variables["A_Index20"]}'] , "|" , 2))
+            variables['funcAllArgs'] += "const std::any& "  +  variables['theVarForFuncDec']  +  ", "
+        variables['funcAllArgs'] = StringTrimRight(variables['funcAllArgs'], 2)
+        variables['funcGetParamsToVars'] = "{\n"
+        for A_Index21 in range(1, variables['funcDecArgsNum'] + 1):
+            variables['A_Index21'] = A_Index21
+            variables['theVarForFuncDec1'] = Trim(StrSplit(variables[f'funcArg{variables["A_Index21"]}'] , "|" , 1))
+            variables['theVarForFuncDec2'] = Trim(StrSplit(variables[f'funcArg{variables["A_Index21"]}'] , "|" , 2))
+            if (variables['theVarForFuncDec1'] == "int"):
+                variables['theVarForFuncDec1'] = "convertToInt("
+            else:
+                variables['theVarForFuncDec1'] = "convertToStr("
+            variables['funcGetParamsToVars'] += "variables["  +  Chr(34) +  variables['theVarForFuncDec2']  +  Chr(34) +  "] = "  +  variables['theVarForFuncDec1']  +  variables['theVarForFuncDec2']  +  ");\n"
+        variables['removeNextCurlyBraceCpp'] = 1
+        variables['cppCode'] += "std::any "  +  variables['funcName123']  +  "("  +  variables['funcAllArgs']  +  ")"  +  "\n"  +  variables['funcGetParamsToVars']  +  "\n"
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 4)== "int "):
+        variables['intVar'] = StringTrimLeft(variables['A_LoopField17'], 4)
         variables['intVar'] = Trim(variables['intVar'])
         if (InStr(variables['intVar'] , " := ")):
             variables['varAssignmentType'] = "="
@@ -405,8 +490,8 @@ for A_Index16, A_LoopField16 in enumerate(items, start=1):
         variables['nameOfVar2'] = Trim(StrSplit(variables['intVar'] , variables['nameOfVarSplit'] , 2))
         variables['nameOfVar2'] = varTranspiler(variables['nameOfVar2'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
         variables['cppCode'] += "variables["  +  Chr(34) +  variables['nameOfVar1']  +  Chr(34) +  "]"  +  " "  +  variables['varAssignmentType']  +  " "  +  variables['nameOfVar2']  +  Chr(59) +  "\n"
-    elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 4)== "str "):
-        variables['strVar'] = StringTrimLeft(variables['A_LoopField16'], 4)
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 4)== "str "):
+        variables['strVar'] = StringTrimLeft(variables['A_LoopField17'], 4)
         variables['strVar'] = Trim(variables['strVar'])
         if (InStr(variables['strVar'] , " := ")):
             variables['varAssignmentType'] = "="
@@ -425,11 +510,11 @@ for A_Index16, A_LoopField16 in enumerate(items, start=1):
         variables['nameOfVar2'] = Trim(StrSplit(variables['strVar'] , variables['nameOfVarSplit'] , 2))
         variables['nameOfVar2'] = varTranspiler(variables['nameOfVar2'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
         variables['cppCode'] += "variables["  +  Chr(34) +  variables['nameOfVar1']  +  Chr(34) +  "]"  +  " "  +  variables['varAssignmentType']  +  " "  +  variables['nameOfVar2']  +  Chr(59) +  "\n"
-    elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 5)== "char "):
-        variables['varName123Temp'] = StringTrimLeft(variables['A_LoopField16'], 5)
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 5)== "char "):
+        variables['varName123Temp'] = StringTrimLeft(variables['A_LoopField17'], 5)
         variables['varName'] = StrSplit(variables['varName123Temp'] , "[" , 1)
         variables['allVarsChars'] += Trim(variables['varName']) +  "\n"
-        variables['strVar'] = StringTrimLeft(variables['A_LoopField16'], 5)
+        variables['strVar'] = StringTrimLeft(variables['A_LoopField17'], 5)
         variables['strVar'] = Trim(variables['strVar'])
         if (InStr(variables['strVar'] , " := ")):
             variables['varAssignmentTypeSplit'] = " := "
@@ -452,18 +537,18 @@ for A_Index16, A_LoopField16 in enumerate(items, start=1):
         variables['charVar1'] = Trim(StrSplit(variables['strVar'] , variables['varAssignmentTypeSplit'] , 1))
         variables['charVar2'] = Trim(StrSplit(variables['strVar'] , variables['varAssignmentTypeSplit'] , 2))
         variables['cppCode'] += "char "  +  variables['charVar1']  +  " "  +  variables['varAssignmentType']  +  " "  +  variables['charVar2']  +  Chr(59) +  "\n"
-    elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 5)== "int8 ")or(SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 6)== "int16 ")or(SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 6)== "int32 ")or(SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 6)== "int64 "):
-        if (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 5)== "int8 "):
-            variables['varName123Temp'] = StringTrimLeft(variables['A_LoopField16'], 5)
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 5)== "int8 ")or(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 6)== "int16 ")or(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 6)== "int32 ")or(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 6)== "int64 "):
+        if (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 5)== "int8 "):
+            variables['varName123Temp'] = StringTrimLeft(variables['A_LoopField17'], 5)
         else:
-            variables['varName123Temp'] = StringTrimLeft(variables['A_LoopField16'], 6)
-        variables['intType'] = Trim(StrSplit(variables['A_LoopField16'] , " " , 1))  +  "_t"
+            variables['varName123Temp'] = StringTrimLeft(variables['A_LoopField17'], 6)
+        variables['intType'] = Trim(StrSplit(variables['A_LoopField17'] , " " , 1))  +  "_t"
         variables['varName'] = StrSplit(variables['varName123Temp'] , " " , 1)
         variables['allVarsInts'] += variables['varName']  +  "\n"
-        if (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 5)== "int8 "):
-            variables['strVar'] = StringTrimLeft(variables['A_LoopField16'], 5)
+        if (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 5)== "int8 "):
+            variables['strVar'] = StringTrimLeft(variables['A_LoopField17'], 5)
         else:
-            variables['strVar'] = StringTrimLeft(variables['A_LoopField16'], 6)
+            variables['strVar'] = StringTrimLeft(variables['A_LoopField17'], 6)
         variables['strVar'] = Trim(variables['strVar'])
         if (InStr(variables['strVar'] , " := ")):
             variables['varAssignmentTypeSplit'] = " := "
@@ -487,8 +572,8 @@ for A_Index16, A_LoopField16 in enumerate(items, start=1):
         variables['charVar2'] = Trim(StrSplit(variables['strVar'] , variables['varAssignmentTypeSplit'] , 2))
         variables['charVar1'] = StrSplit(variables['charVar1'] , " " , 1)
         variables['cppCode'] += variables['intType']  +  " "  +  variables['charVar1']  +  " "  +  variables['varAssignmentType']  +  " "  +  variables['charVar2']  +  Chr(59) +  "\n"
-    elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 4)== "cat "):
-        variables['strVar'] = StringTrimLeft(variables['A_LoopField16'], 4)
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 4)== "cat "):
+        variables['strVar'] = StringTrimLeft(variables['A_LoopField17'], 4)
         variables['strVar'] = Trim(variables['strVar'])
         if (InStr(variables['strVar'] , " := ")):
             variables['varAssignmentType'] = "="
@@ -510,32 +595,32 @@ for A_Index16, A_LoopField16 in enumerate(items, start=1):
         variables['nameOfVar12'] = Trim(StrSplit(variables['nameOfVar1'] , "%" , 2))
         variables['nameOfVar1'] = "variables["  +  Chr(34) +  variables['nameOfVar11']  +  Chr(34) +  " + convertToStr(variables["  +  Chr(34) +  variables['nameOfVar12']  +  Chr(34) +  "])]"
         variables['cppCode'] += variables['nameOfVar1']  +  " "  +  variables['varAssignmentType']  +  " "  +  variables['nameOfVar2']  +  Chr(59) +  "\n"
-    elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 4)== StrLower(variables['CheckIFandElsesss1'])) or(SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 3)== StrLower(variables['CheckIFandElsesss2'])) or(SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 5)== StrLower(variables['CheckIFandElsesss3'])) or(SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 4)== StrLower(variables['CheckIFandElsesss4'])) or(SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 9)== StrLower(variables['CheckIFandElsesss5'])) or(SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 8)== StrLower(variables['CheckIFandElsesss6'])) or(SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 10)== StrLower(variables['CheckIFandElsesss7'])) or(SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 9)== StrLower(variables['CheckIFandElsesss8'])):
-        if (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 4)== StrLower(variables['CheckIFandElsesss1'])):
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 4)== StrLower(variables['CheckIFandElsesss1'])) or(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 3)== StrLower(variables['CheckIFandElsesss2'])) or(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 5)== StrLower(variables['CheckIFandElsesss3'])) or(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 4)== StrLower(variables['CheckIFandElsesss4'])) or(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 9)== StrLower(variables['CheckIFandElsesss5'])) or(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 8)== StrLower(variables['CheckIFandElsesss6'])) or(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 10)== StrLower(variables['CheckIFandElsesss7'])) or(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 9)== StrLower(variables['CheckIFandElsesss8'])):
+        if (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 4)== StrLower(variables['CheckIFandElsesss1'])):
             variables['CheckIFandElsesssNum'] = 4
             variables['CheckIFandElsesssNumNum'] = 1
-        if (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 3)== StrLower(variables['CheckIFandElsesss2'])):
+        if (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 3)== StrLower(variables['CheckIFandElsesss2'])):
             variables['CheckIFandElsesssNum'] = 3
             variables['CheckIFandElsesssNumNum'] = 2
-        if (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 5)== StrLower(variables['CheckIFandElsesss3'])):
+        if (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 5)== StrLower(variables['CheckIFandElsesss3'])):
             variables['CheckIFandElsesssNum'] = 5
             variables['CheckIFandElsesssNumNum'] = 3
-        if (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 4)== StrLower(variables['CheckIFandElsesss4'])):
+        if (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 4)== StrLower(variables['CheckIFandElsesss4'])):
             variables['CheckIFandElsesssNum'] = 4
             variables['CheckIFandElsesssNumNum'] = 4
-        if (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 9)== StrLower(variables['CheckIFandElsesss5'])):
+        if (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 9)== StrLower(variables['CheckIFandElsesss5'])):
             variables['CheckIFandElsesssNum'] = 9
             variables['CheckIFandElsesssNumNum'] = 5
-        if (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 8)== StrLower(variables['CheckIFandElsesss6'])):
+        if (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 8)== StrLower(variables['CheckIFandElsesss6'])):
             variables['CheckIFandElsesssNum'] = 8
             variables['CheckIFandElsesssNumNum'] = 6
-        if (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 10)== StrLower(variables['CheckIFandElsesss7'])):
+        if (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 10)== StrLower(variables['CheckIFandElsesss7'])):
             variables['CheckIFandElsesssNum'] = 10
             variables['CheckIFandElsesssNumNum'] = 7
-        if (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 9)== StrLower(variables['CheckIFandElsesss8'])):
+        if (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 9)== StrLower(variables['CheckIFandElsesss8'])):
             variables['CheckIFandElsesssNum'] = 9
             variables['CheckIFandElsesssNumNum'] = 8
-        variables['str123'] = StringTrimLeft(variables['A_LoopField16'], variables['CheckIFandElsesssNum'])
+        variables['str123'] = StringTrimLeft(variables['A_LoopField17'], variables['CheckIFandElsesssNum'])
         variables['str123'] = StrReplace(variables['str123'] , "(" , " ( ")
         variables['str123'] = StrReplace(variables['str123'] , ")" , " ) ")
         variables['str123'] = StrReplace(variables['str123'] , "!" , " ! ")
@@ -547,7 +632,7 @@ for A_Index16, A_LoopField16 in enumerate(items, start=1):
         variables['str123'] = StrReplace(variables['str123'] , "if "  +  Chr(40) +  Chr(32), "if "  +  Chr(40))
         variables['out123'] = variables['str123']
         variables['cppCode'] += variables['out123']  +  "\n"
-    elif (StrLower(variables['A_LoopField16'])== "loop"):
+    elif (StrLower(variables['A_LoopField17'])== "loop"):
         # infinity loops
         variables['haveWeEverUsedAloop'] = 1
         variables['lineDone'] = 1
@@ -560,8 +645,8 @@ for A_Index16, A_LoopField16 in enumerate(items, start=1):
         variables['pycodeLoopfixa1'] = "nl|itsaersdtgtgfergsdgfsegdfsedAA|"  +  str(variables['AindexcharLength'])
         variables['AindexcharLength'] += 1
         variables['cppCode'] += variables['pycodeLoopfixa1']  +  "\n"  +  variables['var1']  +  "\n"
-    elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 6)== "loop, ")and(SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 8) != "loop, % ")and(SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 7) != "loop % ")and(SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 11) != StrLower("Loop, Parse")):
-        variables['str123'] = variables['A_LoopField16']
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 6)== "loop, ")and(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 8) != "loop, % ")and(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 7) != "loop % ")and(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 11) != StrLower("Loop, Parse")):
+        variables['str123'] = variables['A_LoopField17']
         #MsgBox, % str123
         variables['out2'] = StringTrimLeft(variables['str123'], 6)
         #MsgBox % out2
@@ -581,8 +666,8 @@ for A_Index16, A_LoopField16 in enumerate(items, start=1):
         variables['pycodeLoopfixa1'] = "nl|itsaersdtgtgfergsdgfsegdfsedAA|"  +  str(variables['AindexcharLength'])
         variables['AindexcharLength'] += 1
         variables['cppCode'] += variables['pycodeLoopfixa1']  +  "\n"  +  variables['var1']  +  "\n"
-    elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 8)== "loop, % "):
-        variables['str123'] = variables['A_LoopField16']
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 8)== "loop, % "):
+        variables['str123'] = variables['A_LoopField17']
         #MsgBox, % str123
         variables['out2'] = StringTrimLeft(variables['str123'], 8)
         #MsgBox % out2
@@ -602,9 +687,9 @@ for A_Index16, A_LoopField16 in enumerate(items, start=1):
         variables['pycodeLoopfixa1'] = "nl|itsaersdtgtgfergsdgfsegdfsedAA|"  +  str(variables['AindexcharLength'])
         variables['AindexcharLength'] += 1
         variables['cppCode'] += variables['pycodeLoopfixa1']  +  "\n"  +  variables['var1']  +  "\n"
-    elif (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 13)== StrLower("Loop, Parse, ")):
+    elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 13)== StrLower("Loop, Parse, ")):
         #std::vector<std::string> items = LoopParseFunc(variables["var1"], " ");
-        variables['var1'] = variables['A_LoopField16']
+        variables['var1'] = variables['A_LoopField17']
         variables['var1'] = Trim(variables['var1'])
         variables['var1'] = StringTrimLeft(variables['var1'], 13)
         variables['line1'] = Trim(StrSplit(variables['var1'] , "," , 1))
@@ -643,25 +728,41 @@ for A_Index16, A_LoopField16 in enumerate(items, start=1):
         variables['pycodeLoopfixa1'] = "lp|itsaersdtgtgfergsdgfsegdfsedAA|"  +  str(variables['AindexcharLength'])
         variables['AindexcharLength'] += 1
         variables['cppCode'] += variables['pycodeLoopfixa1']  +  "\n"  +  variables['var1out']  +  "\n"
-    elif (StrLower(variables['A_LoopField16'])== "break"):
-        variables['cppCode'] += variables['A_LoopField16']  +  ";\n"
+    elif (StrLower(variables['A_LoopField17'])== "break"):
+        variables['cppCode'] += variables['A_LoopField17']  +  ";\n"
+    elif (StrLower(variables['A_LoopField17'])== "continue"):
+        variables['cppCode'] += variables['A_LoopField17']  +  ";\n"
+    elif (StrLower(variables['A_LoopField17'])== "return")or(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 7)== "return "):
+        if (StrLower(variables['A_LoopField17'])== "return"):
+            variables['cppCode'] += variables['A_LoopField17']  +  ";\n"
+        else:
+            variables['varTranspiledReturn'] = StringTrimLeft(variables['A_LoopField17'], 7)
+            variables['varTranspiledReturn'] = varTranspiler(variables['varTranspiledReturn'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
+            variables['cppCode'] += "return "  +  variables['varTranspiledReturn']  +  ";\n"
     else:
         # this is THE else
-        if (variables['skipLeftCuleyForFuncPLS']  != 1):
-            if (SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 1)== Chr(125)):
-                variables['cppCode'] += Chr(125) +  "\n"
-            else:
-                if (variables['pycodeAcurlyBraceAddSomeVrasFixLP'] == 1)and(SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 1)== Chr(123)):
-                    variables['pycodeAcurlyBraceAddSomeVrasFixLP'] = 0
-                    variables['cppCode'] += variables['A_LoopField16']  +  "\n"  +  variables['theFixTextLoopLP']  +  "\n"
+        if (variables['removeNextCurlyBraceCpp']  != 1):
+            variables['removeNextCurlyBraceCpp'] = 0
+            if (variables['skipLeftCuleyForFuncPLS']  != 1):
+                if (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 1)== Chr(125)):
+                    variables['cppCode'] += Chr(125) +  "\n"
                 else:
-                    if (variables['pycodeAcurlyBraceAddSomeVrasFixNL'] == 1)and(SubStr(Trim(StrLower(variables['A_LoopField16'])) , 1 , 1)== Chr(123)):
-                        variables['pycodeAcurlyBraceAddSomeVrasFixNL'] = 0
-                        variables['cppCode'] += variables['A_LoopField16']  +  "\n"  +  variables['theFixTextLoopNL']  +  "\n"
+                    if (variables['pycodeAcurlyBraceAddSomeVrasFixLP'] == 1)and(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 1)== Chr(123)):
+                        variables['pycodeAcurlyBraceAddSomeVrasFixLP'] = 0
+                        variables['cppCode'] += variables['A_LoopField17']  +  "\n"  +  variables['theFixTextLoopLP']  +  "\n"
                     else:
-                        variables['cppCode'] += variables['A_LoopField16']  +  "\n"
+                        if (variables['pycodeAcurlyBraceAddSomeVrasFixNL'] == 1)and(SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 1)== Chr(123)):
+                            variables['pycodeAcurlyBraceAddSomeVrasFixNL'] = 0
+                            variables['cppCode'] += variables['A_LoopField17']  +  "\n"  +  variables['theFixTextLoopNL']  +  "\n"
+                        else:
+                            variables['cppCode'] += variables['A_LoopField17']  +  "\n"
+            else:
+                variables['skipLeftCuleyForFuncPLS'] = 0
         else:
-            variables['skipLeftCuleyForFuncPLS'] = 0
+            if (Trim(variables['A_LoopField17'])== "{")and(variables['removeNextCurlyBraceCpp'] == 1):
+                variables['removeNextCurlyBraceCpp'] = 0
+            else:
+                variables['cppCode'] += variables['A_LoopField17']  +  "\n"
 variables['cppCode'] = StringTrimRight(variables['cppCode'], 1)
 #s
 if (variables['haveWeEverUsedAloop'] == 1):
@@ -669,11 +770,11 @@ if (variables['haveWeEverUsedAloop'] == 1):
     #OutputDebug, |%pycodeLoopfixa%|
     variables['AIndexLoopCurlyFix'] = 1
     items = LoopParseFunc(variables['pycodeLoopfixa'], "\n", "\r")
-    for A_Index17, A_LoopField17 in enumerate(items, start=1):
-        variables['A_Index17'] = A_Index17
-        variables['A_LoopField17'] = A_LoopField17
-        variables['str123'] = variables['A_LoopField17']
-        variables['fixLoopLokingFor'] = variables['A_LoopField17']
+    for A_Index22, A_LoopField22 in enumerate(items, start=1):
+        variables['A_Index22'] = A_Index22
+        variables['A_LoopField22'] = A_LoopField22
+        variables['str123'] = variables['A_LoopField22']
+        variables['fixLoopLokingFor'] = variables['A_LoopField22']
         variables['fixLoopLokingForfound'] = 1
         variables['out1'] = StrSplit(variables['str123'] , "|" , 1)
         variables['out2'] = StrSplit(variables['str123'] , "|" , 3)
@@ -695,16 +796,16 @@ if (variables['haveWeEverUsedAloop'] == 1):
             variables['foundTheTopLoop'] = 0
             variables[f'out4758686d86d86d86578991a{variables["AIndexLoopCurlyFix"]}'] = ""
             items = LoopParseFunc(variables['cppCode'], "\n", "\r")
-            for A_Index18, A_LoopField18 in enumerate(items, start=1):
-                variables['A_Index18'] = A_Index18
-                variables['A_LoopField18'] = A_LoopField18
+            for A_Index23, A_LoopField23 in enumerate(items, start=1):
+                variables['A_Index23'] = A_Index23
+                variables['A_LoopField23'] = A_LoopField23
                 #MsgBox, dsfgsdefgesrdg1
-                #MsgBox, |%A_LoopField18%|`n|%fixLoopLokingFor%|
-                if (InStr(variables['A_LoopField18'] , variables['fixLoopLokingFor'])) and(variables['insdeAnestedLoopBAD']  != 1):
+                #MsgBox, |%A_LoopField23%|`n|%fixLoopLokingFor%|
+                if (InStr(variables['A_LoopField23'] , variables['fixLoopLokingFor'])) and(variables['insdeAnestedLoopBAD']  != 1):
                     variables['fixLoopLokingForNum'] = 1
                     #MsgBox, do we came here 1
-                if (InStr(variables['A_LoopField18'] , "for ")) and(variables['weAreDoneHereCurly']  != 1)and(variables['insdeAnestedLoopBAD']  != 1)and(variables['fixLoopLokingForNum'] == 1):
-                    variables['s'] = StrSplit(variables['A_LoopField18'] , "A"  +  Chr(95) +  "Index" , 2)
+                if (InStr(variables['A_LoopField23'] , "for ")) and(variables['weAreDoneHereCurly']  != 1)and(variables['insdeAnestedLoopBAD']  != 1)and(variables['fixLoopLokingForNum'] == 1):
+                    variables['s'] = StrSplit(variables['A_LoopField23'] , "A"  +  Chr(95) +  "Index" , 2)
                     variables['out1z'] = variables['s']
                     variables['s'] = StrSplit(variables['out1z'] , " " , 1)
                     variables['out1z'] = Trim(variables['s'])
@@ -713,49 +814,49 @@ if (variables['haveWeEverUsedAloop'] == 1):
                     variables['fixLoopLokingForNum'] = 0
                     variables['foundTheTopLoop'] += 1
                     variables['inTarget'] = 1
-                    #MsgBox, % A_LoopField18
+                    #MsgBox, % A_LoopField23
                     variables['dontSaveStr'] = 1
-                    variables['ALoopField'] = variables['A_LoopField18']
+                    variables['ALoopField'] = variables['A_LoopField23']
                     variables['DeleayOneCuzOfLoopParse'] = 1
                     variables[f'out4758686d86d86d86578991a{variables["AIndexLoopCurlyFix"]}'] += variables['ALoopField']  +  "\n"
-                if (variables['inTarget'] == 1)and(InStr(variables['A_LoopField18'] , Chr(123)))and(variables['insdeAnestedLoopBAD']  != 1):
+                if (variables['inTarget'] == 1)and(InStr(variables['A_LoopField23'] , Chr(123)))and(variables['insdeAnestedLoopBAD']  != 1):
                     variables['insideBracket'] = 1
-                if (variables['insideBracket'] == 1)and(InStr(variables['A_LoopField18'] , Chr(123)))and(variables['insdeAnestedLoopBAD']  != 1):
+                if (variables['insideBracket'] == 1)and(InStr(variables['A_LoopField23'] , Chr(123)))and(variables['insdeAnestedLoopBAD']  != 1):
                     variables['netsedCurly'] += 1
-                if (variables['insideBracket'] == 1)and(InStr(variables['A_LoopField18'] , Chr(125)))and(variables['insdeAnestedLoopBAD']  != 1):
+                if (variables['insideBracket'] == 1)and(InStr(variables['A_LoopField23'] , Chr(125)))and(variables['insdeAnestedLoopBAD']  != 1):
                     variables['netsedCurly'] -= 1
                     variables['readyToEnd'] = 1
-                if (InStr(variables['A_LoopField18'] , "for ")) and(variables['insdeAnestedLoopBAD']  != 1)and(variables['foundTheTopLoop'] >= 2):
+                if (InStr(variables['A_LoopField23'] , "for ")) and(variables['insdeAnestedLoopBAD']  != 1)and(variables['foundTheTopLoop'] >= 2):
                     variables['insdeAnestedLoopBAD'] = 1
                     variables['insideBracket1'] = 0
                     variables['netsedCurly1'] = 0
                 if (variables['inTarget'] == 1):
                     variables['foundTheTopLoop'] += 1
                 if (variables['insdeAnestedLoopBAD'] == 1):
-                    if (InStr(variables['A_LoopField18'] , Chr(123))):
+                    if (InStr(variables['A_LoopField23'] , Chr(123))):
                         variables['insideBracket1'] = 1
-                    if (variables['insideBracket1'] == 1)and(InStr(variables['A_LoopField18'] , Chr(123))):
+                    if (variables['insideBracket1'] == 1)and(InStr(variables['A_LoopField23'] , Chr(123))):
                         variables['netsedCurly1'] += 1
-                    if (variables['insideBracket1'] == 1)and(InStr(variables['A_LoopField18'] , Chr(125))):
+                    if (variables['insideBracket1'] == 1)and(InStr(variables['A_LoopField23'] , Chr(125))):
                         variables['netsedCurly1'] -= 1
                         variables['readyToEnd1'] = 1
-                    if (InStr(variables['A_LoopField18'] , Chr(125)))and(variables['readyToEnd1'] == 1)and(variables['netsedCurly1'] == 0)and(variables['insideBracket'] == 1):
-                        #MsgBox, % A_LoopField18
+                    if (InStr(variables['A_LoopField23'] , Chr(125)))and(variables['readyToEnd1'] == 1)and(variables['netsedCurly1'] == 0)and(variables['insideBracket'] == 1):
+                        #MsgBox, % A_LoopField23
                         variables['eldLoopNestedBADlol'] = 1
-                    variables[f'out4758686d86d86d86578991a{variables["AIndexLoopCurlyFix"]}'] += variables['A_LoopField18']  +  "\n"
+                    variables[f'out4758686d86d86d86578991a{variables["AIndexLoopCurlyFix"]}'] += variables['A_LoopField23']  +  "\n"
                 if (variables['inTarget'] == 1)and(variables['dontSaveStr']  != 1)and(variables['fixLoopLokingForNum']  != 1)and(variables['insdeAnestedLoopBAD']  != 1):
-                    variables['ALoopField'] = variables['A_LoopField18']
+                    variables['ALoopField'] = variables['A_LoopField23']
                     # Replace "A_Index" with or without a following digit with "A_Index" + out1z
                     variables['ALoopField'] = RegExReplace(variables['ALoopField'] , "A"  +  Chr(95) +  "Index(?:\\d+)?" , "A"  +  Chr(95) +  "Index"  +  variables['out1z'])
                     variables[f'out4758686d86d86d86578991a{variables["AIndexLoopCurlyFix"]}'] += variables['ALoopField']  +  "\n"
-                if (variables['inTarget'] == 1)and(InStr(variables['A_LoopField18'] , Chr(125)))and(variables['readyToEnd'] == 1)and(variables['netsedCurly'] == 0)and(variables['weAreDoneHereCurly'] == 0)and(variables['dontSaveStr']  != 1)and(variables['insdeAnestedLoopBAD']  != 1):
-                    #MsgBox, % A_LoopField18
+                if (variables['inTarget'] == 1)and(InStr(variables['A_LoopField23'] , Chr(125)))and(variables['readyToEnd'] == 1)and(variables['netsedCurly'] == 0)and(variables['weAreDoneHereCurly'] == 0)and(variables['dontSaveStr']  != 1)and(variables['insdeAnestedLoopBAD']  != 1):
+                    #MsgBox, % A_LoopField23
                     variables['weAreDoneHereCurly'] = 1
                     variables['inTarget'] = 0
                     variables['endBracketDOntPutThere'] = 1
                 variables['dontSaveStr'] = 0
                 if (variables['inTarget']  != 1)and(variables['endBracketDOntPutThere']  != 1)and(variables['insdeAnestedLoopBAD']  != 1):
-                    variables[f'out4758686d86d86d86578991a{variables["AIndexLoopCurlyFix"]}'] += variables['A_LoopField18']  +  "\n"
+                    variables[f'out4758686d86d86d86578991a{variables["AIndexLoopCurlyFix"]}'] += variables['A_LoopField23']  +  "\n"
                 variables['endBracketDOntPutThere'] = 0
                 if (variables['eldLoopNestedBADlol'] == 1):
                     variables['insdeAnestedLoopBAD'] = 0
@@ -780,14 +881,14 @@ if (variables['haveWeEverUsedAloop'] == 1):
             variables['foundTheTopLoop'] = 0
             variables[f'out4758686d86d86d86578991a{variables["AIndexLoopCurlyFix"]}'] = ""
             items = LoopParseFunc(variables['cppCode'], "\n", "\r")
-            for A_Index19, A_LoopField19 in enumerate(items, start=1):
-                variables['A_Index19'] = A_Index19
-                variables['A_LoopField19'] = A_LoopField19
-                if (InStr(variables['A_LoopField19'] , variables['fixLoopLokingFor'])) and(variables['insdeAnestedLoopBAD']  != 1):
+            for A_Index24, A_LoopField24 in enumerate(items, start=1):
+                variables['A_Index24'] = A_Index24
+                variables['A_LoopField24'] = A_LoopField24
+                if (InStr(variables['A_LoopField24'] , variables['fixLoopLokingFor'])) and(variables['insdeAnestedLoopBAD']  != 1):
                     variables['fixLoopLokingForNum'] = 1
                     #MsgBox, do we came here 3
-                if (InStr(variables['A_LoopField19'] , "for ")) and(variables['weAreDoneHereCurly']  != 1)and(variables['insdeAnestedLoopBAD']  != 1)and(variables['fixLoopLokingForNum'] == 1):
-                    variables['s'] = StrSplit(variables['A_LoopField19'] , "A"  +  Chr(95) +  "Index" , 2)
+                if (InStr(variables['A_LoopField24'] , "for ")) and(variables['weAreDoneHereCurly']  != 1)and(variables['insdeAnestedLoopBAD']  != 1)and(variables['fixLoopLokingForNum'] == 1):
+                    variables['s'] = StrSplit(variables['A_LoopField24'] , "A"  +  Chr(95) +  "Index" , 2)
                     variables['out1z'] = variables['s']
                     variables['s'] = StrSplit(variables['out1z'] , " " , 1)
                     variables['out1z'] = Trim(variables['s'])
@@ -796,51 +897,51 @@ if (variables['haveWeEverUsedAloop'] == 1):
                     #MsgBox, do we came here 4
                     variables['foundTheTopLoop'] += 1
                     variables['inTarget'] = 1
-                    #MsgBox, % A_LoopField19
+                    #MsgBox, % A_LoopField24
                     variables['dontSaveStr'] = 1
-                    variables['ALoopField'] = variables['A_LoopField19']
+                    variables['ALoopField'] = variables['A_LoopField24']
                     variables['DeleayOneCuzOfLoopParse'] = 1
                     variables[f'out4758686d86d86d86578991a{variables["AIndexLoopCurlyFix"]}'] += variables['ALoopField']  +  "\n"
-                if (variables['inTarget'] == 1)and(InStr(variables['A_LoopField19'] , Chr(123)))and(variables['insdeAnestedLoopBAD']  != 1):
+                if (variables['inTarget'] == 1)and(InStr(variables['A_LoopField24'] , Chr(123)))and(variables['insdeAnestedLoopBAD']  != 1):
                     variables['insideBracket'] = 1
-                if (variables['insideBracket'] == 1)and(InStr(variables['A_LoopField19'] , Chr(123)))and(variables['insdeAnestedLoopBAD']  != 1):
+                if (variables['insideBracket'] == 1)and(InStr(variables['A_LoopField24'] , Chr(123)))and(variables['insdeAnestedLoopBAD']  != 1):
                     variables['netsedCurly'] += 1
-                if (variables['insideBracket'] == 1)and(InStr(variables['A_LoopField19'] , Chr(125)))and(variables['insdeAnestedLoopBAD']  != 1):
+                if (variables['insideBracket'] == 1)and(InStr(variables['A_LoopField24'] , Chr(125)))and(variables['insdeAnestedLoopBAD']  != 1):
                     variables['netsedCurly'] -= 1
                     variables['readyToEnd'] = 1
-                if (InStr(variables['A_LoopField19'] , "for ")) and(variables['insdeAnestedLoopBAD']  != 1)and(variables['foundTheTopLoop'] >= 2):
+                if (InStr(variables['A_LoopField24'] , "for ")) and(variables['insdeAnestedLoopBAD']  != 1)and(variables['foundTheTopLoop'] >= 2):
                     variables['insdeAnestedLoopBAD'] = 1
                     variables['insideBracket1'] = 0
                     variables['netsedCurly1'] = 0
                 if (variables['inTarget'] == 1):
                     variables['foundTheTopLoop'] += 1
                 if (variables['insdeAnestedLoopBAD'] == 1):
-                    if (InStr(variables['A_LoopField19'] , Chr(123))):
+                    if (InStr(variables['A_LoopField24'] , Chr(123))):
                         variables['insideBracket1'] = 1
-                    if (variables['insideBracket1'] == 1)and(InStr(variables['A_LoopField19'] , Chr(123))):
+                    if (variables['insideBracket1'] == 1)and(InStr(variables['A_LoopField24'] , Chr(123))):
                         variables['netsedCurly1'] += 1
-                    if (variables['insideBracket1'] == 1)and(InStr(variables['A_LoopField19'] , Chr(125))):
+                    if (variables['insideBracket1'] == 1)and(InStr(variables['A_LoopField24'] , Chr(125))):
                         variables['netsedCurly1'] -= 1
                         variables['readyToEnd1'] = 1
-                    if (InStr(variables['A_LoopField19'] , Chr(125)))and(variables['readyToEnd1'] == 1)and(variables['netsedCurly1'] == 0)and(variables['insideBracket'] == 1):
-                        #MsgBox, % A_LoopField19
+                    if (InStr(variables['A_LoopField24'] , Chr(125)))and(variables['readyToEnd1'] == 1)and(variables['netsedCurly1'] == 0)and(variables['insideBracket'] == 1):
+                        #MsgBox, % A_LoopField24
                         variables['eldLoopNestedBADlol'] = 1
-                    variables[f'out4758686d86d86d86578991a{variables["AIndexLoopCurlyFix"]}'] += variables['A_LoopField19']  +  "\n"
+                    variables[f'out4758686d86d86d86578991a{variables["AIndexLoopCurlyFix"]}'] += variables['A_LoopField24']  +  "\n"
                 if (variables['inTarget'] == 1)and(variables['dontSaveStr']  != 1)and(variables['fixLoopLokingForNum']  != 1)and(variables['insdeAnestedLoopBAD']  != 1):
-                    variables['ALoopField'] = variables['A_LoopField19']
+                    variables['ALoopField'] = variables['A_LoopField24']
                     # Replace "A_Index" with or without a following digit with "A_Index" + out1z
                     variables['ALoopField'] = RegExReplace(variables['ALoopField'] , "A"  +  Chr(95) +  "Index(?:\\d+)?" , "A"  +  Chr(95) +  "Index"  +  variables['out1z'])
                     # Replace "A_Index" with or without a following digit with "A_Index" + out1z
                     variables['ALoopField'] = RegExReplace(variables['ALoopField'] , "A"  +  Chr(95) +  "LoopField(?:\\d+)?" , "A"  +  Chr(95) +  "LoopField"  +  variables['out1z'])
                     variables[f'out4758686d86d86d86578991a{variables["AIndexLoopCurlyFix"]}'] += variables['ALoopField']  +  "\n"
-                if (variables['inTarget'] == 1)and(InStr(variables['A_LoopField19'] , Chr(125)))and(variables['readyToEnd'] == 1)and(variables['netsedCurly'] == 0)and(variables['weAreDoneHereCurly'] == 0)and(variables['dontSaveStr']  != 1)and(variables['insdeAnestedLoopBAD']  != 1):
-                    #MsgBox, % A_LoopField19
+                if (variables['inTarget'] == 1)and(InStr(variables['A_LoopField24'] , Chr(125)))and(variables['readyToEnd'] == 1)and(variables['netsedCurly'] == 0)and(variables['weAreDoneHereCurly'] == 0)and(variables['dontSaveStr']  != 1)and(variables['insdeAnestedLoopBAD']  != 1):
+                    #MsgBox, % A_LoopField24
                     variables['weAreDoneHereCurly'] = 1
                     variables['inTarget'] = 0
                     variables['endBracketDOntPutThere'] = 1
                 variables['dontSaveStr'] = 0
                 if (variables['inTarget']  != 1)and(variables['endBracketDOntPutThere']  != 1)and(variables['insdeAnestedLoopBAD']  != 1):
-                    variables[f'out4758686d86d86d86578991a{variables["AIndexLoopCurlyFix"]}'] += variables['A_LoopField19']  +  "\n"
+                    variables[f'out4758686d86d86d86578991a{variables["AIndexLoopCurlyFix"]}'] += variables['A_LoopField24']  +  "\n"
                 variables['endBracketDOntPutThere'] = 0
                 if (variables['eldLoopNestedBADlol'] == 1):
                     variables['insdeAnestedLoopBAD'] = 0
@@ -856,58 +957,57 @@ if (variables['haveWeEverUsedAloop'] == 1):
     variables['out4758686d86dgt8r754444444'] = ""
     variables['hold'] = 0
     items = LoopParseFunc(variables['cppCode'], "\n", "\r")
-    for A_Index20, A_LoopField20 in enumerate(items, start=1):
-        variables['A_Index20'] = A_Index20
-        variables['A_LoopField20'] = A_LoopField20
+    for A_Index25, A_LoopField25 in enumerate(items, start=1):
+        variables['A_Index25'] = A_Index25
+        variables['A_LoopField25'] = A_LoopField25
         variables['ignore'] = 0
-        if (InStr(variables['A_LoopField20'] , "for ")):
-            if (variables['hold'] == 1)and(variables['holdText'] == variables['A_LoopField20']):
+        if (InStr(variables['A_LoopField25'] , "for ")):
+            if (variables['hold'] == 1)and(variables['holdText'] == variables['A_LoopField25']):
                 variables['ignore'] = 1
             else:
-                variables['holdText'] = variables['A_LoopField20']
+                variables['holdText'] = variables['A_LoopField25']
                 variables['hold'] = 1
         if ( not (variables['ignore'])):
-            variables['out4758686d86dgt8r754444444'] += variables['A_LoopField20']  +  "\n"
+            variables['out4758686d86dgt8r754444444'] += variables['A_LoopField25']  +  "\n"
     variables['out4758686d86dgt8r754444444'] = StringTrimRight(variables['out4758686d86dgt8r754444444'], 1)
     variables['cppCode'] = variables['out4758686d86dgt8r754444444']
 variables['pyCodeOut1234565432'] = ""
 items = LoopParseFunc(variables['cppCode'], "\n", "\r")
-for A_Index21, A_LoopField21 in enumerate(items, start=1):
-    variables['A_Index21'] = A_Index21
-    variables['A_LoopField21'] = A_LoopField21
-    variables['out'] = variables['A_LoopField21']
+for A_Index26, A_LoopField26 in enumerate(items, start=1):
+    variables['A_Index26'] = A_Index26
+    variables['A_LoopField26'] = A_LoopField26
+    variables['out'] = variables['A_LoopField26']
     if ( not (InStr(variables['out'] , "|itsaersdtgtgfergsdgfsegdfsedAA|"))):
         variables['pyCodeOut1234565432'] += variables['out']  +  "\n"
 variables['cppCode'] = StringTrimRight(variables['pyCodeOut1234565432'], 1)
-for A_Index22 in range(1, variables['theIdNumOfThe34'] + 1):
-    variables['A_Index22'] = A_Index22
-    variables['cppCode'] = StrReplace(variables['cppCode'] , "ihuiuuhuuhtheidFor--asas-theuhturtyphoutr-"  +  Chr(65) +  Chr(65) +  str(variables['A_Index22']) +  Chr(65) +  Chr(65), "std::string("  +  variables[f'theIdNumOfThe34theVar{variables["A_Index22"]}']  +  ")")
+for A_Index27 in range(1, variables['theIdNumOfThe34'] + 1):
+    variables['A_Index27'] = A_Index27
+    variables['cppCode'] = StrReplace(variables['cppCode'] , "ihuiuuhuuhtheidFor--asas-theuhturtyphoutr-"  +  Chr(65) +  Chr(65) +  str(variables['A_Index27']) +  Chr(65) +  Chr(65), "std::string("  +  variables[f'theIdNumOfThe34theVar{variables["A_Index27"]}']  +  ")")
 variables['cppCodeFixCharRemoveStd'] = ""
 items = LoopParseFunc(variables['cppCode'], "\n", "\r")
-for A_Index23, A_LoopField23 in enumerate(items, start=1):
-    variables['A_Index23'] = A_Index23
-    variables['A_LoopField23'] = A_LoopField23
-    if (SubStr(Trim(StrLower(variables['A_LoopField23'])) , 1 , 5)== "char "):
-        variables['cppCodeFixCharRemoveStd123'] = variables['A_LoopField23']
+for A_Index28, A_LoopField28 in enumerate(items, start=1):
+    variables['A_Index28'] = A_Index28
+    variables['A_LoopField28'] = A_LoopField28
+    if (SubStr(Trim(StrLower(variables['A_LoopField28'])) , 1 , 5)== "char "):
+        variables['cppCodeFixCharRemoveStd123'] = variables['A_LoopField28']
         variables['cppCodeFixCharRemoveStd123'] = StrReplace(variables['cppCodeFixCharRemoveStd123'] , "std::string(" , "")
         variables['cppCodeFixCharRemoveStd123'] = StrReplace(variables['cppCodeFixCharRemoveStd123'] , ")" , "")
         variables['cppCodeFixCharRemoveStd'] += variables['cppCodeFixCharRemoveStd123']  +  "\n"
     else:
-        variables['cppCodeFixCharRemoveStd'] += variables['A_LoopField23']  +  "\n"
+        variables['cppCodeFixCharRemoveStd'] += variables['A_LoopField28']  +  "\n"
 variables['cppCode'] = StringTrimRight(variables['cppCodeFixCharRemoveStd'], 1)
-variables['upCode'] = "\nint main()\n{\n"
-if (InStr(variables['cppCode'] , "variables[")):
-    variables['upCode'] = variables['upCode']  +  "// Define a map to store dynamic variables\n"  +  "std::unordered_map<std::string, std::any> variables;\n"
-variables['uperCode'] = "#include <iostream>\n#include <sstream>\n#include <vector>\n#include <unordered_map>\n#include <string>\n#include <any>\n#include <cstdint>\n#include <regex>\n#include <fstream>\n#include <filesystem>\n"
-if (InStr(variables['cppCode'] , "convertToInt(")):
+if (variables['theMainFuncDec'] == 0):
+    variables['upCode'] = "\nint main()\n{\n"
+variables['uperCode'] = "#include <iostream>\n#include <sstream>\n#include <vector>\n#include <unordered_map>\n#include <string>\n#include <any>\n#include <cstdint>\n#include <regex>\n#include <fstream>\n#include <filesystem>\n#include <cctype>\n#include <algorithm>\n#include <cmath>\n#include <limits>\n#include <chrono>\n\n// Define a map to store dynamic variables\n"  +  "std::unordered_map<std::string, std::any> variables;\n"
+if (InStr(variables['cppCode'] , "convertToInt(")) or(InStr(variables['cppCode'] , "convertToInt (")):
     variables['uperCode'] = variables['uperCode']  +  "\n// Function to convert std::any to int\nint convertToInt(const std::any& value) {\n    if (value.type() == typeid(std::string)) {\n        try {\n            return std::stoi(std::any_cast<std::string>(value));\n        } catch (const std::invalid_argument&) {\n            return 0; // Return 0 if conversion fails\n        }\n    } else if (value.type() == typeid(int)) {\n        return std::any_cast<int>(value);\n    } else {\n        return 0; // Return 0 for other types\n    }\n}\n"
-if (InStr(variables['cppCode'] , "convertToStr(")):
+if (InStr(variables['cppCode'] , "convertToStr(")) or(InStr(variables['cppCode'] , "convertToStr (")):
     variables['uperCode'] = variables['uperCode']  +  "\n// Function to convert std::any to std::string\nstd::string convertToStr(const std::any& value) {\n    if (value.type() == typeid(std::string)) {\n        return std::any_cast<std::string>(value);\n    } else if (value.type() == typeid(int)) {\n        return std::to_string(std::any_cast<int>(value));\n    } else if (value.type() == typeid(int8_t)) {\n        return std::to_string(static_cast<int>(std::any_cast<int8_t>(value)));\n    } else {\n        return "  +  Chr(34) +  ""  +  Chr(34) +  "; // Return empty string for other types\n    }\n}\n"
-if (InStr(variables['cppCode'] , "InStr(")):
+if (InStr(variables['cppCode'] , "InStr(")) or(InStr(variables['cppCode'] , "InStr (")):
     variables['uperCode'] = variables['uperCode']  +  "\n// Function to check if needle exists in haystack (std::string overload)\nbool InStr(const std::string& haystack, const std::string& needle) {\n    return haystack.find(needle) != std::string::npos;\n}\n"
 if (InStr(variables['cppCode'] , "LoopParseFunc(")):
     variables['uperCode'] = variables['uperCode']  +  "\n// Function to escape special characters for regex\nstd::string escapeRegex(const std::string& str) {\n    static const std::regex specialChars{R"  +  Chr(34) +  "([-[\]{}()*+?.,\^$|#\s])"  +  Chr(34) +  "};\n    return std::regex_replace(str, specialChars, R"  +  Chr(34) +  "(\$&)"  +  Chr(34) +  ");\n}\n\n// Function to split a string based on delimiters\nstd::vector<std::string> LoopParseFunc(const std::string& var, const std::string& delimiter1 = "  +  Chr(34) +  ""  +  Chr(34) +  ", const std::string& delimiter2 = "  +  Chr(34) +  ""  +  Chr(34) +  ") {\n    std::vector<std::string> items;\n    if (delimiter1.empty() && delimiter2.empty()) {\n        // If no delimiters are provided, return a list of characters\n        for (char c : var) {\n            items.push_back(std::string(1, c));\n        }\n    } else {\n        // Escape delimiters for regex\n        std::string escapedDelimiters = escapeRegex(delimiter1 + delimiter2);\n        // Construct the regular expression pattern for splitting the string\n        std::string pattern = "  +  Chr(34) +  "["  +  Chr(34) +  " + escapedDelimiters + "  +  Chr(34) +  "]+"  +  Chr(34) +  ";\n        std::regex regexPattern(pattern);\n        std::sregex_token_iterator iter(var.begin(), var.end(), regexPattern, -1);\n        std::sregex_token_iterator end;\n        while (iter != end) {\n            items.push_back(*iter++);\n        }\n    }\n    return items;\n}\n"
-if (InStr(variables['cppCode'] , "print(")):
+if (InStr(variables['cppCode'] , "print(")) or(InStr(variables['cppCode'] , "print (")):
     variables['uperCode'] = variables['uperCode']  +  "\n// Function to print the value stored in std::any\nvoid print(const std::any& value) {\n    if (value.has_value()) {\n        if (value.type() == typeid(std::string)) {\n            std::cout << std::any_cast<std::string>(value) << std::endl;\n        } else if (value.type() == typeid(int)) {\n            std::cout << std::any_cast<int>(value) << std::endl;\n        }\n    } else {\n        std::cout << "  +  Chr(34) +  "Value is not set"  +  Chr(34) +  " << std::endl;\n    }\n}\n"
 if (InStr(variables['cppCode'] , "FileRead(")):
     variables['uperCode'] = variables['uperCode']  +  "\nstd::string FileRead(const std::string& path) {\n    std::ifstream file;\n    std::filesystem::path full_path;\n\n    // Check if the file path is an absolute path\n    if (std::filesystem::path(path).is_absolute()) {\n        full_path = path;\n    } else {\n        // If it's not a full path, prepend the current working directory\n        full_path = std::filesystem::current_path() / path;\n    }\n\n    // Open the file\n    file.open(full_path);\n    if (!file.is_open()) {\n        throw std::runtime_error("  +  Chr(34) +  "Error: Could not open the file."  +  Chr(34) +  ");\n    }\n\n    // Read the file content into a string\n    std::string content;\n    std::string line;\n    while (std::getline(file, line)) {\n        content += line + '"  +  Chr(92) +  "n';\n    }\n\n    file.close();\n    return content;\n}\n"
@@ -915,8 +1015,34 @@ if (InStr(variables['cppCode'] , "FileAppend(")):
     variables['uperCode'] = variables['uperCode']  +  "\nbool FileAppend(const std::string& content, const std::string& path) {\n    std::ofstream file;\n\n    // Open the file in append mode\n    file.open(path, std::ios::app);\n\n    if (!file.is_open()) {\n        std::cerr << "  +  Chr(34) +  "Error: Could not open the file for appending."  +  Chr(34) +  " << std::endl;\n        return false;\n    }\n\n    // Append the content to the file\n    file << content;\n\n    // Close the file\n    file.close();\n\n    return true;\n}\n"
 if (InStr(variables['cppCode'] , "FileDelete(")):
     variables['uperCode'] = variables['uperCode']  +  "\nbool FileDelete(const std::string& path) {\n    std::filesystem::path file_path(path);\n\n    // Check if the file exists\n    if (!std::filesystem::exists(file_path)) {\n        std::cerr << "  +  Chr(34) +  "Error: File does not exist."  +  Chr(34) +  " << std::endl;\n        return false;\n    }\n\n    // Attempt to remove the file\n    if (!std::filesystem::remove(file_path)) {\n        std::cerr << "  +  Chr(34) +  "Error: Failed to delete the file."  +  Chr(34) +  " << std::endl;\n        return false;\n    }\n\n    return true;\n}\n"
+#;;;;;;;;;;;;;;
+if (InStr(variables['cppCode'] , "SubStr(")) or(InStr(variables['cppCode'] , "SubStr (")):
+    variables['uperCode'] = variables['uperCode']  +  "\n// Function to extract a substring\nstd::string SubStr(const std::string &str, int startPos, int length = -1) {\n    if (str.empty()) return "  +  Chr(34) +  ""  +  Chr(34) +  ";\n\n    if (startPos < 1) {\n        startPos = str.length() + startPos + 1;\n    }\n\n    if (length == -1) {\n        length = str.length() - startPos + 1;\n    }\n\n    return str.substr(startPos - 1, length);\n}\n"
+if (InStr(variables['cppCode'] , "Trim(")) or(InStr(variables['cppCode'] , "Trim (")):
+    variables['uperCode'] = variables['uperCode']  +  "\n// Function to trim leading and trailing whitespace from a string\nstd::string Trim(const std::string &inputString) {\n    if (inputString.empty()) return "  +  Chr(34) +  ""  +  Chr(34) +  ";\n\n    size_t start = inputString.find_first_not_of("  +  Chr(34) +  " "  +  Chr(92) +  "t"  +  Chr(92) +  "n"  +  Chr(92) +  "r"  +  Chr(92) +  "f"  +  Chr(92) +  "v"  +  Chr(34) +  ");\n    size_t end = inputString.find_last_not_of("  +  Chr(34) +  " "  +  Chr(92) +  "t"  +  Chr(92) +  "n"  +  Chr(92) +  "r"  +  Chr(92) +  "f"  +  Chr(92) +  "v"  +  Chr(34) +  ");\n\n    return (start == std::string::npos) ? "  +  Chr(34) +  ""  +  Chr(34) +  " : inputString.substr(start, end - start + 1);\n}\n"
+if (InStr(variables['cppCode'] , "StrReplace(")) or(InStr(variables['cppCode'] , "StrReplace (")):
+    variables['uperCode'] = variables['uperCode']  +  "\n// Function to replace all occurrences of a substring with another substring\nstd::string StrReplace(const std::string &originalString, const std::string &find, const std::string &replaceWith) {\n    std::string result = originalString;\n    size_t pos = 0;\n\n    while ((pos = result.find(find, pos)) != std::string::npos) {\n        result.replace(pos, find.length(), replaceWith);\n        pos += replaceWith.length();\n    }\n\n    return result;\n}\n"
+if (InStr(variables['cppCode'] , "StringTrimLeft(")) or(InStr(variables['cppCode'] , "StringTrimLeft (")):
+    variables['uperCode'] = variables['uperCode']  +  "\n// Function to trim characters from the left of the string\nstd::string StringTrimLeft(const std::string &input, int numChars) {\n    return (numChars <= input.length()) ? input.substr(numChars) : input;\n}\n"
+if (InStr(variables['cppCode'] , "StringTrimRight(")) or(InStr(variables['cppCode'] , "StringTrimRight (")):
+    variables['uperCode'] = variables['uperCode']  +  "\n// Function to trim characters from the right of the string\nstd::string StringTrimRight(const std::string &input, int numChars) {\n    return (numChars <= input.length()) ? input.substr(0, input.length() - numChars) : input;\n}\n"
+if (InStr(variables['cppCode'] , "StrLower(")) or(InStr(variables['cppCode'] , "StrLower (")):
+    variables['uperCode'] = variables['uperCode']  +  "\n// Function to convert a string to lowercase\nstd::string StrLower(const std::string &string) {\n    std::string result = string;\n    std::transform(result.begin(), result.end(), result.begin(), ::tolower);\n    return result;\n}\n"
+if (InStr(variables['cppCode'] , "RegExReplace(")) or(InStr(variables['cppCode'] , "RegExReplace (")):
+    variables['uperCode'] = variables['uperCode']  +  "\n// Function to perform a regex replacement\nstd::string RegExReplace(const std::string &inputStr, const std::string &regexPattern, const std::string &replacement) {\n    std::regex regex(regexPattern);\n    return std::regex_replace(inputStr, regex, replacement);\n}\n"
+if (InStr(variables['cppCode'] , "StrSplit(")) or(InStr(variables['cppCode'] , "StrSplit (")):
+    variables['uperCode'] = variables['uperCode']  +  "\n// Function to split a string by a delimiter and return the nth part\nstd::string StrSplit(const std::string &inputStr, const std::string &delimiter, int num) {\n    size_t start = 0, end = 0, count = 0;\n\n    while ((end = inputStr.find(delimiter, start)) != std::string::npos) {\n        if (++count == num) {\n            return inputStr.substr(start, end - start);\n        }\n        start = end + delimiter.length();\n    }\n\n    if (count + 1 == num) {\n        return inputStr.substr(start);\n    }\n\n    return "  +  Chr(34) +  ""  +  Chr(34) +  ";\n}\n"
+if (InStr(variables['cppCode'] , "Chr(")) or(InStr(variables['cppCode'] , "Chr (")):
+    variables['uperCode'] = variables['uperCode']  +  "\n// Function to convert a number to a character\nstd::string Chr(int number) {\n    return (number >= 0 && number <= 0x10FFFF) ? std::string(1, static_cast<char>(number)) : "  +  Chr(34) +  ""  +  Chr(34) +  ";\n}\n"
+if (InStr(variables['cppCode'] , "Mod(")) or(InStr(variables['cppCode'] , "Mod (")):
+    variables['uperCode'] = variables['uperCode']  +  "\n// Custom Mod function\nint Mod(int dividend, int divisor) {\n    return dividend % divisor;\n}\n"
+if (InStr(variables['cppCode'] , "Floor(")) or(InStr(variables['cppCode'] , "Floor (")):
+    variables['uperCode'] = variables['uperCode']  +  "\ndouble Floor(double num) {\n    if (std::isnan(num)) {\n        return std::numeric_limits<double>::quiet_NaN();\n    }\n    return std::floor(num);\n}\n"
+if (InStr(variables['cppCode'] , "A_TickCount(")) or(InStr(variables['cppCode'] , "A_TickCount (")):
+    variables['uperCode'] = variables['uperCode']  +  "\nauto start_timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();\n\n// Function to calculate tick count in milliseconds\nstd::string A_TickCount() {\n    auto current_timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();\n    return std::to_string(current_timestamp - start_timestamp);\n}\n"
 variables['downCode'] = "\nreturn 0;\n}"
 variables['cppCode'] = variables['uperCode']  +  variables['upCode']  +  variables['cppCode']  +  variables['downCode']
+variables['cppCode'] = StrReplace(variables['cppCode'] , "std::string()" , "")
 #MsgBox, % cppCode
 variables['filePathOfCode'] = StringTrimRight(variables['filePathOfCode'], 4)
 variables['filePathOfCode'] = variables['filePathOfCode']  +  "cpp"

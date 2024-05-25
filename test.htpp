@@ -1,10 +1,53 @@
 
 
 
+func aszdxfc()
+{
+return "hello"
+}
+main:
 
-str var1 := "hello asdfdxg aesdf asdfg cdfxcgv"
+int StartTime :=  convertToInt(A_TickCount())
 
+str var1 := "hello asdfdxg aesdf asdfg cdfxcgvhello asdfdxg aesdf asdfg cd"
+
+Loop, 11
+{
+str var1 := str var1 . str var1 . str var1
+}
+
+int numsss := 0
 Loop, Parse, var1, " "
 {
- msgbox, % A_LoopField
+numsss++
+if (InStr(str A_LoopField, "sd"))
+{
+
+str AWSEDRF := A_LoopField
 }
+}
+MsgBox, % str numsss
+
+str asdfg := "hello"
+
+StringTrimRight, asdfg, str asdfg, 1
+StringTrimLeft, asdfg, str asdfg, 1
+MsgBox, % convertToStr(asdfg)
+
+
+int ElapsedTime := convertToInt(A_TickCount()) - int StartTime
+
+
+int ms := ElapsedTime
+
+
+int hours := Floor(int ms / 3600000)
+int ms := Mod(int ms, 3600000 )
+int minutes := Floor(int ms / 60000)
+int ms := Mod(int ms, 60000)
+int seconds := Floor(int ms / 1000)
+int milliseconds := Mod(int ms, 1000)
+
+str ElapsedTime123 := str hours . "h " . str minutes . "m " . str seconds . "s " . str milliseconds . "ms"
+
+MsgBox, % ElapsedTime123
