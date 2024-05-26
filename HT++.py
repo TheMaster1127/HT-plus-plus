@@ -26,7 +26,7 @@ def InStr(Haystack, Needle, CaseSensitive=True, StartingPos=1, Occurrence=1):
             count += 1
             if count == Occurrence:
                 return True
-    return False  
+    return False
 def SubStr(str, startPos, length=None):
     if str is None or str == "":
         return ""
@@ -39,7 +39,7 @@ def Trim(inputString):
     if inputString is None:
         return ""
     return inputString.strip()
-  
+
 def StrReplace(originalString, find, replaceWith):
     # Use the replace method to replace occurrences of 'find' with 'replaceWith'
     return originalString.replace(find, replaceWith)
@@ -72,13 +72,20 @@ def RegExReplace(inputStr, regexPattern, replacement):
     # Return the modified string
     return resultStr
 def StrSplit(inputStr, delimiter, num):
+    # Check if the delimiter is empty
+    if delimiter == '':
+        # Return an empty string since splitting with an empty delimiter is not possible
+        return ''
+
     # Split the input string based on the delimiter
     parts = inputStr.split(delimiter)
+
     # Return the part specified by the num parameter (1-based index)
     if 0 < num <= len(parts):
         return parts[num - 1]  # Return the specified part (0-based index)
     else:
         return ''  # Return an empty string if num is out of range
+
 def Chr(number):
     # Check if the number is None
     if number is None:
@@ -507,8 +514,8 @@ for A_Index17, A_LoopField17 in enumerate(items, start=1):
         if (InStr(variables['strVar'] , " /= ")):
             variables['varAssignmentType'] = "/="
         variables['nameOfVar1'] = Trim(StrSplit(variables['strVar'] , " " , 1))
-        variables['nameOfVarSplit'] = Trim(StrSplit(variables['strVar'] , " " , 2))
-        variables['nameOfVar2'] = Trim(StrSplit(variables['strVar'] , variables['nameOfVarSplit'] , 2))
+        variables['nameOfVarSplit'] = StrSplit(variables['strVar'] , " " , 2)
+        variables['nameOfVar2'] = Trim(StrSplit(variables['strVar'] , str(variables['nameOfVarSplit']), 2))
         variables['nameOfVar2'] = varTranspiler(variables['nameOfVar2'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
         variables['cppCode'] += "variables["  +  Chr(34) +  variables['nameOfVar1']  +  Chr(34) +  "]"  +  " "  +  variables['varAssignmentType']  +  " "  +  variables['nameOfVar2']  +  Chr(59) +  "\n"
     elif (SubStr(Trim(StrLower(variables['A_LoopField17'])) , 1 , 5)== "char "):
@@ -589,8 +596,8 @@ for A_Index17, A_LoopField17 in enumerate(items, start=1):
         if (InStr(variables['strVar'] , " /= ")):
             variables['varAssignmentType'] = "/="
         variables['nameOfVar1'] = Trim(StrSplit(variables['strVar'] , " " , 1))
-        variables['nameOfVarSplit'] = Trim(StrSplit(variables['strVar'] , " " , 2))
-        variables['nameOfVar2'] = Trim(StrSplit(variables['strVar'] , variables['nameOfVarSplit'] , 2))
+        variables['nameOfVarSplit'] = StrSplit(variables['strVar'] , " " , 2)
+        variables['nameOfVar2'] = Trim(StrSplit(variables['strVar'] , str(variables['nameOfVarSplit']), 2))
         variables['nameOfVar2'] = varTranspiler(variables['nameOfVar2'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
         variables['nameOfVar11'] = Trim(StrSplit(variables['nameOfVar1'] , "%" , 1))
         variables['nameOfVar12'] = Trim(StrSplit(variables['nameOfVar1'] , "%" , 2))

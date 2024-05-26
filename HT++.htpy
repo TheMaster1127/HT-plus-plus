@@ -613,8 +613,8 @@ varAssignmentType := "/="
 }
 
 nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
-nameOfVarSplit := Trim(StrSplit(strVar, " ", 2))
-nameOfVar2 := Trim(StrSplit(strVar, nameOfVarSplit, 2))
+nameOfVarSplit := StrSplit(strVar, " ", 2)
+nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
 nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 
 cppCode .= "variables[" . Chr(34) . nameOfVar1 . Chr(34) . "]" . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
@@ -767,8 +767,8 @@ varAssignmentType := "/="
 }
 
 nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
-nameOfVarSplit := Trim(StrSplit(strVar, " ", 2))
-nameOfVar2 := Trim(StrSplit(strVar, nameOfVarSplit, 2))
+nameOfVarSplit := StrSplit(strVar, " ", 2)
+nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
 nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 
 nameOfVar11 := Trim(StrSplit(nameOfVar1, "%", 1))
