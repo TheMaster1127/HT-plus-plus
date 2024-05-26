@@ -493,6 +493,7 @@ StringTrimRight, funcTranspile, funcTranspile, 1
 intOrStrTypeFuncDec := ""
 intOrStrTypeFuncDecMode := 0
 funcDecArgsNum := 0
+funcTranspile := StrReplace(funcTranspile, ",", "")
 Loop, Parse, funcTranspile, " "
 {
 if (A_LoopField = "int")

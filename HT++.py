@@ -438,6 +438,7 @@ for A_Index17, A_LoopField17 in enumerate(items, start=1):
         variables['intOrStrTypeFuncDec'] = ""
         variables['intOrStrTypeFuncDecMode'] = 0
         variables['funcDecArgsNum'] = 0
+        variables['funcTranspile'] = StrReplace(variables['funcTranspile'] , "," , "")
         items = LoopParseFunc(variables['funcTranspile'], " ")
         for A_Index19, A_LoopField19 in enumerate(items, start=1):
             variables['A_Index19'] = A_Index19
