@@ -1,4 +1,3 @@
-
 func hello(int var5)
 {
 return var5
@@ -34,18 +33,18 @@ sadsfdx++
 int sads := INT([wasedsa])
 
 
-str text := "hello hello hello man man whats up up today today how are you ypu doing"
+str text := "hello hello hello man man whats up up today today how are you you doing"
 
 str out
 int wordCount := 0
 Loop, Parse, text, " "
 {
 wordCount++
-cat word%wordCount%	:= A_LoopField
+cat word%wordCount% := A_LoopField
 }
 
 wordCount++
-cat word%wordCount%	:= ""
+cat word%wordCount% := ""
 
 int AIndex
 Loop, Parse, text, " "
@@ -59,6 +58,6 @@ out .= A_LoopField . " "
 StringTrimRight, out, out, 1
 MsgBox, % out
 
-
-
-
+[num] := "5"
+cat var%[num]% := "hello"
+MsgBox, % [var5]

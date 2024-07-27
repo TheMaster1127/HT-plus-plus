@@ -97,7 +97,17 @@ if (InStr(varInVarTranspiler, "%"))
 
 nameOfVarr11 := Trim(StrSplit(varInVarTranspiler, "%", 1))
 nameOfVarr12 := Trim(StrSplit(varInVarTranspiler, "%", 2))
+if (InStr(nameOfVarr12, "["))
+{
+StringTrimRight, nameOfVarr12, nameOfVarr12, 1
+StringTrimLeft, nameOfVarr12, nameOfVarr12, 1
+
 nameOfVarr111 := "variables[" . Chr(34) . nameOfVarr11 . Chr(34) . " + std::string(variables[" . Chr(34) . nameOfVarr12 . Chr(34) . "])]"
+}
+else
+{
+nameOfVarr111 := "variables[" . Chr(34) . nameOfVarr11 . Chr(34) . " + STR(" . nameOfVarr12 . ")]"
+}
 
 return nameOfVarr111
 }
@@ -243,6 +253,36 @@ return var123out
 } ; end of func
 
 
+transpileLowVariables(sstr)
+{
+sstr := Trim(sstr)
+
+outOftranspileVariablesOut := Chr(34)
+if (InStr(sstr, Chr(37)))
+{
+Loop, Parse, sstr, "%"
+{
+
+if (Mod(A_Index, 2))
+{
+outOftranspileVariablesOut .= A_LoopField
+}
+else
+{
+outOftranspileVariablesOut .= Chr(34) . " + variables['" . A_LoopField . Chr(39) . Chr(93) . " + " . Chr(34)
+}
+
+}
+}
+else
+{
+sstr := Chr(34) . sstr . Chr(34)
+return sstr
+}
+
+outOftranspileVariablesOut := outOftranspileVariablesOut . Chr(34)
+return outOftranspileVariablesOut
+}
 
 
 
@@ -844,10 +884,23 @@ nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
 nameOfVarSplit := StrSplit(strVar, " ", 2)
 nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
 nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
-
 nameOfVar11 := Trim(StrSplit(nameOfVar1, "%", 1))
 nameOfVar12 := Trim(StrSplit(nameOfVar1, "%", 2))
+
+if (InStr(nameOfVar12, "["))
+{
+StringTrimRight, nameOfVar12, nameOfVar12, 1
+StringTrimLeft, nameOfVar12, nameOfVar12, 1
+
 nameOfVar1 := "variables[" . Chr(34) . nameOfVar11 . Chr(34) . " + std::string(variables[" . Chr(34) . nameOfVar12 . Chr(34) . "])]"
+}
+else
+{
+nameOfVar1 := "variables[" . Chr(34) . nameOfVar11 . Chr(34) . " + STR(" . nameOfVar12 . ")]"
+}
+
+
+
 
 cppCode .= nameOfVar1 . Chr(59) . "`n"
 }
@@ -857,10 +910,19 @@ nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
 nameOfVarSplit := StrSplit(strVar, " ", 2)
 nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
 nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
-
 nameOfVar11 := Trim(StrSplit(nameOfVar1, "%", 1))
 nameOfVar12 := Trim(StrSplit(nameOfVar1, "%", 2))
+if (InStr(nameOfVar12, "["))
+{
+StringTrimRight, nameOfVar12, nameOfVar12, 1
+StringTrimLeft, nameOfVar12, nameOfVar12, 1
+
 nameOfVar1 := "variables[" . Chr(34) . nameOfVar11 . Chr(34) . " + std::string(variables[" . Chr(34) . nameOfVar12 . Chr(34) . "])]"
+}
+else
+{
+nameOfVar1 := "variables[" . Chr(34) . nameOfVar11 . Chr(34) . " + STR(" . nameOfVar12 . ")]"
+}
 
 cppCode .= nameOfVar1 . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
 }
@@ -1090,7 +1152,7 @@ itemsOut := StrReplace(itemsOut, Chr(96), Chr(92))
 }
 
 ;for (size_t A_Index1 = 0; A_Index1 < items.size(); A_Index1++)
-var1out := itemsOut . "`n" . "for (size_t A" . Chr(95) . "Index" . str(AindexcharLength) . " = 1; A" . Chr(95) . "Index" . str(AindexcharLength) . " < items" . str(AindexcharLength) . ".size(); A" . Chr(95) . "Index" . str(AindexcharLength) . "++)"
+var1out := itemsOut . "`n" . "for (size_t A" . Chr(95) . "Index" . str(AindexcharLength) . " = 1; A" . Chr(95) . "Index" . str(AindexcharLength) . " < items" . str(AindexcharLength) . ".size() + 1; A" . Chr(95) . "Index" . str(AindexcharLength) . "++)"
 
 
 
@@ -1098,7 +1160,7 @@ nothing := ""
 AindexcharLengthStr := nothing . str(AindexcharLength) . nothing
 
 
-theFixTextLoopLP := "std::string A" . Chr(95) . "LoopField" . str(AindexcharLength) . " = items" . str(AindexcharLength) . "[A" . Chr(95) . "Index" . str(AindexcharLength) . "];"
+theFixTextLoopLP := "std::string A" . Chr(95) . "LoopField" . str(AindexcharLength) . " = items" . str(AindexcharLength) . "[A" . Chr(95) . "Index" . str(AindexcharLength) . " - 1];"
 
 pycodeAcurlyBraceAddSomeVrasFixLP := 1
 haveWeEverUsedAloop := 1
@@ -1200,7 +1262,7 @@ else
 if (pycodeAcurlyBraceAddSomeVrasFixNL = 1) && (SubStr(Trim(StrLower(A_LoopField)), 1, 1) = Chr(123))
 {
 pycodeAcurlyBraceAddSomeVrasFixNL := 0
-cppCode .= A_LoopField . "`n" . theFixTextLoopNL . "`n"
+cppCode .= A_LoopField . "`n" . "`n"
 }
 else
 {
@@ -1757,14 +1819,13 @@ upCode := "`nint main()`n{`n"
 
 uperCode := "#include <iostream>`n#include <sstream>`n#include <vector>`n#include <unordered_map>`n#include <string>`n#include <any>`n#include <cstdint>`n#include <regex>`n#include <fstream>`n#include <filesystem>`n#include <cctype>`n#include <algorithm>`n#include <cmath>`n#include <limits>`n#include <chrono>`n`n// Define a map to store dynamic variables`n" . "// Create a map to hold variables`n    std::unordered_map<std::string, std::string> variables;`n"
 
-if (InStr(cppCode, "INT(")) or (InStr(cppCode, "INT ("))
-{
+
 uperCode := uperCode . "`n// Convert std::string to int`nint INT(const std::string& str) {`n    std::istringstream iss(str);`n    int value;`n    iss >> value;`n    return value;`n}`n"
-}
-if (InStr(cppCode, "STR(")) or (InStr(cppCode, "STR ("))
-{
+
+
 uperCode := uperCode . "`n// Convert various types to std::string`nstd::string STR(int value) {`n    return std::to_string(value);`n}`n`nstd::string STR(float value) {`n    return std::to_string(value);`n}`n`nstd::string STR(double value) {`n    return std::to_string(value);`n}`n`nstd::string STR(size_t value) {`n    return std::to_string(value);`n}`n`nstd::string STR(bool value) {`n    return value ? " . Chr(34) . "1" . Chr(34) . " : " . Chr(34) . "0" . Chr(34) . ";`n}`n"
-}
+
+
 if (InStr(cppCode, "FLOAT(")) or (InStr(cppCode, "FLOAT ("))
 {
 uperCode := uperCode . "`n// Convert std::string to float`nfloat FLOAT(const std::string& str) {`n    std::istringstream iss(str);`n    float value;`n    iss >> value;`n    return value;`n}`n"
@@ -1788,21 +1849,21 @@ uperCode := uperCode . "`n// Print function that converts all types to string if
 
 
 
-if (InStr(cppCode, "FileRead("))
+if (InStr(cppCode, "FileRead(")) or (InStr(cppCode, "FileRead ("))
 {
 uperCode := uperCode . "`nstd::string FileRead(const std::string& path) {`n    std::ifstream file;`n    std::filesystem::path full_path;`n`n    // Check if the file path is an absolute path`n    if (std::filesystem::path(path).is_absolute()) {`n        full_path = path;`n    } else {`n        // If it's not a full path, prepend the current working directory`n        full_path = std::filesystem::current_path() / path;`n    }`n`n    // Open the file`n    file.open(full_path);`n    if (!file.is_open()) {`n        throw std::runtime_error(" . Chr(34) . "Error: Could not open the file." . Chr(34) . ");`n    }`n`n    // Read the file content into a string`n    std::string content;`n    std::string line;`n    while (std::getline(file, line)) {`n        content += line + '" . Chr(92) . "n';`n    }`n`n    file.close();`n    return content;`n}`n"
 }
 
 
 
-if (InStr(cppCode, "FileAppend("))
+if (InStr(cppCode, "FileAppend(")) or (InStr(cppCode, "FileAppend ("))
 {
 uperCode := uperCode . "`nbool FileAppend(const std::string& content, const std::string& path) {`n    std::ofstream file;`n`n    // Open the file in append mode`n    file.open(path, std::ios::app);`n`n    if (!file.is_open()) {`n        std::cerr << " . Chr(34) . "Error: Could not open the file for appending." . Chr(34) . " << std::endl;`n        return false;`n    }`n`n    // Append the content to the file`n    file << content;`n`n    // Close the file`n    file.close();`n`n    return true;`n}`n"
 }
 
 
 
-if (InStr(cppCode, "FileDelete("))
+if (InStr(cppCode, "FileDelete(")) or (InStr(cppCode, "FileDelete ("))
 {
 uperCode := uperCode . "`nbool FileDelete(const std::string& path) {`n    std::filesystem::path file_path(path);`n`n    // Check if the file exists`n    if (!std::filesystem::exists(file_path)) {`n        std::cerr << " . Chr(34) . "Error: File does not exist." . Chr(34) . " << std::endl;`n        return false;`n    }`n`n    // Attempt to remove the file`n    if (!std::filesystem::remove(file_path)) {`n        std::cerr << " . Chr(34) . "Error: Failed to delete the file." . Chr(34) . " << std::endl;`n        return false;`n    }`n`n    return true;`n}`n"
 }
