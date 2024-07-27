@@ -435,25 +435,33 @@ for A_Index18, A_LoopField18 in enumerate(items, start=1):
         variables['filereadCommand1varname'] = StrSplit(variables['filereadCommand'] , ", " , 1)
         variables['filereadCommand2path'] = StrSplit(variables['filereadCommand'] , ", " , 2)
         variables['filereadCommand2path'] = StrReplace(variables['filereadCommand2path'] , "\\" , "\\\\")
-        variables['filereadCommand2path'] = Trim(transpileLowVariables(variables['filereadCommand2path']))
-        variables['filereadCommand1varname'] = Trim(variables['transpileVariables'](variables['filereadCommand1varname'] , variables['functionNames']))
-        variables['cppCode'] += variables['filereadCommand1varname'] + " = FileRead(" + variables['filereadCommand2path'] + ")\n"
+        if ( not (InStr(variables['filereadCommand2path'] , "%"))):
+            variables['filereadCommand2path'] = Trim(transpileLowVariables(variables['filereadCommand2path']))
+        else:
+            variables['filereadCommand2path'] = StrReplace(variables['filereadCommand2path'] , "%" , "")
+        variables['cppCode'] += "std::string " + variables['filereadCommand1varname'] + " = FileRead(" + variables['filereadCommand2path'] + ");\n"
         variables['lineDone'] = 1
     elif (SubStr(Trim(StrLower(variables['A_LoopField18'])), 1 , 12)== "fileappend, "):
         variables['fileAppendCommand'] = StringTrimLeft(variables['A_LoopField18'], 12)
         variables['fileAppendCommand1varname'] = StrSplit(variables['fileAppendCommand'] , ", " , 1)
         variables['fileAppendCommand2path'] = StrSplit(variables['fileAppendCommand'] , ", " , 2)
         variables['fileAppendCommand2path'] = StrReplace(variables['fileAppendCommand2path'] , "\\" , "\\\\")
-        variables['fileAppendCommand1varname'] = Trim(transpileLowVariables(variables['fileAppendCommand1varname']))
-        variables['fileAppendCommand2path'] = Trim(transpileLowVariables(variables['fileAppendCommand2path']))
-        variables['cppCode'] += "FileAppend(" + variables['fileAppendCommand1varname'] + ", " + variables['fileAppendCommand2path'] + ")\n"
+        if ( not (InStr(variables['fileAppendCommand2path'] , "%"))):
+            variables['fileAppendCommand2path'] = Trim(transpileLowVariables(variables['fileAppendCommand2path']))
+        else:
+            variables['fileAppendCommand2path'] = StrReplace(variables['fileAppendCommand2path'] , "%" , "")
+        variables['fileAppendCommand1varname'] = StrReplace(variables['fileAppendCommand1varname'] , "%" , "")
+        variables['cppCode'] += "FileAppend(" + variables['fileAppendCommand1varname'] + ", " + variables['fileAppendCommand2path'] + ");\n"
         variables['lineDone'] = 1
     elif (SubStr(Trim(StrLower(variables['A_LoopField18'])), 1 , 12)== "filedelete, "):
         variables['fileDeleteCommand'] = StringTrimLeft(variables['A_LoopField18'], 12)
         variables['fileDeleteCommand2path'] = StrSplit(variables['fileDeleteCommand'] , ", " , 1)
         variables['fileDeleteCommand2path'] = StrReplace(variables['fileDeleteCommand2path'] , "\\" , "\\\\")
-        variables['fileDeleteCommand2path'] = Trim(transpileLowVariables(variables['fileDeleteCommand2path']))
-        variables['cppCode'] += "FileDelete(" + variables['fileDeleteCommand2path'] + ")\n"
+        if ( not (InStr(variables['fileDeleteCommand2path'] , "%"))):
+            variables['fileDeleteCommand2path'] = Trim(transpileLowVariables(variables['fileDeleteCommand2path']))
+        else:
+            variables['fileDeleteCommand2path'] = StrReplace(variables['fileDeleteCommand2path'] , "%" , "")
+        variables['cppCode'] += "FileDelete(" + variables['fileDeleteCommand2path'] + ");\n"
         variables['lineDone'] = 1
     elif (SubStr(Trim(StrLower(variables['A_LoopField18'])), 1 , 17)== StrLower("StringTrimRight, ")):
         variables['varr1'] = StrSplit(variables['A_LoopField18'] , "," , 2)

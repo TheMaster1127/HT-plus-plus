@@ -32,6 +32,11 @@ sadsfdx++
 [wasedsa] := "5"
 int sads := INT([wasedsa])
 
+str filepath := "testText.txt"
+str text1234 := "dzsfddz jskd jd cakjs a jsv`nsal sajvas"
+FileAppend, %text1234%, %filepath%
+FileRead, text12346, %filepath%
+FileDelete, %filepath%
 
 str text := "hello hello hello man man whats up up today today how are you you doing"
 

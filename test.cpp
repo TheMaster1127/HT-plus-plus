@@ -96,6 +96,73 @@ void print(const T& value) {
     }
 }
 
+std::string FileRead(const std::string& path) {
+    std::ifstream file;
+    std::filesystem::path full_path;
+
+    // Check if the file path is an absolute path
+    if (std::filesystem::path(path).is_absolute()) {
+        full_path = path;
+    } else {
+        // If it's not a full path, prepend the current working directory
+        full_path = std::filesystem::current_path() / path;
+    }
+
+    // Open the file
+    file.open(full_path);
+    if (!file.is_open()) {
+        throw std::runtime_error("Error: Could not open the file.");
+    }
+
+    // Read the file content into a string
+    std::string content;
+    std::string line;
+    while (std::getline(file, line)) {
+        content += line + '\n';
+    }
+
+    file.close();
+    return content;
+}
+
+bool FileAppend(const std::string& content, const std::string& path) {
+    std::ofstream file;
+
+    // Open the file in append mode
+    file.open(path, std::ios::app);
+
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open the file for appending." << std::endl;
+        return false;
+    }
+
+    // Append the content to the file
+    file << content;
+
+    // Close the file
+    file.close();
+
+    return true;
+}
+
+bool FileDelete(const std::string& path) {
+    std::filesystem::path file_path(path);
+
+    // Check if the file exists
+    if (!std::filesystem::exists(file_path)) {
+        std::cerr << "Error: File does not exist." << std::endl;
+        return false;
+    }
+
+    // Attempt to remove the file
+    if (!std::filesystem::remove(file_path)) {
+        std::cerr << "Error: Failed to delete the file." << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
 // Function to trim characters from the right of the string
 std::string StringTrimRight(const std::string &input, int numChars) {
     return (numChars <= input.length()) ? input.substr(0, input.length() - numChars) : input;
@@ -128,6 +195,11 @@ int sadsfdx = 5;
 sadsfdx++;
 variables["wasedsa"] = std::string("5");
 int sads = INT ( variables["wasedsa"] ) ;
+std::string filepath = std::string("testText.txt");
+std::string text1234 = std::string("dzsfddz jskd jd cakjs a jsv\nsal sajvas");
+FileAppend(text1234, filepath);
+std::string text12346 = FileRead(filepath);
+//FileDelete(filepath);
 std::string text = std::string("hello hello hello man man whats up up today today how are you you doing");
 std::string out;
 int wordCount = 0;
@@ -146,7 +218,7 @@ for (size_t A_Index3 = 1; A_Index3 < items3.size() + 1; A_Index3++)
 {
 std::string A_LoopField3 = items3[A_Index3 - 1];
 AIndex = A_Index3 + 1;
-if (A_LoopField3!= variables["word" + STR(AIndex)]) 
+if (A_LoopField3!= variables["word" + STR(AIndex)])
 {
 out += A_LoopField3 + std::string(" ");
 }
