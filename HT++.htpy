@@ -97,7 +97,7 @@ if (InStr(varInVarTranspiler, "%"))
 
 nameOfVarr11 := Trim(StrSplit(varInVarTranspiler, "%", 1))
 nameOfVarr12 := Trim(StrSplit(varInVarTranspiler, "%", 2))
-nameOfVarr111 := "variables[" . Chr(34) . nameOfVarr11 . Chr(34) . " + convertToStr(variables[" . Chr(34) . nameOfVarr12 . Chr(34) . "])]"
+nameOfVarr111 := "variables[" . Chr(34) . nameOfVarr11 . Chr(34) . " + std::string(variables[" . Chr(34) . nameOfVarr12 . Chr(34) . "])]"
 
 return nameOfVarr111
 }
@@ -106,7 +106,7 @@ Loop, Parse, allVarsChars, `n ,`r
 {
 if (Trim(varInVarTranspiler) = Trim(A_LoopField))
 {
-return "std::string(" . varInVarTranspiler . ")"
+return varInVarTranspiler
 }
 }
 
@@ -114,7 +114,7 @@ Loop, Parse, allVarsInts, `n ,`r
 {
 if (Trim(varInVarTranspiler) = Trim(A_LoopField))
 {
-return "std::any(" . varInVarTranspiler . ")"
+return varInVarTranspiler
 }
 }
 
@@ -137,9 +137,16 @@ return varInVarTranspiler
 
 
 
+if (SubStr(varInVarTranspiler, 1, 1) = "[")
+{
+StringTrimLeft, varInVarTranspiler, varInVarTranspiler, 1
+StringTrimRight, varInVarTranspiler, varInVarTranspiler, 1
+return "variables[" . Chr(34) . varInVarTranspiler . Chr(34) . "]"
+}
+
 if (varDetect(varInVarTranspiler))
 {
-return "variables[" . Chr(34) . varInVarTranspiler . Chr(34) . "]"
+return varInVarTranspiler
 }
 
 if (isVarAnumKindaVar(varInVarTranspiler))
@@ -205,11 +212,11 @@ varOut2out := isVarAfuncOrWhat(varInVarTranspiler, funcNames, allVarsChars, allV
 
 if (lastType = "int")
 {
-varOut2out := "convertToInt(" . varOut2out . ")"
+varOut2out := "INT(" . varOut2out . ")"
 }
 if (lastType = "str")
 {
-varOut2out := "convertToStr(" . varOut2out . ")"
+varOut2out := "std::string(" . varOut2out . ")"
 }
 
 var123out .= str(varOut2out) . " "
@@ -270,7 +277,9 @@ if (A_Index = 1)
 {
 MsgBox, % A_LoopField
 filePathOfCode := A_LoopField
-code := FileRead(filePathOfCode)
+;code := FileRead(filePathOfCode)
+FileRead, code, %filePathOfCode%
+
 }
 if (A_Index = 2)
 {
@@ -278,6 +287,9 @@ MsgBox, % A_LoopField
 }
 }
 ;MsgBox, % code
+
+nothing := ""
+code := StrReplace(code, Chr(13), nothing)
 
 codeTrimBeggining := ""
 Loop, Parse, code, `n, `r
@@ -351,7 +363,7 @@ theIdNumOfThe34theVar%A_Index% .= Chr(34)
 
 allVarsChars := ""
 allVarsInts := ""
-funcNames := "convertToInt|convertToStr|InStr|LoopParseFunc|print|FileRead|FileAppend|FileDelete|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|StrLower|RegExReplace|StrSplit|Chr|Mod|Floor|A_TickCount"
+funcNames := "std::string|InStr|LoopParseFunc|print|FileRead|FileAppend|FileDelete|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|StrLower|RegExReplace|StrSplit|Chr|Mod|Floor|A_TickCount|STR|INT|FLOAT"
 
 ; func
 Loop, Parse, code, `n, `r
@@ -371,7 +383,7 @@ cppCode := ""
 Loop, Parse, code, `n, `r
 {
 
-
+lineDone := 0
 if (SubStr(Trim(StrLower(A_LoopField)), 1, 10) = "msgbox, % ")
 {
 StringTrimLeft, msgboxCode, A_LoopField, 10
@@ -379,6 +391,7 @@ StringTrimLeft, msgboxCode, A_LoopField, 10
 msgboxCode := varTranspiler(msgboxCode, funcNames, allVarsChars, allVarsInts)
 
 cppCode .= "print(" . msgboxCode . ");" . "`n"
+lineDone := 1
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 8) = "msgbox, ")
 {
@@ -387,23 +400,31 @@ StringTrimLeft, msgboxCode, A_LoopField, 8
 
 
 cppCode .= "print(std::string(" . Chr(34) . msgboxCode . Chr(34) . "));" . "`n"
+lineDone := 1
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 1) = ";")
+{
+StringTrimLeft, str1234, A_LoopField, 1
+cppCode .= "//" . str1234 . "`n"
+lineDone := 1
 }
 else if (SubStr(A_LoopField, -1) = "++")
 {
 str123 := Trim(A_LoopField)
 StringTrimRight, str123, str123, 2
 
-out := "variables[" . Chr(34) . str123 . Chr(34) . "] = convertToInt(variables[" . Chr(34) . str123 . Chr(34) . "]) + 1;"
-
+out := str123 . "++;"
 cppCode .= out . "`n"
+lineDone := 1
 }
 else if (SubStr(A_LoopField, -1) = "--")
 {
 str123 := Trim(A_LoopField)
 StringTrimRight, str123, str123, 2
 
-out := "variables[" . Chr(34) . str123 . Chr(34) . "] = convertToInt(variables[" . Chr(34) . str123 . Chr(34) . "]) - 1;"
+out := str123 . "--;"
 cppCode .= out . "`n"
+lineDone := 1
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 10) = "fileread, ")
 {
@@ -413,10 +434,10 @@ filereadCommand2path := StrSplit(filereadCommand, ", ", 2)
 
 filereadCommand2path := StrReplace(filereadCommand2path, "\\", "\\\\")
 
-filereadCommand2path := varTranspiler(filereadCommand2path, funcNames, allVarsChars, allVarsInts)
-filereadCommand1varname := varTranspiler(filereadCommand1varname, funcNames, allVarsChars, allVarsInts)
-cppCode .= filereadCommand1varname . " = FileRead(" . filereadCommand2path . ");`n"
-
+filereadCommand2path := Trim(transpileLowVariables(filereadCommand2path))
+filereadCommand1varname := Trim(transpileVariables(filereadCommand1varname, functionNames))
+cppCode .= filereadCommand1varname . " = FileRead(" . filereadCommand2path . ")`n"
+lineDone := 1
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 12) = "fileappend, ")
 {
@@ -426,11 +447,11 @@ fileAppendCommand2path := StrSplit(fileAppendCommand, ", ", 2)
 
 fileAppendCommand2path := StrReplace(fileAppendCommand2path, "\\", "\\\\")
 
-fileAppendCommand1varname := varTranspiler(fileAppendCommand1varname, funcNames, allVarsChars, allVarsInts)
-fileAppendCommand2path := varTranspiler(fileAppendCommand2path, funcNames, allVarsChars, allVarsInts)
+fileAppendCommand1varname := Trim(transpileLowVariables(fileAppendCommand1varname))
+fileAppendCommand2path := Trim(transpileLowVariables(fileAppendCommand2path))
 
-cppCode .= "FileAppend(" . fileAppendCommand1varname . ", " . fileAppendCommand2path . ");`n"
-
+cppCode .= "FileAppend(" . fileAppendCommand1varname . ", " . fileAppendCommand2path . ")`n"
+lineDone := 1
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 12) = "filedelete, ")
 {
@@ -439,10 +460,11 @@ StringTrimLeft, fileDeleteCommand, A_LoopField, 12
 fileDeleteCommand2path := StrSplit(fileDeleteCommand, ", ", 1)
 
 fileDeleteCommand2path := StrReplace(fileDeleteCommand2path, "\\", "\\\\")
-fileDeleteCommand2path := varTranspiler(fileDeleteCommand2path, funcNames, allVarsChars, allVarsInts)
+fileDeleteCommand2path := Trim(transpileLowVariables(fileDeleteCommand2path))
 
-cppCode .= "FileDelete(" . fileDeleteCommand2path . ");`n"
 
+cppCode .= "FileDelete(" . fileDeleteCommand2path . ")`n"
+lineDone := 1
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 17) = StrLower("StringTrimRight, "))
 {
@@ -457,6 +479,7 @@ outt3 := Trim(varTranspiler(varr3, funcNames, allVarsChars, allVarsInts))
 out := outt1 . " = " . "StringTrimRight(" . outt2 . ", " . outt3 . ");"
 
 cppCode .= out . "`n"
+lineDone := 1
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 16) = StrLower("StringTrimLeft, "))
 {
@@ -471,209 +494,214 @@ outt3 := Trim(varTranspiler(varr3, funcNames, allVarsChars, allVarsInts))
 out := outt1 . " = " . "StringTrimLeft(" . outt2 . ", " . outt3 . ");"
 
 cppCode .= out . "`n"
+lineDone := 1
 }
 else if (A_LoopField = "main:")
 {
 theMainFuncDec := 1
 cppCode .= "`nint main()`n{`n"
+lineDone := 1
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "func ")
 {
-StringTrimLeft, funcTranspile, A_LoopField, 5
-funcName123 := Trim(StrSplit(funcTranspile, "(", 1))
-funcName123Num := 1
-Loop, Parse, funcName123
-{
-funcName123Num++
-}
-StringTrimLeft, funcTranspile, funcTranspile, funcName123Num
-StringTrimRight, funcTranspile, funcTranspile, 1
-;MsgBox, ||%funcTranspile%||
-
-intOrStrTypeFuncDec := ""
-intOrStrTypeFuncDecMode := 0
-funcDecArgsNum := 0
-funcTranspile := StrReplace(funcTranspile, ",", "")
-Loop, Parse, funcTranspile, " "
-{
-if (A_LoopField = "int")
-{
-intOrStrTypeFuncDec := "int"
-intOrStrTypeFuncDecMode := 1
-}
-if (A_LoopField = "str")
-{
-intOrStrTypeFuncDec := "str"
-intOrStrTypeFuncDecMode := 1
-}
-
-if (intOrStrTypeFuncDecMode = 1) && (A_LoopField != "int") && (A_LoopField != "str")
-{
-intOrStrTypeFuncDecMode := 0
-funcDecArgsNum++
-
-funcArg%funcDecArgsNum% := intOrStrTypeFuncDec . "|" . Trim(A_LoopField)
-}
-}
-funcAllArgs := ""
-Loop, % funcDecArgsNum
-{
-theVarForFuncDec := Trim(StrSplit(funcArg%A_Index%, "|", 2))
-funcAllArgs .= "const std::any& " . theVarForFuncDec . ", "
-}
-StringTrimRight, funcAllArgs, funcAllArgs, 2
-
-funcGetParamsToVars := "{`n"
-Loop, % funcDecArgsNum
-{
-theVarForFuncDec1 := Trim(StrSplit(funcArg%A_Index%, "|", 1))
-theVarForFuncDec2 := Trim(StrSplit(funcArg%A_Index%, "|", 2))
-
-if (theVarForFuncDec1 = "int")
-{
-theVarForFuncDec1 := "convertToInt("
-}
-else
-{
-theVarForFuncDec1 := "convertToStr("
-}
-
-funcGetParamsToVars .= "variables[" . Chr(34) . theVarForFuncDec2 . Chr(34) . "] = " . theVarForFuncDec1 . theVarForFuncDec2 . ");`n"
-}
+StringTrimLeft, funcName123, A_LoopField, 5
 
 removeNextCurlyBraceCpp := 1
-cppCode .= "std::any " . funcName123 . "(" . funcAllArgs . ")" . "`n" . funcGetParamsToVars . "`n"
-}
-else if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = "int ")
-{
-StringTrimLeft, intVar, A_LoopField, 4
-intVar := Trim(intVar)
-
-if (InStr(intVar, " := "))
-{
-varAssignmentType := "="
-}
-if (InStr(intVar, " += "))
-{
-varAssignmentType := "+="
-}
-if (InStr(intVar, " .= "))
-{
-varAssignmentType := "+="
-}
-if (InStr(intVar, " -= "))
-{
-varAssignmentType := "-="
-}
-if (InStr(intVar, " *= "))
-{
-varAssignmentType := "*="
-}
-if (InStr(intVar, " /= "))
-{
-varAssignmentType := "/="
-}
-
-nameOfVar1 := Trim(StrSplit(intVar, " ", 1))
-nameOfVarSplit := Trim(StrSplit(intVar, " ", 2))
-nameOfVar2 := Trim(StrSplit(intVar, nameOfVarSplit, 2))
-nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
-
-cppCode .= "variables[" . Chr(34) . nameOfVar1 . Chr(34) . "]" . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
-
+funcName123 := StrReplace(funcName123, " str ", " std::string ")
+funcName123 := StrReplace(funcName123, "(str ", "std::string ")
+cppCode .= "std::any " . funcName123 . "`n{`n"
+lineDone := 1
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = "str ")
 {
 StringTrimLeft, strVar, A_LoopField, 4
 strVar := Trim(strVar)
 
+
+declareAvarNOvalue := 0
 if (InStr(strVar, " := "))
 {
 varAssignmentType := "="
 }
-if (InStr(strVar, " += "))
+else if (InStr(strVar, " += "))
 {
 varAssignmentType := "+="
 }
-if (InStr(strVar, " .= "))
+else if (InStr(strVar, " .= "))
 {
 varAssignmentType := "+="
 }
-if (InStr(strVar, " -= "))
+else if (InStr(strVar, " -= "))
 {
 varAssignmentType := "-="
 }
-if (InStr(strVar, " *= "))
+else if (InStr(strVar, " *= "))
 {
 varAssignmentType := "*="
 }
-if (InStr(strVar, " /= "))
+else if (InStr(strVar, " /= "))
 {
 varAssignmentType := "/="
 }
+else
+{
+declareAvarNOvalue := 1
+}
 
+if (declareAvarNOvalue = 1)
+{
 nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
 nameOfVarSplit := StrSplit(strVar, " ", 2)
 nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
 nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 
-cppCode .= "variables[" . Chr(34) . nameOfVar1 . Chr(34) . "]" . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+cppCode .= "std::string " . nameOfVar1  . Chr(59) . "`n"
+}
+else
+{
+nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
+nameOfVarSplit := StrSplit(strVar, " ", 2)
+nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
+nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 
+cppCode .= "std::string " . nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+}
+lineDone := 1
+
+
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 1) = "[")
+{
+StringTrimLeft, strVar, A_LoopField, 1
+strVar := Trim(strVar)
+
+declareAvarNOvalue := 0
+if (InStr(strVar, " := "))
+{
+varAssignmentType := "="
+}
+else if (InStr(strVar, " += "))
+{
+varAssignmentType := "+="
+}
+else if (InStr(strVar, " .= "))
+{
+varAssignmentType := "+="
+}
+else if (InStr(strVar, " -= "))
+{
+varAssignmentType := "-="
+}
+else if (InStr(strVar, " *= "))
+{
+varAssignmentType := "*="
+}
+else if (InStr(strVar, " /= "))
+{
+varAssignmentType := "/="
+}
+else
+{
+declareAvarNOvalue := 1
+}
+
+
+if (declareAvarNOvalue = 1)
+{
+nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
+StringTrimRight, nameOfVar1, nameOfVar1, 1
+
+nameOfVarSplit := StrSplit(strVar, " ", 2)
+nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
+nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
+
+cppCode .= "variables[" . Chr(34) . nameOfVar1 . Chr(34) . "]" . Chr(59) . "`n"
+}
+else
+{
+nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
+StringTrimRight, nameOfVar1, nameOfVar1, 1
+
+nameOfVarSplit := StrSplit(strVar, " ", 2)
+nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
+nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
+
+cppCode .= "variables[" . Chr(34) . nameOfVar1 . Chr(34) . "] " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+}
+
+lineDone := 1
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "char ")
 {
 StringTrimLeft, varName123Temp, A_LoopField, 5
-varName := StrSplit(varName123Temp, "[", 1)
-allVarsChars .= Trim(varName) . "`n"
+varName := StrSplit(varName123Temp, " ", 1)
+lineDone := 1
 
 
 StringTrimLeft, strVar, A_LoopField, 5
 strVar := Trim(strVar)
 
+declareAvarNOvalue := 0
 if (InStr(strVar, " := "))
 {
-varAssignmentTypeSplit := " := "
 varAssignmentType := "="
 }
-if (InStr(strVar, " += "))
+else if (InStr(strVar, " += "))
 {
-varAssignmentTypeSplit := " += "
 varAssignmentType := "+="
 }
-if (InStr(strVar, " .= "))
+else if (InStr(strVar, " .= "))
 {
-varAssignmentTypeSplit := " .= "
 varAssignmentType := "+="
 }
-if (InStr(strVar, " -= "))
+else if (InStr(strVar, " -= "))
 {
-varAssignmentTypeSplit := " -= "
 varAssignmentType := "-="
 }
-if (InStr(strVar, " *= "))
+else if (InStr(strVar, " *= "))
 {
-varAssignmentTypeSplit := " *= "
 varAssignmentType := "*="
 }
-if (InStr(strVar, " /= "))
+else if (InStr(strVar, " /= "))
 {
-varAssignmentTypeSplit := " /= "
 varAssignmentType := "/="
 }
+else
+{
+declareAvarNOvalue := 1
+}
+
+if (declareAvarNOvalue = 1)
+{
+charVar1 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 1))
+charVar2 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 2))
+
+didItFoundTheChar := 0
+
+cppCode .= "const char* " . charVar1 . Chr(59) . "`n"
+}
+else
+{
 
 charVar1 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 1))
 charVar2 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 2))
 
+didItFoundTheChar := 0
 
-cppCode .= "char " . charVar1 . " " . varAssignmentType . " " . charVar2 . Chr(59) . "`n"
+cppCode .= "const char* " . charVar1 . " " . varAssignmentType . " " . charVar2 . Chr(59) . "`n"
+}
 
 }
-else if (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "int8 ") or (SubStr(Trim(StrLower(A_LoopField)), 1, 6) = "int16 ") or (SubStr(Trim(StrLower(A_LoopField)), 1, 6) = "int32 ") or (SubStr(Trim(StrLower(A_LoopField)), 1, 6) = "int64 ")
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = "int ") or (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "int8 ") or (SubStr(Trim(StrLower(A_LoopField)), 1, 6) = "int16 ") or (SubStr(Trim(StrLower(A_LoopField)), 1, 6) = "int32 ")
 {
-
+lineDone := 1
 if (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "int8 ")
 {
 StringTrimLeft, varName123Temp, A_LoopField, 5
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = "int ")
+{
+StringTrimLeft, varName123Temp, A_LoopField, 4
 }
 else
 {
@@ -691,81 +719,123 @@ if (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "int8 ")
 {
 StringTrimLeft, strVar, A_LoopField, 5
 }
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = "int ")
+{
+StringTrimLeft, strVar, A_LoopField, 4
+}
 else
 {
 StringTrimLeft, strVar, A_LoopField, 6
 }
 strVar := Trim(strVar)
 
+declareAvarNOvalue := 0
 if (InStr(strVar, " := "))
 {
-varAssignmentTypeSplit := " := "
 varAssignmentType := "="
 }
-if (InStr(strVar, " += "))
+else if (InStr(strVar, " += "))
 {
-varAssignmentTypeSplit := " += "
 varAssignmentType := "+="
 }
-if (InStr(strVar, " .= "))
+else if (InStr(strVar, " .= "))
 {
-varAssignmentTypeSplit := " .= "
 varAssignmentType := "+="
 }
-if (InStr(strVar, " -= "))
+else if (InStr(strVar, " -= "))
 {
-varAssignmentTypeSplit := " -= "
 varAssignmentType := "-="
 }
-if (InStr(strVar, " *= "))
+else if (InStr(strVar, " *= "))
 {
-varAssignmentTypeSplit := " *= "
 varAssignmentType := "*="
 }
-if (InStr(strVar, " /= "))
+else if (InStr(strVar, " /= "))
 {
-varAssignmentTypeSplit := " /= "
 varAssignmentType := "/="
 }
+else
+{
+declareAvarNOvalue := 1
+}
 
+if (declareAvarNOvalue = 1)
+{
 charVar1 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 1))
 charVar2 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 2))
 charVar1 := StrSplit(charVar1, " ", 1)
 
+
+charVar2 := varTranspiler(charVar2, funcNames, allVarsChars, allVarsInts)
+;MsgBox, % intType
+
+if (intType = "int_t")
+{
+intType := "int"
+}
+
+cppCode .= intType . " " . charVar1 . Chr(59) . "`n"
+}
+else
+{
+charVar1 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 1))
+charVar2 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 2))
+charVar1 := StrSplit(charVar1, " ", 1)
+
+
+charVar2 := varTranspiler(charVar2, funcNames, allVarsChars, allVarsInts)
+;MsgBox, % intType
+
+if (intType = "int_t")
+{
+intType := "int"
+}
+
 cppCode .= intType . " " . charVar1 . " " . varAssignmentType . " " . charVar2 . Chr(59) . "`n"
+}
+
+
+
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = "cat ")
 {
-
+lineDone := 1
 StringTrimLeft, strVar, A_LoopField, 4
 
 strVar := Trim(strVar)
 
+declareAvarNOvalue := 0
 if (InStr(strVar, " := "))
 {
 varAssignmentType := "="
 }
-if (InStr(strVar, " += "))
+else if (InStr(strVar, " += "))
 {
 varAssignmentType := "+="
 }
-if (InStr(strVar, " .= "))
+else if (InStr(strVar, " .= "))
 {
 varAssignmentType := "+="
 }
-if (InStr(strVar, " -= "))
+else if (InStr(strVar, " -= "))
 {
 varAssignmentType := "-="
 }
-if (InStr(strVar, " *= "))
+else if (InStr(strVar, " *= "))
 {
 varAssignmentType := "*="
 }
-if (InStr(strVar, " /= "))
+else if (InStr(strVar, " /= "))
 {
 varAssignmentType := "/="
 }
+else
+{
+declareAvarNOvalue := 1
+}
 
+if (declareAvarNOvalue = 1)
+{
 nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
 nameOfVarSplit := StrSplit(strVar, " ", 2)
 nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
@@ -773,14 +843,29 @@ nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 
 nameOfVar11 := Trim(StrSplit(nameOfVar1, "%", 1))
 nameOfVar12 := Trim(StrSplit(nameOfVar1, "%", 2))
-nameOfVar1 := "variables[" . Chr(34) . nameOfVar11 . Chr(34) . " + convertToStr(variables[" . Chr(34) . nameOfVar12 . Chr(34) . "])]"
+nameOfVar1 := "variables[" . Chr(34) . nameOfVar11 . Chr(34) . " + std::string(variables[" . Chr(34) . nameOfVar12 . Chr(34) . "])]"
+
+cppCode .= nameOfVar1 . Chr(59) . "`n"
+}
+else
+{
+nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
+nameOfVarSplit := StrSplit(strVar, " ", 2)
+nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
+nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
+
+nameOfVar11 := Trim(StrSplit(nameOfVar1, "%", 1))
+nameOfVar12 := Trim(StrSplit(nameOfVar1, "%", 2))
+nameOfVar1 := "variables[" . Chr(34) . nameOfVar11 . Chr(34) . " + std::string(variables[" . Chr(34) . nameOfVar12 . Chr(34) . "])]"
 
 cppCode .= nameOfVar1 . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+}
 
+lineDone := 1
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = StrLower(CheckIFandElsesss1)) or (SubStr(Trim(StrLower(A_LoopField)), 1, 3) = StrLower(CheckIFandElsesss2)) or (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = StrLower(CheckIFandElsesss3)) or (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = StrLower(CheckIFandElsesss4)) or (SubStr(Trim(StrLower(A_LoopField)), 1, 9) = StrLower(CheckIFandElsesss5)) or (SubStr(Trim(StrLower(A_LoopField)), 1, 8) = StrLower(CheckIFandElsesss6)) or (SubStr(Trim(StrLower(A_LoopField)), 1, 10) = StrLower(CheckIFandElsesss7)) or (SubStr(Trim(StrLower(A_LoopField)), 1, 9) = StrLower(CheckIFandElsesss8))
 {
-
+lineDone := 1
 
 if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = StrLower(CheckIFandElsesss1))
 {
@@ -856,7 +941,7 @@ lineDone := 1
 var1 := "for (int A" . Chr(95) . "Index" . str(AindexcharLength) . " = 1;; A" . Chr(95) . "Index" . str(AindexcharLength) . "++)"
 nothing := ""
 AindexcharLengthStr := nothing . str(AindexcharLength) . nothing
-theFixTextLoopNL := "variables[" . Chr(34) . "A" . Chr(95) . "Index" . str(AindexcharLength) . Chr(34) . "] = A" . Chr(95) . "Index" . str(AindexcharLength) . ";"
+theFixTextLoopNL := "A" . Chr(95) . "Index" . str(AindexcharLength) . Chr(34) . " = A" . Chr(95) . "Index" . str(AindexcharLength) . ";"
 
 pycodeAcurlyBraceAddSomeVrasFixNL := 1
 
@@ -881,7 +966,7 @@ StringTrimLeft, out2, str123, 6
 
 ;MsgBox, % out2
 out2 := Trim(out2)
-
+lineDone := 1
 
 myVar := out2
 lineYGI := varTranspiler(myVar, funcNames, allVarsChars, allVarsInts)
@@ -889,10 +974,10 @@ line := lineYGI
 haveWeEverUsedAloop := 1
 ;MsgBox, % line
 
-var1 := "for (int A" . Chr(95) . "Index" . str(AindexcharLength) . " = 1; A" . Chr(95) . "Index" . str(AindexcharLength) . "<= " . line ."; ++A" . Chr(95) . "Index" . str(AindexcharLength) . ")"
+var1 := "for (int A" . Chr(95) . "Index" . str(AindexcharLength) . " = 1; A" . Chr(95) . "Index" . str(AindexcharLength) . "<= " . line . "; ++A" . Chr(95) . "Index" . str(AindexcharLength) . ")"
 nothing := ""
 AindexcharLengthStr := nothing . str(AindexcharLength) . nothing
-theFixTextLoopNL := "variables[" . Chr(34) . "A" . Chr(95) . "Index" . str(AindexcharLength) . Chr(34) . "] = A" . Chr(95) . "Index" . str(AindexcharLength) . ";"
+theFixTextLoopNL := "A" . Chr(95) . "Index" . str(AindexcharLength) . " = A" . Chr(95) . "Index" . str(AindexcharLength) . ";"
 
 pycodeAcurlyBraceAddSomeVrasFixNL := 1
 
@@ -906,7 +991,7 @@ else if (SubStr(Trim(StrLower(A_LoopField)), 1, 8) = "loop, % ")
 {
 str123 := A_LoopField
 ;MsgBox, % str123
-
+lineDone := 1
 
 StringTrimLeft, out2, str123, 8
 
@@ -924,7 +1009,7 @@ line := lineYGI
 var1 := "for A" . Chr(95) . "Index" . str(AindexcharLength) . " in range(1, " . line . " + 1):"
 nothing := ""
 AindexcharLengthStr := nothing . str(AindexcharLength) . nothing
-theFixTextLoopNL := "variables[" . Chr(34) . "A" . Chr(95) . "Index" . str(AindexcharLength) . Chr(34) . "] = A" . Chr(95) . "Index" . str(AindexcharLength) . ";"
+theFixTextLoopNL := "A" . Chr(95) . "Index" . str(AindexcharLength) . " = A" . Chr(95) . "Index" . str(AindexcharLength) . ";"
 
 pycodeAcurlyBraceAddSomeVrasFixNL := 1
 haveWeEverUsedAloop := 1
@@ -936,7 +1021,7 @@ cppCode .= pycodeLoopfixa1 . "`n" . var1 . "`n"
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 13) = StrLower("Loop, Parse, "))
 {
 ;std::vector<std::string> items = LoopParseFunc(variables["var1"], " ");
-
+lineDone := 1
 var1 := A_LoopField
 
 var1 := Trim(var1)
@@ -956,7 +1041,7 @@ line3 := Trim(StrSplit(var1, ",", 3))
 if (InStr(var1, Chr(96) . ","))
 {
 line2 := Chr(34) . "," . Chr(34)
-itemsOut := "std::vector<std::string> items" . str(AindexcharLength) . " = LoopParseFunc(convertToStr(" . line1 . "), " . line2 . ");"
+itemsOut := "std::vector<std::string> items" . str(AindexcharLength) . " = LoopParseFunc(" . line1 . ", " . line2 . ");"
 }
 else
 {
@@ -966,7 +1051,7 @@ else
 if (line2 = "") && (line3 = "")
 {
 ; nothing so only each char
-itemsOut := "std::vector<std::string> items" . str(AindexcharLength) . " = LoopParseFunc(convertToStr(" . line1 . "));"
+itemsOut := "std::vector<std::string> items" . str(AindexcharLength) . " = LoopParseFunc(" . line1 . ");"
 }
 
 if (line2 != "") && (line3 = "")
@@ -975,7 +1060,7 @@ if (InStr(line2, Chr(96)))
 {
 line2 := Chr(34) . line2 . Chr(34)
 }
-itemsOut := "std::vector<std::string> items" . str(AindexcharLength) . " = LoopParseFunc(convertToStr(" . line1 . "), " . line2 . ");"
+itemsOut := "std::vector<std::string> items" . str(AindexcharLength) . " = LoopParseFunc(" . line1 . ", " . line2 . ");"
 }
 
 if (line2 != "") && (line3 != "")
@@ -989,7 +1074,7 @@ if (InStr(line3, Chr(96)))
 line3 := Chr(34) . line3 . Chr(34)
 }
 
-itemsOut := "std::vector<std::string> items" . str(AindexcharLength) . " = LoopParseFunc(convertToStr(" . line1 . "), " . line2 . ", " . line3 . ");"
+itemsOut := "std::vector<std::string> items" . str(AindexcharLength) . " = LoopParseFunc(" . line1 . ", " . line2 . ", " . line3 . ");"
 }
 
 
@@ -1009,7 +1094,7 @@ nothing := ""
 AindexcharLengthStr := nothing . str(AindexcharLength) . nothing
 
 
-theFixTextLoopLP := "variables[" . Chr(34) . "A" . Chr(95) . "Index" . str(AindexcharLength) . Chr(34) . "] = std::to_string(A" . Chr(95) . "Index" . str(AindexcharLength) . " + 1);" . "`n" . "variables[" . Chr(34) . "A" . Chr(95) . "LoopField" . str(AindexcharLength) . Chr(34) . "] = items" . str(AindexcharLength) . "[A" . Chr(95) . "Index" . str(AindexcharLength) . "];"
+theFixTextLoopLP := "A" . Chr(95) . "Index" . str(AindexcharLength) . " = A" . Chr(95) . "Index" . str(AindexcharLength) . " + 1;" . "`n" . "std::string A" . Chr(95) . "LoopField" . str(AindexcharLength) . " = items" . str(AindexcharLength) . "[A" . Chr(95) . "Index" . str(AindexcharLength) . "];"
 
 pycodeAcurlyBraceAddSomeVrasFixLP := 1
 haveWeEverUsedAloop := 1
@@ -1017,27 +1102,71 @@ pycodeLoopfixa .= "lp|itsaersdtgtgfergsdgfsegdfsedAA|" . str(AindexcharLength) .
 pycodeLoopfixa1 := "lp|itsaersdtgtgfergsdgfsegdfsedAA|" . str(AindexcharLength)
 AindexcharLength++
 cppCode .= pycodeLoopfixa1 . "`n" . var1out . "`n"
+lineDone := 1
 }
 else if (StrLower(A_LoopField) = "break")
 {
 cppCode .= A_LoopField . ";`n"
+lineDone := 1
 }
 else if (StrLower(A_LoopField) = "continue")
 {
 cppCode .= A_LoopField . ";`n"
+lineDone := 1
 }
 else if (StrLower(A_LoopField) = "return") or (SubStr(Trim(StrLower(A_LoopField)), 1, 7) = "return ")
 {
 if (StrLower(A_LoopField) = "return")
 {
 cppCode .= A_LoopField . ";`n"
+lineDone := 1
 }
 else
 {
 StringTrimLeft, varTranspiledReturn, A_LoopField, 7
 varTranspiledReturn := varTranspiler(varTranspiledReturn, funcNames, allVarsChars, allVarsInts)
 cppCode .= "return " . varTranspiledReturn . ";`n"
+lineDone := 1
 }
+}
+else if (InStr(A_LoopField, " := ")) or (InStr(A_LoopField, " .= ")) or (InStr(A_LoopField, " += ")) or (InStr(A_LoopField, " -= ")) or (InStr(A_LoopField, " *= ")) or (InStr(A_LoopField, " /= ")) && (lineDone = 0)
+{
+lineDone := 1
+strVar := A_LoopField
+strVar := Trim(strVar)
+
+if (InStr(strVar, " := "))
+{
+varAssignmentType := "="
+}
+if (InStr(strVar, " += "))
+{
+varAssignmentType := "+="
+}
+if (InStr(strVar, " .= "))
+{
+varAssignmentType := "+="
+}
+if (InStr(strVar, " -= "))
+{
+varAssignmentType := "-="
+}
+if (InStr(strVar, " *= "))
+{
+varAssignmentType := "*="
+}
+if (InStr(strVar, " /= "))
+{
+varAssignmentType := "/="
+}
+
+nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
+nameOfVarSplit := StrSplit(strVar, " ", 2)
+nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
+nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
+
+cppCode .= nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+
 }
 else
 {
@@ -1597,10 +1726,11 @@ Loop, % theIdNumOfThe34
 {
 cppCode := StrReplace(cppCode, "ihuiuuhuuhtheidFor--asas-theuhturtyphoutr-" . Chr(65) . Chr(65) . str(A_Index) . Chr(65) . Chr(65), "std::string(" . theIdNumOfThe34theVar%A_Index% . ")")
 }
+
 cppCodeFixCharRemoveStd := ""
 Loop, Parse, cppCode, `n, `r
 {
-if (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "char ")
+if (SubStr(Trim(StrLower(A_LoopField)), 1, 12) = "const char* ")
 {
 cppCodeFixCharRemoveStd123 := A_LoopField
 
@@ -1616,22 +1746,24 @@ cppCodeFixCharRemoveStd .= A_LoopField . "`n"
 }
 StringTrimRight, cppCode, cppCodeFixCharRemoveStd, 1
 
-
 if (theMainFuncDec = 0)
 {
 upCode := "`nint main()`n{`n"
 }
 
-uperCode := "#include <iostream>`n#include <sstream>`n#include <vector>`n#include <unordered_map>`n#include <string>`n#include <any>`n#include <cstdint>`n#include <regex>`n#include <fstream>`n#include <filesystem>`n#include <cctype>`n#include <algorithm>`n#include <cmath>`n#include <limits>`n#include <chrono>`n`n// Define a map to store dynamic variables`n" . "std::unordered_map<std::string, std::any> variables;`n"
+uperCode := "#include <iostream>`n#include <sstream>`n#include <vector>`n#include <unordered_map>`n#include <string>`n#include <any>`n#include <cstdint>`n#include <regex>`n#include <fstream>`n#include <filesystem>`n#include <cctype>`n#include <algorithm>`n#include <cmath>`n#include <limits>`n#include <chrono>`n`n// Define a map to store dynamic variables`n" . "// Create a map to hold variables`n    std::unordered_map<std::string, std::string> variables;`n"
 
-
-if (InStr(cppCode, "convertToInt(")) or (InStr(cppCode, "convertToInt ("))
+if (InStr(cppCode, "INT(")) or (InStr(cppCode, "INT ("))
 {
-uperCode := uperCode . "`n// Function to convert std::any to int`nint convertToInt(const std::any& value) {`n    if (value.type() == typeid(std::string)) {`n        try {`n            return std::stoi(std::any_cast<std::string>(value));`n        } catch (const std::invalid_argument&) {`n            return 0; // Return 0 if conversion fails`n        }`n    } else if (value.type() == typeid(int)) {`n        return std::any_cast<int>(value);`n    } else {`n        return 0; // Return 0 for other types`n    }`n}`n"
+uperCode := uperCode . "`n// Convert std::string to int`nint INT(const std::string& str) {`n    std::istringstream iss(str);`n    int value;`n    iss >> value;`n    return value;`n}`n"
 }
-if (InStr(cppCode, "convertToStr(")) or (InStr(cppCode, "convertToStr ("))
+if (InStr(cppCode, "STR(")) or (InStr(cppCode, "STR ("))
 {
-uperCode := uperCode . "`n// Function to convert std::any to std::string`nstd::string convertToStr(const std::any& value) {`n    if (value.type() == typeid(std::string)) {`n        return std::any_cast<std::string>(value);`n    } else if (value.type() == typeid(int)) {`n        return std::to_string(std::any_cast<int>(value));`n    } else if (value.type() == typeid(int8_t)) {`n        return std::to_string(static_cast<int>(std::any_cast<int8_t>(value)));`n    } else {`n        return " . Chr(34) . "" . Chr(34) . "; // Return empty string for other types`n    }`n}`n"
+uperCode := uperCode . "`n// Convert various types to std::string`nstd::string STR(int value) {`n    return std::to_string(value);`n}`n`nstd::string STR(float value) {`n    return std::to_string(value);`n}`n`nstd::string STR(double value) {`n    return std::to_string(value);`n}`n`nstd::string STR(size_t value) {`n    return std::to_string(value);`n}`n`nstd::string STR(bool value) {`n    return value ? " . Chr(34) . "1" . Chr(34) . " : " . Chr(34) . "0" . Chr(34) . ";`n}`n"
+}
+if (InStr(cppCode, "FLOAT(")) or (InStr(cppCode, "FLOAT ("))
+{
+uperCode := uperCode . "`n// Convert std::string to float`nfloat FLOAT(const std::string& str) {`n    std::istringstream iss(str);`n    float value;`n    iss >> value;`n    return value;`n}`n"
 }
 
 
@@ -1647,7 +1779,7 @@ uperCode := uperCode . "`n// Function to escape special characters for regex`nst
 
 if (InStr(cppCode, "print(")) or (InStr(cppCode, "print ("))
 {
-uperCode := uperCode . "`n// Function to print the value stored in std::any`nvoid print(const std::any& value) {`n    if (value.has_value()) {`n        if (value.type() == typeid(std::string)) {`n            std::cout << std::any_cast<std::string>(value) << std::endl;`n        } else if (value.type() == typeid(int)) {`n            std::cout << std::any_cast<int>(value) << std::endl;`n        }`n    } else {`n        std::cout << " . Chr(34) . "Value is not set" . Chr(34) . " << std::endl;`n    }`n}`n"
+uperCode := uperCode . "`n// Print function that converts all types to string if needed`ntemplate <typename T>`nvoid print(const T& value) {`n    if constexpr (std::is_same_v<T, std::string>) {`n        std::cout << value << std::endl;`n    } else if constexpr (std::is_same_v<T, int>) {`n        std::cout << STR(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, float>) {`n        std::cout << STR(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, double>) {`n        std::cout << STR(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, size_t>) {`n        std::cout << STR(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, bool>) {`n        std::cout << STR(value) << std::endl;`n    } else {`n        std::cout << " . Chr(34) . "Unsupported type" . Chr(34) . " << std::endl;`n    }`n}`n"
 }
 
 
@@ -1675,7 +1807,7 @@ uperCode := uperCode . "`nbool FileDelete(const std::string& path) {`n    std::f
 
 if (InStr(cppCode, "SubStr(")) or (InStr(cppCode, "SubStr ("))
 {
-uperCode := uperCode . "`n// Function to extract a substring`nstd::string SubStr(const std::string &str, int startPos, int length = -1) {`n    if (str.empty()) return " . Chr(34) . "" . Chr(34) . ";`n`n    if (startPos < 1) {`n        startPos = str.length() + startPos + 1;`n    }`n`n    if (length == -1) {`n        length = str.length() - startPos + 1;`n    }`n`n    return str.substr(startPos - 1, length);`n}`n"
+uperCode := uperCode . "`n// SubStr function to get a substring with optional length`nstd::string SubStr(const std::string& str, int startPos, int length = -1) {`n    std::string result;`n    size_t strLen = str.size();`n`n    // Handle negative starting positions`n    if (startPos < 0) {`n        startPos += strLen;`n        if (startPos < 0) startPos = 0;`n    } else {`n        if (startPos > static_cast<int>(strLen)) return " . Chr(34) . "" . Chr(34) . "; // Starting position beyond string length`n        startPos -= 1; // Convert to 0-based index`n    }`n`n    // Handle length`n    if (length < 0) {`n        length = strLen - startPos; // Length to end of string`n    } else if (startPos + length > static_cast<int>(strLen)) {`n        length = strLen - startPos; // Adjust length to fit within the string`n    }`n`n    // Extract substring`n    result = str.substr(startPos, length);`n    return result;`n}`n"
 }
 
 if (InStr(cppCode, "Trim(")) or (InStr(cppCode, "Trim ("))
@@ -1749,8 +1881,8 @@ cppCode := StrReplace(cppCode, "std::string()", "")
 ;MsgBox, % cppCode
 StringTrimRight, filePathOfCode, filePathOfCode, 4
 filePathOfCode := filePathOfCode . "cpp"
-FileDelete, filePathOfCode
-FileAppend, cppCode, filePathOfCode
+FileDelete, %filePathOfCode%
+FileAppend, %cppCode%, %filePathOfCode%
 
 
 
