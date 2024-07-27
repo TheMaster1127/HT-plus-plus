@@ -32,3 +32,33 @@ sadsfdx++
 
 [wasedsa] := "5"
 int sads := INT([wasedsa])
+
+
+str text := "hello hello hello man man whats up up today today how are you ypu doing"
+
+str out
+int wordCount := 0
+Loop, Parse, text, " "
+{
+wordCount++
+cat word%wordCount%	:= A_LoopField
+}
+
+wordCount++
+cat word%wordCount%	:= ""
+
+int AIndex
+Loop, Parse, text, " "
+{
+AIndex := A_Index + 1
+if (A_LoopField != word%AIndex%)
+{
+out .= A_LoopField . " "
+}
+}
+StringTrimRight, out, out, 1
+MsgBox, % out
+
+
+
+

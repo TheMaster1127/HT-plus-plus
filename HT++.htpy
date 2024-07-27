@@ -165,6 +165,8 @@ if (varInVarTranspiler = "=")
 return "=="
 }
 
+
+
 if (varInVarTranspiler = "or")
 {
 return "||"
@@ -174,6 +176,8 @@ if (varInVarTranspiler = "and")
 {
 return "&&"
 }
+
+
 
 return varInVarTranspiler
 
@@ -673,8 +677,8 @@ declareAvarNOvalue := 1
 
 if (declareAvarNOvalue = 1)
 {
-charVar1 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 1))
-charVar2 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 2))
+charVar1 := Trim(StrSplit(strVar, ":=", 1))
+
 
 didItFoundTheChar := 0
 
@@ -683,8 +687,8 @@ cppCode .= "const char* " . charVar1 . Chr(59) . "`n"
 else
 {
 
-charVar1 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 1))
-charVar2 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 2))
+charVar1 := Trim(StrSplit(strVar, ":=", 1))
+charVar2 := Trim(StrSplit(strVar, ":=", 2))
 
 didItFoundTheChar := 0
 
@@ -761,8 +765,8 @@ declareAvarNOvalue := 1
 
 if (declareAvarNOvalue = 1)
 {
-charVar1 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 1))
-charVar2 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 2))
+charVar1 := Trim(StrSplit(strVar, varAssignmentType, 1))
+charVar2 := Trim(StrSplit(strVar, varAssignmentType, 2))
 charVar1 := StrSplit(charVar1, " ", 1)
 
 
@@ -778,8 +782,8 @@ cppCode .= intType . " " . charVar1 . Chr(59) . "`n"
 }
 else
 {
-charVar1 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 1))
-charVar2 := Trim(StrSplit(strVar, varAssignmentTypeSplit, 2))
+charVar1 := Trim(StrSplit(strVar, varAssignmentType, 1))
+charVar2 := Trim(StrSplit(strVar, varAssignmentType, 2))
 charVar1 := StrSplit(charVar1, " ", 1)
 
 
@@ -926,7 +930,7 @@ str123 := StrReplace(str123, " ! ", "!")
 str123 := StrReplace(str123, "std::string()", "")
 str123 := StrReplace(str123, "if " . Chr(40) . Chr(32), "if " . Chr(40))
 
-
+str123 := StrReplace(str123, "!==", "!=")
 
 out123 := str123
 
@@ -941,7 +945,7 @@ lineDone := 1
 var1 := "for (int A" . Chr(95) . "Index" . str(AindexcharLength) . " = 1;; A" . Chr(95) . "Index" . str(AindexcharLength) . "++)"
 nothing := ""
 AindexcharLengthStr := nothing . str(AindexcharLength) . nothing
-theFixTextLoopNL := "A" . Chr(95) . "Index" . str(AindexcharLength) . Chr(34) . " = A" . Chr(95) . "Index" . str(AindexcharLength) . ";"
+
 
 pycodeAcurlyBraceAddSomeVrasFixNL := 1
 
@@ -977,7 +981,7 @@ haveWeEverUsedAloop := 1
 var1 := "for (int A" . Chr(95) . "Index" . str(AindexcharLength) . " = 1; A" . Chr(95) . "Index" . str(AindexcharLength) . "<= " . line . "; ++A" . Chr(95) . "Index" . str(AindexcharLength) . ")"
 nothing := ""
 AindexcharLengthStr := nothing . str(AindexcharLength) . nothing
-theFixTextLoopNL := "A" . Chr(95) . "Index" . str(AindexcharLength) . " = A" . Chr(95) . "Index" . str(AindexcharLength) . ";"
+
 
 pycodeAcurlyBraceAddSomeVrasFixNL := 1
 
@@ -1009,7 +1013,7 @@ line := lineYGI
 var1 := "for A" . Chr(95) . "Index" . str(AindexcharLength) . " in range(1, " . line . " + 1):"
 nothing := ""
 AindexcharLengthStr := nothing . str(AindexcharLength) . nothing
-theFixTextLoopNL := "A" . Chr(95) . "Index" . str(AindexcharLength) . " = A" . Chr(95) . "Index" . str(AindexcharLength) . ";"
+
 
 pycodeAcurlyBraceAddSomeVrasFixNL := 1
 haveWeEverUsedAloop := 1
@@ -1086,7 +1090,7 @@ itemsOut := StrReplace(itemsOut, Chr(96), Chr(92))
 }
 
 ;for (size_t A_Index1 = 0; A_Index1 < items.size(); A_Index1++)
-var1out := itemsOut . "`n" . "for (size_t A" . Chr(95) . "Index" . str(AindexcharLength) . " = 0; A" . Chr(95) . "Index" . str(AindexcharLength) . " < items" . str(AindexcharLength) . ".size(); A" . Chr(95) . "Index" . str(AindexcharLength) . "++)"
+var1out := itemsOut . "`n" . "for (size_t A" . Chr(95) . "Index" . str(AindexcharLength) . " = 1; A" . Chr(95) . "Index" . str(AindexcharLength) . " < items" . str(AindexcharLength) . ".size(); A" . Chr(95) . "Index" . str(AindexcharLength) . "++)"
 
 
 
@@ -1094,7 +1098,7 @@ nothing := ""
 AindexcharLengthStr := nothing . str(AindexcharLength) . nothing
 
 
-theFixTextLoopLP := "A" . Chr(95) . "Index" . str(AindexcharLength) . " = A" . Chr(95) . "Index" . str(AindexcharLength) . " + 1;" . "`n" . "std::string A" . Chr(95) . "LoopField" . str(AindexcharLength) . " = items" . str(AindexcharLength) . "[A" . Chr(95) . "Index" . str(AindexcharLength) . "];"
+theFixTextLoopLP := "std::string A" . Chr(95) . "LoopField" . str(AindexcharLength) . " = items" . str(AindexcharLength) . "[A" . Chr(95) . "Index" . str(AindexcharLength) . "];"
 
 pycodeAcurlyBraceAddSomeVrasFixLP := 1
 haveWeEverUsedAloop := 1

@@ -546,13 +546,12 @@ for A_Index17, A_LoopField17 in enumerate(items, start=1):
         else:
             variables['declareAvarNOvalue'] = 1
         if (variables['declareAvarNOvalue'] == 1):
-            variables['charVar1'] = Trim(StrSplit(variables['strVar'] , variables['varAssignmentTypeSplit'] , 1))
-            variables['charVar2'] = Trim(StrSplit(variables['strVar'] , variables['varAssignmentTypeSplit'] , 2))
+            variables['charVar1'] = Trim(StrSplit(variables['strVar'] , ":=" , 1))
             variables['didItFoundTheChar'] = 0
             variables['cppCode'] += "const char* " + variables['charVar1'] + Chr(59) + "\n"
         else:
-            variables['charVar1'] = Trim(StrSplit(variables['strVar'] , variables['varAssignmentTypeSplit'] , 1))
-            variables['charVar2'] = Trim(StrSplit(variables['strVar'] , variables['varAssignmentTypeSplit'] , 2))
+            variables['charVar1'] = Trim(StrSplit(variables['strVar'] , ":=" , 1))
+            variables['charVar2'] = Trim(StrSplit(variables['strVar'] , ":=" , 2))
             variables['didItFoundTheChar'] = 0
             variables['cppCode'] += "const char* " + variables['charVar1'] + " " + variables['varAssignmentType'] + " " + variables['charVar2'] + Chr(59) + "\n"
     elif (SubStr(Trim(StrLower(variables['A_LoopField17'])), 1 , 4)== "int ")or(SubStr(Trim(StrLower(variables['A_LoopField17'])), 1 , 5)== "int8 ")or(SubStr(Trim(StrLower(variables['A_LoopField17'])), 1 , 6)== "int16 ")or(SubStr(Trim(StrLower(variables['A_LoopField17'])), 1 , 6)== "int32 "):
@@ -589,8 +588,8 @@ for A_Index17, A_LoopField17 in enumerate(items, start=1):
         else:
             variables['declareAvarNOvalue'] = 1
         if (variables['declareAvarNOvalue'] == 1):
-            variables['charVar1'] = Trim(StrSplit(variables['strVar'] , variables['varAssignmentTypeSplit'] , 1))
-            variables['charVar2'] = Trim(StrSplit(variables['strVar'] , variables['varAssignmentTypeSplit'] , 2))
+            variables['charVar1'] = Trim(StrSplit(variables['strVar'] , variables['varAssignmentType'] , 1))
+            variables['charVar2'] = Trim(StrSplit(variables['strVar'] , variables['varAssignmentType'] , 2))
             variables['charVar1'] = StrSplit(variables['charVar1'] , " " , 1)
             variables['charVar2'] = varTranspiler(variables['charVar2'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
             #MsgBox, % intType
@@ -598,8 +597,8 @@ for A_Index17, A_LoopField17 in enumerate(items, start=1):
                 variables['intType'] = "int"
             variables['cppCode'] += variables['intType'] + " " + variables['charVar1'] + Chr(59) + "\n"
         else:
-            variables['charVar1'] = Trim(StrSplit(variables['strVar'] , variables['varAssignmentTypeSplit'] , 1))
-            variables['charVar2'] = Trim(StrSplit(variables['strVar'] , variables['varAssignmentTypeSplit'] , 2))
+            variables['charVar1'] = Trim(StrSplit(variables['strVar'] , variables['varAssignmentType'] , 1))
+            variables['charVar2'] = Trim(StrSplit(variables['strVar'] , variables['varAssignmentType'] , 2))
             variables['charVar1'] = StrSplit(variables['charVar1'] , " " , 1)
             variables['charVar2'] = varTranspiler(variables['charVar2'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
             #MsgBox, % intType
@@ -680,6 +679,7 @@ for A_Index17, A_LoopField17 in enumerate(items, start=1):
         variables['str123'] = StrReplace(variables['str123'] , " ! " , "!")
         variables['str123'] = StrReplace(variables['str123'] , "std::string()" , "")
         variables['str123'] = StrReplace(variables['str123'] , "if " + Chr(40) + Chr(32), "if " + Chr(40))
+        variables['str123'] = StrReplace(variables['str123'] , "!==" , "!=")
         variables['out123'] = variables['str123']
         variables['cppCode'] += variables['out123'] + "\n"
     elif (StrLower(variables['A_LoopField17'])== "loop"):
@@ -689,7 +689,6 @@ for A_Index17, A_LoopField17 in enumerate(items, start=1):
         variables['var1'] = "for (int A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + " = 1;; A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + "++)"
         variables['nothing'] = ""
         variables['AindexcharLengthStr'] = variables['nothing'] + str(variables['AindexcharLength']) + variables['nothing']
-        variables['theFixTextLoopNL'] = "A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + Chr(34) + " = A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + ";"
         variables['pycodeAcurlyBraceAddSomeVrasFixNL'] = 1
         variables['pycodeLoopfixa'] += "nl|itsaersdtgtgfergsdgfsegdfsedAA|" + str(variables['AindexcharLength']) + "\n"
         variables['pycodeLoopfixa1'] = "nl|itsaersdtgtgfergsdgfsegdfsedAA|" + str(variables['AindexcharLength'])
@@ -711,7 +710,6 @@ for A_Index17, A_LoopField17 in enumerate(items, start=1):
         variables['var1'] = "for (int A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + " = 1; A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + "<= " + variables['line'] + "; ++A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + ")"
         variables['nothing'] = ""
         variables['AindexcharLengthStr'] = variables['nothing'] + str(variables['AindexcharLength']) + variables['nothing']
-        variables['theFixTextLoopNL'] = "A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + " = A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + ";"
         variables['pycodeAcurlyBraceAddSomeVrasFixNL'] = 1
         variables['pycodeLoopfixa'] += "nl|itsaersdtgtgfergsdgfsegdfsedAA|" + str(variables['AindexcharLength']) + "\n"
         variables['pycodeLoopfixa1'] = "nl|itsaersdtgtgfergsdgfsegdfsedAA|" + str(variables['AindexcharLength'])
@@ -732,7 +730,6 @@ for A_Index17, A_LoopField17 in enumerate(items, start=1):
         variables['var1'] = "for A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + " in range(1, " + variables['line'] + " + 1):"
         variables['nothing'] = ""
         variables['AindexcharLengthStr'] = variables['nothing'] + str(variables['AindexcharLength']) + variables['nothing']
-        variables['theFixTextLoopNL'] = "A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + " = A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + ";"
         variables['pycodeAcurlyBraceAddSomeVrasFixNL'] = 1
         variables['haveWeEverUsedAloop'] = 1
         variables['pycodeLoopfixa'] += "nl|itsaersdtgtgfergsdgfsegdfsedAA|" + str(variables['AindexcharLength']) + "\n"
@@ -771,10 +768,10 @@ for A_Index17, A_LoopField17 in enumerate(items, start=1):
                 variables['itemsOut'] = "std::vector<std::string> items" + str(variables['AindexcharLength']) + " = LoopParseFunc(" + variables['line1'] + ", " + variables['line2'] + ", " + variables['line3'] + ");"
             variables['itemsOut'] = StrReplace(variables['itemsOut'] , Chr(96), Chr(92))
         #for (size_t A_Index1 = 0; A_Index1 < items.size(); A_Index1++)
-        variables['var1out'] = variables['itemsOut'] + "\n" + "for (size_t A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + " = 0; A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + " < items" + str(variables['AindexcharLength']) + ".size(); A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + "++)"
+        variables['var1out'] = variables['itemsOut'] + "\n" + "for (size_t A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + " = 1; A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + " < items" + str(variables['AindexcharLength']) + ".size(); A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + "++)"
         variables['nothing'] = ""
         variables['AindexcharLengthStr'] = variables['nothing'] + str(variables['AindexcharLength']) + variables['nothing']
-        variables['theFixTextLoopLP'] = "A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + " = A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + " + 1;" + "\n" + "std::string A" + Chr(95) + "LoopField" + str(variables['AindexcharLength']) + " = items" + str(variables['AindexcharLength']) + "[A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + "];"
+        variables['theFixTextLoopLP'] = "std::string A" + Chr(95) + "LoopField" + str(variables['AindexcharLength']) + " = items" + str(variables['AindexcharLength']) + "[A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + "];"
         variables['pycodeAcurlyBraceAddSomeVrasFixLP'] = 1
         variables['haveWeEverUsedAloop'] = 1
         variables['pycodeLoopfixa'] += "lp|itsaersdtgtgfergsdgfsegdfsedAA|" + str(variables['AindexcharLength']) + "\n"
