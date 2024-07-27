@@ -1,5 +1,5 @@
 # HT++
 
-HT++ is a transpiled programming language designed to bridge the gap between the ease of use of AutoHotkey-like syntax and the performance of C++. It allows developers familiar with AutoHotkey to leverage the power and efficiency of C++ by writing code in a familiar syntax.
+HT++ is a statically-typed programming language that transpiles to C++. It features an AutoHotkey (AHK)-like syntax with static types, combining ease of use with the performance and power of C++. This allows for the development of efficient and versatile scripts that can run on any device where C++ is supported, ensuring compatibility across every platform.
 
 ## still in developmnet
