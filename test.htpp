@@ -1,8 +1,66 @@
-func hello(int var5)
+func str removeRepeatingWords(str text)
 {
-return var5
+str out
+
+arr words := arrSplit(text, " ")
+
+arr words .= " "
+
+Loop, Parse, text, " "
+{
+
+if (A_LoopField != words[A_Index + 1])
+{
+out .= A_LoopField . " "
+}
+}
+StringTrimRight, out, out, 1
+
+
+return out
 }
 main:
+
+str text := "hello hello hello man man whats up up today today how are you you doing"
+MsgBox, % removeRepeatingWords(text)
+
+; how to use arrays in HT++
+
+; declare the array
+arr MyArray123
+
+; add an element to the array
+arr MyArray123 .= "6"
+
+; add an element to the array
+arr MyArray123 .= "6"
+
+; concatenate an element to the second element of the array array
+MyArray123[2] .= "9"
+
+; add an element to the array
+arr MyArray123 .= "6"
+
+; reassign an element in the array
+MyArray123[3] := "7"
+
+MsgBox, % "the number of elements in the array MyArray123 is: " . MyArray123[0]
+MsgBox, Here are all the elements in the array MyArray123
+MsgBox, % MyArray123
+
+; we can also do this
+
+; declare a new array
+str var123Text := "some text whit spacses"
+
+; split the string var123Text into an array using space as a delimiter
+arr MyArray123456789 := arrSplit(var123Text, " ")
+
+MsgBox, % "the number of elements in the array MyArray123456789 is: " . MyArray123456789[0]
+MsgBox, Here are all the elements in the array MyArray123456789
+MsgBox, % MyArray123456789
+
+
 
 str var1 := "aersdgfw esrdtg wesvn"
 
@@ -32,37 +90,51 @@ sadsfdx++
 [wasedsa] := "5"
 int sads := INT([wasedsa])
 
-str filepath := "testText.txt"
-str text1234 := "dzsfddz jskd jd cakjs a jsv`nsal sajvas"
-FileAppend, %text1234%, %filepath%
-FileRead, text12346, %filepath%
-FileDelete, %filepath%
-
-str text := "hello hello hello man man whats up up today today how are you you doing"
-
-str out
-int wordCount := 0
-Loop, Parse, text, " "
-{
-wordCount++
-cat word%wordCount% := A_LoopField
-}
-
-wordCount++
-cat word%wordCount% := ""
-
-int AIndex
-Loop, Parse, text, " "
-{
-AIndex := A_Index + 1
-if (A_LoopField != word%AIndex%)
-{
-out .= A_LoopField . " "
-}
-}
-StringTrimRight, out, out, 1
-MsgBox, % out
-
 [num] := "5"
 cat var%[num]% := "hello"
 MsgBox, % [var5]
+
+
+str filepath := "testText.txt"
+str text1234 := "dzsfddz jskd jd cakjs a jsv`nsal sajvas"
+FileAppend, %text1234%, %filepath%
+FileRead, text12346, testText.txt
+FileDelete, %filepath%
+
+
+Loop
+{
+if (A_Index = 5)
+{
+break
+}
+else
+{
+MsgBox, % A_Index
+}
+}
+
+int numLoop := 10
+Loop, % numLoop
+{
+if (A_Index = 5)
+{
+break
+}
+else
+{
+MsgBox, % A_Index
+}
+}
+
+Loop, 5
+{
+if (A_Index = 5)
+{
+break
+}
+else
+{
+MsgBox, % A_Index
+}
+}

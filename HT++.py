@@ -210,7 +210,7 @@ def isVarAfuncOrWhat(varInVarTranspiler, funcNames, allVarsChars, allVarsInts):
     if (InStr(variables['varInVarTranspiler'] , "%")):
         variables['nameOfVarr11'] = Trim(StrSplit(variables['varInVarTranspiler'] , "%" , 1))
         variables['nameOfVarr12'] = Trim(StrSplit(variables['varInVarTranspiler'] , "%" , 2))
-        if (InStr(variables['nameOfVarr12'] , "[")):
+        if (SubStr(variables['nameOfVarr12'] , 1 , 1)== "["):
             variables['nameOfVarr12'] = StringTrimRight(variables['nameOfVarr12'], 1)
             variables['nameOfVarr12'] = StringTrimLeft(variables['nameOfVarr12'], 1)
             variables['nameOfVarr111'] = "variables[" + Chr(34) + variables['nameOfVarr11'] + Chr(34) + " + std::string(variables[" + Chr(34) + variables['nameOfVarr12'] + Chr(34) + "])]"
@@ -387,9 +387,10 @@ variables['code'] = variables['HTpyCodeOUT754754']
 for A_Index16 in range(1, variables['theIdNumOfThe34'] + 1):
     variables['A_Index16'] = A_Index16
     variables[f'theIdNumOfThe34theVar{variables["A_Index16"]}'] += Chr(34)
+variables['haveWeEverUsedArrays'] = 0
 variables['allVarsChars'] = ""
 variables['allVarsInts'] = ""
-variables['funcNames'] = "std::string|InStr|LoopParseFunc|print|FileRead|FileAppend|FileDelete|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|StrLower|RegExReplace|StrSplit|Chr|Mod|Floor|A_TickCount|STR|INT|FLOAT"
+variables['funcNames'] = "std::string|InStr|LoopParseFunc|print|FileRead|FileAppend|FileDelete|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|StrLower|RegExReplace|StrSplit|Chr|Mod|Floor|A_TickCount|STR|INT|FLOAT|arrSplit"
 # func
 items = LoopParseFunc(variables['code'], "\n", "\r")
 for A_Index17, A_LoopField17 in enumerate(items, start=1):
@@ -398,6 +399,7 @@ for A_Index17, A_LoopField17 in enumerate(items, start=1):
     if (SubStr(Trim(StrLower(variables['A_LoopField17'])), 1 , 5)== "func "):
         variables['funcName123'] = StringTrimLeft(variables['A_LoopField17'], 5)
         variables['funcName123'] = Trim(StrSplit(variables['funcName123'] , "(" , 1))
+        variables['funcName123'] = Trim(StrSplit(variables['funcName123'] , " " , 2))
         variables['funcNames'] += "|" + variables['funcName123']
 variables['cppCode'] = ""
 items = LoopParseFunc(variables['code'], "\n", "\r")
@@ -491,8 +493,9 @@ for A_Index18, A_LoopField18 in enumerate(items, start=1):
         variables['funcName123'] = StringTrimLeft(variables['A_LoopField18'], 5)
         variables['removeNextCurlyBraceCpp'] = 1
         variables['funcName123'] = StrReplace(variables['funcName123'] , " str " , " std::string ")
-        variables['funcName123'] = StrReplace(variables['funcName123'] , "(str " , "std::string ")
-        variables['cppCode'] += "std::any " + variables['funcName123'] + "\n{\n"
+        variables['funcName123'] = StrReplace(variables['funcName123'] , "str " , "std::string ")
+        variables['funcName123'] = StrReplace(variables['funcName123'] , "(str " , "(std::string ")
+        variables['cppCode'] += variables['funcName123'] + "\n{\n"
         variables['lineDone'] = 1
     elif (SubStr(Trim(StrLower(variables['A_LoopField18'])), 1 , 4)== "str "):
         variables['strVar'] = StringTrimLeft(variables['A_LoopField18'], 4)
@@ -524,6 +527,39 @@ for A_Index18, A_LoopField18 in enumerate(items, start=1):
             variables['nameOfVar2'] = Trim(StrSplit(variables['strVar'] , str(variables['nameOfVarSplit']), 2))
             variables['nameOfVar2'] = varTranspiler(variables['nameOfVar2'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
             variables['cppCode'] += "std::string " + variables['nameOfVar1'] + " " + variables['varAssignmentType'] + " " + variables['nameOfVar2'] + Chr(59) + "\n"
+        variables['lineDone'] = 1
+    elif (SubStr(Trim(StrLower(variables['A_LoopField18'])), 1 , 4)== "arr "):
+        variables['strVar'] = StringTrimLeft(variables['A_LoopField18'], 4)
+        variables['strVar'] = Trim(variables['strVar'])
+        variables['haveWeEverUsedArrays'] = 1
+        variables['declareAvarNOvalue'] = 0
+        if (InStr(variables['strVar'] , " := ")):
+            variables['varAssignmentType'] = "="
+        elif (InStr(variables['strVar'] , " += ")):
+            variables['varAssignmentType'] = "+="
+        elif (InStr(variables['strVar'] , " .= ")):
+            variables['varAssignmentType'] = "+="
+        elif (InStr(variables['strVar'] , " -= ")):
+            variables['varAssignmentType'] = "-="
+        elif (InStr(variables['strVar'] , " *= ")):
+            variables['varAssignmentType'] = "*="
+        elif (InStr(variables['strVar'] , " /= ")):
+            variables['varAssignmentType'] = "/="
+        else:
+            variables['declareAvarNOvalue'] = 1
+        if (variables['declareAvarNOvalue'] == 1):
+            variables['nameOfVar1'] = Trim(StrSplit(variables['strVar'] , " " , 1))
+            variables['cppCode'] += "OneIndexedArray " + variables['nameOfVar1'] + Chr(59) + "\n"
+        else:
+            variables['nameOfVar1'] = Trim(StrSplit(variables['strVar'] , " " , 1))
+            variables['nameOfVarSplit'] = StrSplit(variables['strVar'] , " " , 2)
+            variables['nameOfVar2'] = Trim(StrSplit(variables['strVar'] , str(variables['nameOfVarSplit']), 2))
+            variables['nameOfVar222223'] = variables['nameOfVar2']
+            variables['nameOfVar2'] = varTranspiler(variables['nameOfVar2'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
+            if (variables['varAssignmentType'] == "+="):
+                variables['cppCode'] += variables['nameOfVar1'] + ".add(" + variables['nameOfVar222223'] + ")" + Chr(59) + "\n"
+            else:
+                variables['cppCode'] += "OneIndexedArray " + variables['nameOfVar1'] + " " + variables['varAssignmentType'] + " " + variables['nameOfVar2'] + Chr(59) + "\n"
         variables['lineDone'] = 1
     elif (SubStr(Trim(StrLower(variables['A_LoopField18'])), 1 , 1)== "["):
         variables['strVar'] = StringTrimLeft(variables['A_LoopField18'], 1)
@@ -665,7 +701,7 @@ for A_Index18, A_LoopField18 in enumerate(items, start=1):
             variables['nameOfVar2'] = varTranspiler(variables['nameOfVar2'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
             variables['nameOfVar11'] = Trim(StrSplit(variables['nameOfVar1'] , "%" , 1))
             variables['nameOfVar12'] = Trim(StrSplit(variables['nameOfVar1'] , "%" , 2))
-            if (InStr(variables['nameOfVar12'] , "[")):
+            if (SubStr(variables['nameOfVar12'] , 1 , 1)== "["):
                 variables['nameOfVar12'] = StringTrimRight(variables['nameOfVar12'], 1)
                 variables['nameOfVar12'] = StringTrimLeft(variables['nameOfVar12'], 1)
                 variables['nameOfVar1'] = "variables[" + Chr(34) + variables['nameOfVar11'] + Chr(34) + " + std::string(variables[" + Chr(34) + variables['nameOfVar12'] + Chr(34) + "])]"
@@ -679,7 +715,7 @@ for A_Index18, A_LoopField18 in enumerate(items, start=1):
             variables['nameOfVar2'] = varTranspiler(variables['nameOfVar2'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
             variables['nameOfVar11'] = Trim(StrSplit(variables['nameOfVar1'] , "%" , 1))
             variables['nameOfVar12'] = Trim(StrSplit(variables['nameOfVar1'] , "%" , 2))
-            if (InStr(variables['nameOfVar12'] , "[")):
+            if (SubStr(variables['nameOfVar12'] , 1 , 1)== "["):
                 variables['nameOfVar12'] = StringTrimRight(variables['nameOfVar12'], 1)
                 variables['nameOfVar12'] = StringTrimLeft(variables['nameOfVar12'], 1)
                 variables['nameOfVar1'] = "variables[" + Chr(34) + variables['nameOfVar11'] + Chr(34) + " + std::string(variables[" + Chr(34) + variables['nameOfVar12'] + Chr(34) + "])]"
@@ -771,7 +807,7 @@ for A_Index18, A_LoopField18 in enumerate(items, start=1):
         variables['lineYGI'] = varTranspiler(variables['myVar'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts'])
         variables['line'] = variables['lineYGI']
         #MsgBox, % line
-        variables['var1'] = "for A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + " in range(1, " + variables['line'] + " + 1):"
+        variables['var1'] = "for (int A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + " = 1; A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + "<= " + variables['line'] + "; ++A" + Chr(95) + "Index" + str(variables['AindexcharLength']) + ")"
         variables['nothing'] = ""
         variables['AindexcharLengthStr'] = variables['nothing'] + str(variables['AindexcharLength']) + variables['nothing']
         variables['pycodeAcurlyBraceAddSomeVrasFixNL'] = 1
@@ -1121,6 +1157,8 @@ if (variables['theMainFuncDec'] == 0):
 variables['uperCode'] = "#include <iostream>\n#include <sstream>\n#include <vector>\n#include <unordered_map>\n#include <string>\n#include <any>\n#include <cstdint>\n#include <regex>\n#include <fstream>\n#include <filesystem>\n#include <cctype>\n#include <algorithm>\n#include <cmath>\n#include <limits>\n#include <chrono>\n\n// Define a map to store dynamic variables\n" + "// Create a map to hold variables\n    std::unordered_map<std::string, std::string> variables;\n"
 variables['uperCode'] = variables['uperCode'] + "\n// Convert std::string to int\nint INT(const std::string& str) {\n    std::istringstream iss(str);\n    int value;\n    iss >> value;\n    return value;\n}\n"
 variables['uperCode'] = variables['uperCode'] + "\n// Convert various types to std::string\nstd::string STR(int value) {\n    return std::to_string(value);\n}\n\nstd::string STR(float value) {\n    return std::to_string(value);\n}\n\nstd::string STR(double value) {\n    return std::to_string(value);\n}\n\nstd::string STR(size_t value) {\n    return std::to_string(value);\n}\n\nstd::string STR(bool value) {\n    return value ? " + Chr(34) + "1" + Chr(34) + " : " + Chr(34) + "0" + Chr(34) + ";\n}\n"
+if (variables['haveWeEverUsedArrays'] == 1):
+    variables['uperCode'] = variables['uperCode'] + "\n// Define OneIndexedArray\n#define OneIndexedArray_DEFINED\n\n// One-indexed dynamic array class\nclass OneIndexedArray {\nprivate:\n    std::vector<std::string> internalArray;\n\npublic:\n    OneIndexedArray() {\n        internalArray.push_back(" + Chr(34) + "" + Chr(34) + "); // Placeholder for element count\n    }\n\n    void add(const std::string& newElement) {\n        internalArray.push_back(newElement);\n        internalArray[0] = std::to_string(internalArray.size() - 1);\n    }\n\n    void setArray(const std::vector<std::string>& newArray) {\n        internalArray.resize(newArray.size() + 1);\n        std::copy(newArray.begin(), newArray.end(), internalArray.begin() + 1);\n        internalArray[0] = std::to_string(newArray.size());\n    }\n\n    std::string& operator[](size_t index) {\n        if (index >= internalArray.size()) {\n            internalArray.resize(index + 1);\n            internalArray[0] = std::to_string(internalArray.size() - 1);\n        }\n        return internalArray[index];\n    }\n\n    const std::string& operator[](size_t index) const {\n        if (index >= internalArray.size()) {\n            throw std::out_of_range(" + Chr(34) + "Index out of range" + Chr(34) + ");\n        }\n        return internalArray[index];\n    }\n\n    size_t size() const {\n        return internalArray.size() - 1;\n    }\n};\n\n// Function to split text into words based on a delimiter\nstd::vector<std::string> split(const std::string& text, const std::string& delimiter) {\n    std::vector<std::string> words;\n    std::istringstream stream(text);\n    std::string word;\n    while (std::getline(stream, word, delimiter[0])) { // assuming single character delimiter\n        words.push_back(word);\n    }\n    return words;\n}\n\n// Function to split text into a OneIndexedArray\nOneIndexedArray arrSplit(const std::string& text, const std::string& delimiter) {\n    OneIndexedArray array;\n    std::vector<std::string> words = split(text, delimiter);\n    array.setArray(words);\n    return array;\n}\n"
 if (InStr(variables['cppCode'] , "FLOAT("))or(InStr(variables['cppCode'] , "FLOAT (")):
     variables['uperCode'] = variables['uperCode'] + "\n// Convert std::string to float\nfloat FLOAT(const std::string& str) {\n    std::istringstream iss(str);\n    float value;\n    iss >> value;\n    return value;\n}\n"
 if (InStr(variables['cppCode'] , "InStr("))or(InStr(variables['cppCode'] , "InStr (")):
@@ -1128,7 +1166,7 @@ if (InStr(variables['cppCode'] , "InStr("))or(InStr(variables['cppCode'] , "InSt
 if (InStr(variables['cppCode'] , "LoopParseFunc(")):
     variables['uperCode'] = variables['uperCode'] + "\n// Function to escape special characters for regex\nstd::string escapeRegex(const std::string& str) {\n    static const std::regex specialChars{R" + Chr(34) + "([-[\]{}()*+?.,\^$|#\s])" + Chr(34) + "};\n    return std::regex_replace(str, specialChars, R" + Chr(34) + "(\$&)" + Chr(34) + ");\n}\n\n// Function to split a string based on delimiters\nstd::vector<std::string> LoopParseFunc(const std::string& var, const std::string& delimiter1 = " + Chr(34) + "" + Chr(34) + ", const std::string& delimiter2 = " + Chr(34) + "" + Chr(34) + ") {\n    std::vector<std::string> items;\n    if (delimiter1.empty() && delimiter2.empty()) {\n        // If no delimiters are provided, return a list of characters\n        for (char c : var) {\n            items.push_back(std::string(1, c));\n        }\n    } else {\n        // Escape delimiters for regex\n        std::string escapedDelimiters = escapeRegex(delimiter1 + delimiter2);\n        // Construct the regular expression pattern for splitting the string\n        std::string pattern = " + Chr(34) + "[" + Chr(34) + " + escapedDelimiters + " + Chr(34) + "]+" + Chr(34) + ";\n        std::regex regexPattern(pattern);\n        std::sregex_token_iterator iter(var.begin(), var.end(), regexPattern, -1);\n        std::sregex_token_iterator end;\n        while (iter != end) {\n            items.push_back(*iter++);\n        }\n    }\n    return items;\n}\n"
 if (InStr(variables['cppCode'] , "print("))or(InStr(variables['cppCode'] , "print (")):
-    variables['uperCode'] = variables['uperCode'] + "\n// Print function that converts all types to string if needed\ntemplate <typename T>\nvoid print(const T& value) {\n    if constexpr (std::is_same_v<T, std::string>) {\n        std::cout << value << std::endl;\n    } else if constexpr (std::is_same_v<T, int>) {\n        std::cout << STR(value) << std::endl;\n    } else if constexpr (std::is_same_v<T, float>) {\n        std::cout << STR(value) << std::endl;\n    } else if constexpr (std::is_same_v<T, double>) {\n        std::cout << STR(value) << std::endl;\n    } else if constexpr (std::is_same_v<T, size_t>) {\n        std::cout << STR(value) << std::endl;\n    } else if constexpr (std::is_same_v<T, bool>) {\n        std::cout << STR(value) << std::endl;\n    } else {\n        std::cout << " + Chr(34) + "Unsupported type" + Chr(34) + " << std::endl;\n    }\n}\n"
+    variables['uperCode'] = variables['uperCode'] + "\n// Print function that converts all types to string if needed\ntemplate <typename T>\nvoid print(const T& value) {\n    if constexpr (std::is_same_v<T, std::string>) {\n        std::cout << value << std::endl;\n    } else if constexpr (std::is_same_v<T, int>) {\n        std::cout << std::to_string(value) << std::endl;\n    } else if constexpr (std::is_same_v<T, float>) {\n        std::cout << std::to_string(value) << std::endl;\n    } else if constexpr (std::is_same_v<T, double>) {\n        std::cout << std::to_string(value) << std::endl;\n    } else if constexpr (std::is_same_v<T, size_t>) {\n        std::cout << std::to_string(value) << std::endl;\n    } else if constexpr (std::is_same_v<T, bool>) {\n        std::cout << (value ? " + Chr(34) + "1" + Chr(34) + " : " + Chr(34) + "0" + Chr(34) + ") << std::endl;\n    }\n    #ifdef OneIndexedArray_DEFINED\n    else if constexpr (std::is_same_v<T, OneIndexedArray>) {\n        for (size_t i = 1; i <= value.size(); ++i) {\n            std::cout << value[i] << std::endl;\n        }\n    }\n    #endif\n    else {\n        std::cout << " + Chr(34) + "Unsupported type" + Chr(34) + " << std::endl;\n    }\n}\n"
 if (InStr(variables['cppCode'] , "FileRead("))or(InStr(variables['cppCode'] , "FileRead (")):
     variables['uperCode'] = variables['uperCode'] + "\nstd::string FileRead(const std::string& path) {\n    std::ifstream file;\n    std::filesystem::path full_path;\n\n    // Check if the file path is an absolute path\n    if (std::filesystem::path(path).is_absolute()) {\n        full_path = path;\n    } else {\n        // If it's not a full path, prepend the current working directory\n        full_path = std::filesystem::current_path() / path;\n    }\n\n    // Open the file\n    file.open(full_path);\n    if (!file.is_open()) {\n        throw std::runtime_error(" + Chr(34) + "Error: Could not open the file." + Chr(34) + ");\n    }\n\n    // Read the file content into a string\n    std::string content;\n    std::string line;\n    while (std::getline(file, line)) {\n        content += line + '" + Chr(92) + "n';\n    }\n\n    file.close();\n    return content;\n}\n"
 if (InStr(variables['cppCode'] , "FileAppend("))or(InStr(variables['cppCode'] , "FileAppend (")):

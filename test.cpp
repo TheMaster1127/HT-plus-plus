@@ -47,6 +47,69 @@ std::string STR(bool value) {
     return value ? "1" : "0";
 }
 
+// Define OneIndexedArray
+#define OneIndexedArray_DEFINED
+
+// One-indexed dynamic array class
+class OneIndexedArray {
+private:
+    std::vector<std::string> internalArray;
+
+public:
+    OneIndexedArray() {
+        internalArray.push_back(""); // Placeholder for element count
+    }
+
+    void add(const std::string& newElement) {
+        internalArray.push_back(newElement);
+        internalArray[0] = std::to_string(internalArray.size() - 1);
+    }
+
+    void setArray(const std::vector<std::string>& newArray) {
+        internalArray.resize(newArray.size() + 1);
+        std::copy(newArray.begin(), newArray.end(), internalArray.begin() + 1);
+        internalArray[0] = std::to_string(newArray.size());
+    }
+
+    std::string& operator[](size_t index) {
+        if (index >= internalArray.size()) {
+            internalArray.resize(index + 1);
+            internalArray[0] = std::to_string(internalArray.size() - 1);
+        }
+        return internalArray[index];
+    }
+
+    const std::string& operator[](size_t index) const {
+        if (index >= internalArray.size()) {
+            throw std::out_of_range("Index out of range");
+        }
+        return internalArray[index];
+    }
+
+    size_t size() const {
+        return internalArray.size() - 1;
+    }
+};
+
+// Function to split text into words based on a delimiter
+std::vector<std::string> split(const std::string& text, const std::string& delimiter) {
+    std::vector<std::string> words;
+    std::istringstream stream(text);
+    std::string word;
+    while (std::getline(stream, word, delimiter[0])) { // assuming single character delimiter
+        words.push_back(word);
+    }
+    return words;
+}
+
+// Function to split text into a OneIndexedArray
+OneIndexedArray arrSplit(const std::string& text, const std::string& delimiter) {
+    OneIndexedArray array;
+    std::vector<std::string> words = split(text, delimiter);
+    array.setArray(words);
+    return array;
+}
+
 // Function to escape special characters for regex
 std::string escapeRegex(const std::string& str) {
     static const std::regex specialChars{R"([-[\]{}()*+?.,\^$|#\s])"};
@@ -82,16 +145,24 @@ void print(const T& value) {
     if constexpr (std::is_same_v<T, std::string>) {
         std::cout << value << std::endl;
     } else if constexpr (std::is_same_v<T, int>) {
-        std::cout << STR(value) << std::endl;
+        std::cout << std::to_string(value) << std::endl;
     } else if constexpr (std::is_same_v<T, float>) {
-        std::cout << STR(value) << std::endl;
+        std::cout << std::to_string(value) << std::endl;
     } else if constexpr (std::is_same_v<T, double>) {
-        std::cout << STR(value) << std::endl;
+        std::cout << std::to_string(value) << std::endl;
     } else if constexpr (std::is_same_v<T, size_t>) {
-        std::cout << STR(value) << std::endl;
+        std::cout << std::to_string(value) << std::endl;
     } else if constexpr (std::is_same_v<T, bool>) {
-        std::cout << STR(value) << std::endl;
-    } else {
+        std::cout << (value ? "1" : "0") << std::endl;
+    }
+    #ifdef OneIndexedArray_DEFINED
+    else if constexpr (std::is_same_v<T, OneIndexedArray>) {
+        for (size_t i = 1; i <= value.size(); ++i) {
+            std::cout << value[i] << std::endl;
+        }
+    }
+    #endif
+    else {
         std::cout << "Unsupported type" << std::endl;
     }
 }
@@ -167,18 +238,57 @@ bool FileDelete(const std::string& path) {
 std::string StringTrimRight(const std::string &input, int numChars) {
     return (numChars <= input.length()) ? input.substr(0, input.length() - numChars) : input;
 }
-std::any hello(int var5)
+std::string removeRepeatingWords(std::string text)
 {
-return var5;
-}
-int main()
-{
-std::string var1 = std::string("aersdgfw esrdtg wesvn");
-std::vector<std::string> items1 = LoopParseFunc(var1, std::string(" "));
+std::string out;
+OneIndexedArray words = arrSplit ( text , std::string(" ") ) ;
+words.add(std::string(" "));
+std::vector<std::string> items1 = LoopParseFunc(text, std::string(" "));
 for (size_t A_Index1 = 1; A_Index1 < items1.size() + 1; A_Index1++)
 {
 std::string A_LoopField1 = items1[A_Index1 - 1];
-print(A_LoopField1);
+if (A_LoopField1!= words[A_Index1 + 1]) 
+{
+out += A_LoopField1 + std::string(" ");
+}
+}
+out = StringTrimRight(out, 1);
+return out;
+}
+int main()
+{
+std::string text = std::string("hello hello hello man man whats up up today today how are you you doing");
+print(removeRepeatingWords ( text ) );
+// how to use arrays in HT++
+// declare the array
+OneIndexedArray MyArray123;
+// add an element to the array
+MyArray123.add(std::string("6"));
+// add an element to the array
+MyArray123.add(std::string("6"));
+// concatenate an element to the second element of the array array
+MyArray123[2] += std::string("9");
+// add an element to the array
+MyArray123.add(std::string("6"));
+// reassign an element in the array
+MyArray123[3] = std::string("7");
+print(std::string("the number of elements in the array MyArray123 is: ") + MyArray123[0]);
+print(std::string("Here are all the elements in the array MyArray123"));
+print(MyArray123);
+// we can also do this
+// declare a new array
+std::string var123Text = std::string("some text whit spacses");
+// split the string var123Text into an array using space as a delimiter
+OneIndexedArray MyArray123456789 = arrSplit ( var123Text , std::string(" ") ) ;
+print(std::string("the number of elements in the array MyArray123456789 is: ") + MyArray123456789[0]);
+print(std::string("Here are all the elements in the array MyArray123456789"));
+print(MyArray123456789);
+std::string var1 = std::string("aersdgfw esrdtg wesvn");
+std::vector<std::string> items2 = LoopParseFunc(var1, std::string(" "));
+for (size_t A_Index2 = 1; A_Index2 < items2.size() + 1; A_Index2++)
+{
+std::string A_LoopField2 = items2[A_Index2 - 1];
+print(A_LoopField2);
 }
 int num = 5;
 const char* vasdf = "s";
@@ -195,38 +305,48 @@ int sadsfdx = 5;
 sadsfdx++;
 variables["wasedsa"] = std::string("5");
 int sads = INT ( variables["wasedsa"] ) ;
-std::string filepath = std::string("testText.txt");
-std::string text1234 = std::string("dzsfddz jskd jd cakjs a jsv\nsal sajvas");
-FileAppend(text1234, filepath);
-std::string text12346 = FileRead(filepath);
-//FileDelete(filepath);
-std::string text = std::string("hello hello hello man man whats up up today today how are you you doing");
-std::string out;
-int wordCount = 0;
-std::vector<std::string> items2 = LoopParseFunc(text, std::string(" "));
-for (size_t A_Index2 = 1; A_Index2 < items2.size() + 1; A_Index2++)
-{
-std::string A_LoopField2 = items2[A_Index2 - 1];
-wordCount++;
-variables["word" + STR(wordCount)] = A_LoopField2;
-}
-wordCount++;
-variables["word" + STR(wordCount)] = std::string("");
-int AIndex;
-std::vector<std::string> items3 = LoopParseFunc(text, std::string(" "));
-for (size_t A_Index3 = 1; A_Index3 < items3.size() + 1; A_Index3++)
-{
-std::string A_LoopField3 = items3[A_Index3 - 1];
-AIndex = A_Index3 + 1;
-if (A_LoopField3!= variables["word" + STR(AIndex)])
-{
-out += A_LoopField3 + std::string(" ");
-}
-}
-out = StringTrimRight(out, 1);
-print(out);
 variables["num"] = std::string("5");
 variables["var" + std::string(variables["num"])] = std::string("hello");
 print(variables["var5"]);
+std::string filepath = std::string("testText.txt");
+std::string text1234 = std::string("dzsfddz jskd jd cakjs a jsv\nsal sajvas");
+FileAppend(text1234, filepath);
+std::string text12346 = FileRead("testText.txt");
+FileDelete(filepath);
+for (int A_Index3 = 1;; A_Index3++)
+{
+if (A_Index3 == 5) 
+{
+break;
+}
+else
+{
+print(A_Index3);
+}
+}
+int numLoop = 10;
+for (int A_Index4 = 1; A_Index4<= numLoop; ++A_Index4)
+{
+if (A_Index4 == 5) 
+{
+break;
+}
+else
+{
+print(A_Index4);
+}
+}
+for (int A_Index5 = 1; A_Index5<= 5; ++A_Index5)
+{
+if (A_Index5 == 5) 
+{
+break;
+}
+else
+{
+print(A_Index5);
+}
+}
+
 return 0;
 }

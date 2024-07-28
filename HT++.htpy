@@ -97,7 +97,7 @@ if (InStr(varInVarTranspiler, "%"))
 
 nameOfVarr11 := Trim(StrSplit(varInVarTranspiler, "%", 1))
 nameOfVarr12 := Trim(StrSplit(varInVarTranspiler, "%", 2))
-if (InStr(nameOfVarr12, "["))
+if (SubStr(nameOfVarr12, 1, 1) = "[")
 {
 StringTrimRight, nameOfVarr12, nameOfVarr12, 1
 StringTrimLeft, nameOfVarr12, nameOfVarr12, 1
@@ -404,10 +404,10 @@ Loop, % theIdNumOfThe34
 {
 theIdNumOfThe34theVar%A_Index% .= Chr(34)
 }
-
+haveWeEverUsedArrays := 0
 allVarsChars := ""
 allVarsInts := ""
-funcNames := "std::string|InStr|LoopParseFunc|print|FileRead|FileAppend|FileDelete|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|StrLower|RegExReplace|StrSplit|Chr|Mod|Floor|A_TickCount|STR|INT|FLOAT"
+funcNames := "std::string|InStr|LoopParseFunc|print|FileRead|FileAppend|FileDelete|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|StrLower|RegExReplace|StrSplit|Chr|Mod|Floor|A_TickCount|STR|INT|FLOAT|arrSplit"
 
 ; func
 Loop, Parse, code, `n, `r
@@ -416,6 +416,8 @@ if (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "func ")
 {
 StringTrimLeft, funcName123, A_LoopField, 5
 funcName123 := Trim(StrSplit(funcName123, "(", 1))
+funcName123 := Trim(StrSplit(funcName123, " ", 2))
+
 funcNames .= "|" . funcName123
 }
 }
@@ -572,10 +574,12 @@ else if (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "func ")
 {
 StringTrimLeft, funcName123, A_LoopField, 5
 
+
 removeNextCurlyBraceCpp := 1
 funcName123 := StrReplace(funcName123, " str ", " std::string ")
-funcName123 := StrReplace(funcName123, "(str ", "std::string ")
-cppCode .= "std::any " . funcName123 . "`n{`n"
+funcName123 := StrReplace(funcName123, "str ", "std::string ")
+funcName123 := StrReplace(funcName123, "(str ", "(std::string ")
+cppCode .= funcName123 . "`n{`n"
 lineDone := 1
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = "str ")
@@ -631,6 +635,73 @@ nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
 nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 
 cppCode .= "std::string " . nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+}
+lineDone := 1
+
+
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = "arr ")
+{
+StringTrimLeft, strVar, A_LoopField, 4
+strVar := Trim(strVar)
+
+haveWeEverUsedArrays := 1
+declareAvarNOvalue := 0
+if (InStr(strVar, " := "))
+{
+varAssignmentType := "="
+}
+else if (InStr(strVar, " += "))
+{
+varAssignmentType := "+="
+}
+else if (InStr(strVar, " .= "))
+{
+varAssignmentType := "+="
+}
+else if (InStr(strVar, " -= "))
+{
+varAssignmentType := "-="
+}
+else if (InStr(strVar, " *= "))
+{
+varAssignmentType := "*="
+}
+else if (InStr(strVar, " /= "))
+{
+varAssignmentType := "/="
+}
+else
+{
+declareAvarNOvalue := 1
+}
+
+if (declareAvarNOvalue = 1)
+{
+nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
+
+
+cppCode .= "OneIndexedArray " . nameOfVar1  . Chr(59) . "`n"
+}
+else
+{
+nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
+nameOfVarSplit := StrSplit(strVar, " ", 2)
+nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
+nameOfVar222223 := nameOfVar2
+nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
+
+if (varAssignmentType = "+=")
+{
+cppCode .= nameOfVar1  . ".add(" . nameOfVar222223 . ")" . Chr(59) . "`n"
+}
+else
+{
+cppCode .= "OneIndexedArray " . nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+}
+
+
+
 }
 lineDone := 1
 
@@ -908,8 +979,7 @@ nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
 nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 nameOfVar11 := Trim(StrSplit(nameOfVar1, "%", 1))
 nameOfVar12 := Trim(StrSplit(nameOfVar1, "%", 2))
-
-if (InStr(nameOfVar12, "["))
+if (SubStr(nameOfVar12, 1, 1) = "[")
 {
 StringTrimRight, nameOfVar12, nameOfVar12, 1
 StringTrimLeft, nameOfVar12, nameOfVar12, 1
@@ -934,7 +1004,7 @@ nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
 nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 nameOfVar11 := Trim(StrSplit(nameOfVar1, "%", 1))
 nameOfVar12 := Trim(StrSplit(nameOfVar1, "%", 2))
-if (InStr(nameOfVar12, "["))
+if (SubStr(nameOfVar12, 1, 1) = "[")
 {
 StringTrimRight, nameOfVar12, nameOfVar12, 1
 StringTrimLeft, nameOfVar12, nameOfVar12, 1
@@ -1094,7 +1164,7 @@ lineYGI := varTranspiler(myVar, funcNames, allVarsChars, allVarsInts)
 line := lineYGI
 
 ;MsgBox, % line
-var1 := "for A" . Chr(95) . "Index" . str(AindexcharLength) . " in range(1, " . line . " + 1):"
+var1 := "for (int A" . Chr(95) . "Index" . str(AindexcharLength) . " = 1; A" . Chr(95) . "Index" . str(AindexcharLength) . "<= " . line . "; ++A" . Chr(95) . "Index" . str(AindexcharLength) . ")"
 nothing := ""
 AindexcharLengthStr := nothing . str(AindexcharLength) . nothing
 
@@ -1848,6 +1918,12 @@ uperCode := uperCode . "`n// Convert std::string to int`nint INT(const std::stri
 uperCode := uperCode . "`n// Convert various types to std::string`nstd::string STR(int value) {`n    return std::to_string(value);`n}`n`nstd::string STR(float value) {`n    return std::to_string(value);`n}`n`nstd::string STR(double value) {`n    return std::to_string(value);`n}`n`nstd::string STR(size_t value) {`n    return std::to_string(value);`n}`n`nstd::string STR(bool value) {`n    return value ? " . Chr(34) . "1" . Chr(34) . " : " . Chr(34) . "0" . Chr(34) . ";`n}`n"
 
 
+
+if (haveWeEverUsedArrays = 1)
+{
+uperCode := uperCode . "`n// Define OneIndexedArray`n#define OneIndexedArray_DEFINED`n`n// One-indexed dynamic array class`nclass OneIndexedArray {`nprivate:`n    std::vector<std::string> internalArray;`n`npublic:`n    OneIndexedArray() {`n        internalArray.push_back(" . Chr(34) . "" . Chr(34) . "); // Placeholder for element count`n    }`n`n    void add(const std::string& newElement) {`n        internalArray.push_back(newElement);`n        internalArray[0] = std::to_string(internalArray.size() - 1);`n    }`n`n    void setArray(const std::vector<std::string>& newArray) {`n        internalArray.resize(newArray.size() + 1);`n        std::copy(newArray.begin(), newArray.end(), internalArray.begin() + 1);`n        internalArray[0] = std::to_string(newArray.size());`n    }`n`n    std::string& operator[](size_t index) {`n        if (index >= internalArray.size()) {`n            internalArray.resize(index + 1);`n            internalArray[0] = std::to_string(internalArray.size() - 1);`n        }`n        return internalArray[index];`n    }`n`n    const std::string& operator[](size_t index) const {`n        if (index >= internalArray.size()) {`n            throw std::out_of_range(" . Chr(34) . "Index out of range" . Chr(34) . ");`n        }`n        return internalArray[index];`n    }`n`n    size_t size() const {`n        return internalArray.size() - 1;`n    }`n};`n`n// Function to split text into words based on a delimiter`nstd::vector<std::string> split(const std::string& text, const std::string& delimiter) {`n    std::vector<std::string> words;`n    std::istringstream stream(text);`n    std::string word;`n    while (std::getline(stream, word, delimiter[0])) { // assuming single character delimiter`n        words.push_back(word);`n    }`n    return words;`n}`n`n// Function to split text into a OneIndexedArray`nOneIndexedArray arrSplit(const std::string& text, const std::string& delimiter) {`n    OneIndexedArray array;`n    std::vector<std::string> words = split(text, delimiter);`n    array.setArray(words);`n    return array;`n}`n"
+}
+
 if (InStr(cppCode, "FLOAT(")) or (InStr(cppCode, "FLOAT ("))
 {
 uperCode := uperCode . "`n// Convert std::string to float`nfloat FLOAT(const std::string& str) {`n    std::istringstream iss(str);`n    float value;`n    iss >> value;`n    return value;`n}`n"
@@ -1866,7 +1942,7 @@ uperCode := uperCode . "`n// Function to escape special characters for regex`nst
 
 if (InStr(cppCode, "print(")) or (InStr(cppCode, "print ("))
 {
-uperCode := uperCode . "`n// Print function that converts all types to string if needed`ntemplate <typename T>`nvoid print(const T& value) {`n    if constexpr (std::is_same_v<T, std::string>) {`n        std::cout << value << std::endl;`n    } else if constexpr (std::is_same_v<T, int>) {`n        std::cout << STR(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, float>) {`n        std::cout << STR(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, double>) {`n        std::cout << STR(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, size_t>) {`n        std::cout << STR(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, bool>) {`n        std::cout << STR(value) << std::endl;`n    } else {`n        std::cout << " . Chr(34) . "Unsupported type" . Chr(34) . " << std::endl;`n    }`n}`n"
+uperCode := uperCode . "`n// Print function that converts all types to string if needed`ntemplate <typename T>`nvoid print(const T& value) {`n    if constexpr (std::is_same_v<T, std::string>) {`n        std::cout << value << std::endl;`n    } else if constexpr (std::is_same_v<T, int>) {`n        std::cout << std::to_string(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, float>) {`n        std::cout << std::to_string(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, double>) {`n        std::cout << std::to_string(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, size_t>) {`n        std::cout << std::to_string(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, bool>) {`n        std::cout << (value ? " . Chr(34) . "1" . Chr(34) . " : " . Chr(34) . "0" . Chr(34) . ") << std::endl;`n    }`n    #ifdef OneIndexedArray_DEFINED`n    else if constexpr (std::is_same_v<T, OneIndexedArray>) {`n        for (size_t i = 1; i <= value.size(); ++i) {`n            std::cout << value[i] << std::endl;`n        }`n    }`n    #endif`n    else {`n        std::cout << " . Chr(34) . "Unsupported type" . Chr(34) . " << std::endl;`n    }`n}`n"
 }
 
 
