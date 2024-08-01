@@ -205,9 +205,23 @@ var123out := ""
 lastType := ""
 typeMode := 0
 
+;MsgBox, % var123
+var123 := StrReplace(var123, ") or (", " || ")
+var123 := StrReplace(var123, ") || (", " || ")
+var123 := StrReplace(var123, ") and (", " && ")
+var123 := StrReplace(var123, ") && (", " && ")
+
+var123 := StrReplace(var123, ")  or  (", "  ||  ")
+var123 := StrReplace(var123, ")  ||  (", "  ||  ")
+var123 := StrReplace(var123, ")  and  (", "  &&  ")
+var123 := StrReplace(var123, ")  &&  (", "  &&  ")
+
+
 var123 := StrReplace(var123, ",", " , ")
 var123 := StrReplace(var123, "(", " ( ")
 var123 := StrReplace(var123, ")", " ) ")
+
+
 
 
 Loop, Parse, var123, " "
@@ -407,7 +421,11 @@ theIdNumOfThe34theVar%A_Index% .= Chr(34)
 haveWeEverUsedArrays := 0
 allVarsChars := ""
 allVarsInts := ""
-funcNames := "std::string|InStr|LoopParseFunc|print|FileRead|FileAppend|FileDelete|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|StrLower|RegExReplace|StrSplit|Chr|Mod|Floor|A_TickCount|STR|INT|FLOAT|arrSplit"
+funcNames := "std::string|INT|STR|FLOAT|arrSplit|LoopParseFunc|InStr|Random|Sleep|input|print|FileRead|StrLower|FileAppend|FileDelete|StrLen|Asc|Abs|ACos|ATan|Ceil|Cos|Exp|Ln|Log|Round|Sin|Sqrt|Tan|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|RegExReplace|StrSplit|Chr|Mod|Floor|getDataFromJSON|GetParams|BuildInVars|RegExReplace|RegExMatch|RunCMD|SetTimer|ExitApp|getDataFromAPI|SortLikeAHK"
+
+;"std::string|INT|STR|FLOAT|arrSplit|LoopParseFunc|InStr|Random|Sleep|input|print|FileRead|FileAppend|FileDelete|StrLen|Asc|Abs|ACos|ATan|Ceil|Cos|Exp|Ln|Log|Round|Sin|Sqrt|Tan|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|RegExReplace|StrSplit|Chr|Mod|Floor|getDataFromJSON|GetParams|BuildInVars|RegExReplace|RegExMatch|RunCMD|SetTimer|getDataFromAPI|SortLikeAHK"
+
+;"input|int|chr|str|InStr|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|StrLower|RegExReplace|StrSplit|Chr|Mod|FileRead|FileAppend|FileDelete|GetParams|RunCMD|SortLikeAHK|BuildInVars|Floor|ExitApp|SetTimer|Abs|ACos|ASin|ATan|Ceil|Cos|Exp|Ln|Log|Round|Sin|Sqrt|Tan|RegExMatch|StrLen|Asc|getDataFromAPI|getDataFromJSON|float"
 
 ; func
 Loop, Parse, code, `n, `r
@@ -424,6 +442,8 @@ funcNames .= "|" . funcName123
 
 
 
+varAssignmentType := "="
+timer_thread := 0
 
 cppCode := ""
 Loop, Parse, code, `n, `r
@@ -471,6 +491,152 @@ StringTrimRight, str123, str123, 2
 out := str123 . "--;"
 cppCode .= out . "`n"
 lineDone := 1
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 6) = "sort, ")
+{
+StringTrimLeft, str1, A_LoopField, 6
+
+str1 := Trim(str1)
+weHaveAcommaFixSortCommand := 0
+if (SubStr(str1, 0) = Chr(44))
+{
+;MsgBox, comma YES
+StringTrimRight, str1, str1, 1
+weHaveAcommaFixSortCommand := 1
+}
+else
+{
+;MsgBox, comma NO
+gg := 0
+}
+
+s := StrSplit(str1, ",", 1)
+out1 := Trim(s)
+
+s := StrSplit(str1, ",", 2)
+out2 := Trim(s)
+
+if (weHaveAcommaFixSortCommand = 1)
+{
+out2 := out2 . Chr(44)
+}
+
+
+var1 := out1 . " = SortLikeAHK(" . out1 . ", " . Chr(34) . out2 . Chr(34) . ");"
+lineDone := 1
+cppCode .= var1 . "`n"
+
+
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 10) = "settimer, ")
+{
+StringTrimLeft, str1, A_LoopField, 10
+
+str2 := Trim(StrSplit(str1, ",", 1))
+str3 := Trim(StrSplit(str1, ",", 2))
+
+
+if (str3 = "")
+{
+str3 := Chr(34) . "10" . Chr(34)
+}
+else
+{
+
+if (StrLower(str3) = "on")
+{
+str3 := Chr(34) . "On" . Chr(34)
+}
+else if (StrLower(str3) = "off")
+{
+str3 := Chr(34) . "Off" . Chr(34)
+}
+else
+{
+
+
+if (RegExMatch(str3, "^\\d+$"))
+{
+str3 := Chr(34) . str3 . Chr(34)
+}
+else
+{
+str3 :=  "STR(" . str3 . ")"
+}
+}
+
+}
+
+
+out1 := "SetTimer(" . str2 . ", " . str3 . ");"
+
+lineDone := 1
+cppCode .= out1 . "`n"
+}
+else if (StrLower(A_LoopField) = "settimers")
+{
+lineDone := 1
+timer_thread++
+cppCode .= "std::thread timer_thread" . str(timer_thread) . "(TimerManager);`n"
+}
+else if (StrLower(A_LoopField) = "starttimers")
+{
+lineDone := 1
+cppCode .=  "timer_thread" . str(timer_thread) . ".join(); // Wait for TimerManager to finish`nshould_exit = false; // Reset the exit flag for the new TimerManager thread`n"
+}
+else if (Trim(StrLower(A_LoopField)) = "exitapp")
+{
+
+lineDone := 1
+cppCode .= "ExitApp();" . "`n"
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 7) = "gosub, ")
+{
+
+;MsgBox, % A_LoopField
+
+
+sstr1 := A_LoopField
+
+s := StrSplit(sstr1, ",", 2)
+out1 := s
+
+out1 := Trim(out1)
+
+out2 := out1 . "();"
+
+;MsgBox, % out2
+lineDone := 1
+cppCode .= out2 . "`n"
+
+}
+else if (A_LoopField == "Return")
+{
+cppCode .= "}" . "`n"
+lineDone := 1
+}
+else if (RegExReplace(A_LoopField, "^\\w+:$", "") != A_LoopField) && (Trim(SubStr(A_LoopField, 0)) = ":") && (lineDone != 1) && (A_LoopField != "main:")
+{
+
+;MsgBox, % A_LoopField
+
+
+
+out1 := A_LoopField
+
+out1 := Trim(out1)
+
+StringTrimRight, out1, out1, 1
+
+
+lineDone := 1
+cppCode .= "void " . out1 . "()`n{`n"
+
+
+;MsgBox, % out1
+;~ MsgBox, % see
+
+
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 10) = "fileread, ")
 {
@@ -549,6 +715,43 @@ out := outt1 . " = " . "StringTrimRight(" . outt2 . ", " . outt3 . ");"
 cppCode .= out . "`n"
 lineDone := 1
 }
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 8) = StrLower("Random, "))
+{
+
+varr1 := StrSplit(A_LoopField, ",", 2)
+varr2 := StrSplit(A_LoopField, ",", 3)
+varr3 := StrSplit(A_LoopField, ",", 4)
+
+varr1 := StrReplace(varr1, "%", "")
+varr2 := StrReplace(varr2, "%", "")
+varr3 := StrReplace(varr3, "%", "")
+
+varr1 := "int " . varr1
+
+varr1 := StrReplace(varr1, "  ", " ")
+
+outt2 := Trim(varTranspiler(varr2, funcNames, allVarsChars, allVarsInts))
+outt3 := Trim(varTranspiler(varr3, funcNames, allVarsChars, allVarsInts))
+
+out := varr1 . " = " . "Random(" . outt2 . ", " . outt3 . ");"
+
+cppCode .= out . "`n"
+lineDone := 1
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 7) = StrLower("Sleep, "))
+{
+
+varr1 := StrSplit(A_LoopField, ",", 2)
+
+
+varr1 := StrReplace(varr1, "%", "")
+varr1 := StrReplace(varr1, "  ", " ")
+
+out := "Sleep(" . varr1 . ");"
+
+cppCode .= out . "`n"
+lineDone := 1
+}
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 16) = StrLower("StringTrimLeft, "))
 {
 varr1 := StrSplit(A_LoopField, ",", 2)
@@ -567,7 +770,7 @@ lineDone := 1
 else if (A_LoopField = "main:")
 {
 theMainFuncDec := 1
-cppCode .= "`nint main()`n{`n"
+cppCode .= "`nint main(int argc, char* argv[])`n{`n"
 lineDone := 1
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "func ")
@@ -640,6 +843,216 @@ lineDone := 1
 
 
 }
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 8) = "arr str ")
+{
+StringTrimLeft, strVar, A_LoopField, 8
+strVar := Trim(strVar)
+
+haveWeEverUsedArrays := 1
+declareAvarNOvalue := 0
+if (InStr(strVar, " := "))
+{
+varAssignmentType := "="
+}
+else if (InStr(strVar, " += "))
+{
+varAssignmentType := "+="
+}
+else if (InStr(strVar, " .= "))
+{
+varAssignmentType := "+="
+}
+else if (InStr(strVar, " -= "))
+{
+varAssignmentType := "-="
+}
+else if (InStr(strVar, " *= "))
+{
+varAssignmentType := "*="
+}
+else if (InStr(strVar, " /= "))
+{
+varAssignmentType := "/="
+}
+else
+{
+declareAvarNOvalue := 1
+}
+
+; defalut type
+arrType := "std::string"
+
+if (declareAvarNOvalue = 1)
+{
+nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
+
+
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . Chr(59) . "`n"
+}
+else
+{
+nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
+nameOfVarSplit := StrSplit(strVar, " ", 2)
+nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
+nameOfVar222223 := nameOfVar2
+nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
+
+if (varAssignmentType = "+=")
+{
+cppCode .= nameOfVar1  . ".add(" . nameOfVar222223 . ")" . Chr(59) . "`n"
+}
+else
+{
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+}
+
+
+
+}
+lineDone := 1
+
+
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 8) = "arr int ")
+{
+StringTrimLeft, strVar, A_LoopField, 8
+strVar := Trim(strVar)
+
+haveWeEverUsedArrays := 1
+declareAvarNOvalue := 0
+if (InStr(strVar, " := "))
+{
+varAssignmentType := "="
+}
+else if (InStr(strVar, " += "))
+{
+varAssignmentType := "+="
+}
+else if (InStr(strVar, " .= "))
+{
+varAssignmentType := "+="
+}
+else if (InStr(strVar, " -= "))
+{
+varAssignmentType := "-="
+}
+else if (InStr(strVar, " *= "))
+{
+varAssignmentType := "*="
+}
+else if (InStr(strVar, " /= "))
+{
+varAssignmentType := "/="
+}
+else
+{
+declareAvarNOvalue := 1
+}
+
+; defalut type
+arrType := "int"
+
+if (declareAvarNOvalue = 1)
+{
+nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
+
+
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . Chr(59) . "`n"
+}
+else
+{
+nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
+nameOfVarSplit := StrSplit(strVar, " ", 2)
+nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
+nameOfVar222223 := nameOfVar2
+nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
+
+if (varAssignmentType = "+=")
+{
+cppCode .= nameOfVar1  . ".add(" . nameOfVar222223 . ")" . Chr(59) . "`n"
+}
+else
+{
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+}
+
+
+
+}
+lineDone := 1
+
+
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 10) = "arr float ")
+{
+StringTrimLeft, strVar, A_LoopField, 10
+strVar := Trim(strVar)
+
+haveWeEverUsedArrays := 1
+declareAvarNOvalue := 0
+if (InStr(strVar, " := "))
+{
+varAssignmentType := "="
+}
+else if (InStr(strVar, " += "))
+{
+varAssignmentType := "+="
+}
+else if (InStr(strVar, " .= "))
+{
+varAssignmentType := "+="
+}
+else if (InStr(strVar, " -= "))
+{
+varAssignmentType := "-="
+}
+else if (InStr(strVar, " *= "))
+{
+varAssignmentType := "*="
+}
+else if (InStr(strVar, " /= "))
+{
+varAssignmentType := "/="
+}
+else
+{
+declareAvarNOvalue := 1
+}
+
+; defalut type
+arrType := "float"
+
+if (declareAvarNOvalue = 1)
+{
+nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
+
+
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . Chr(59) . "`n"
+}
+else
+{
+nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
+nameOfVarSplit := StrSplit(strVar, " ", 2)
+nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
+nameOfVar222223 := nameOfVar2
+nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
+
+if (varAssignmentType = "+=")
+{
+cppCode .= nameOfVar1  . ".add(" . nameOfVar222223 . ")" . Chr(59) . "`n"
+}
+else
+{
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+}
+
+
+
+}
+lineDone := 1
+
+
+}
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = "arr ")
 {
 StringTrimLeft, strVar, A_LoopField, 4
@@ -676,12 +1089,15 @@ else
 declareAvarNOvalue := 1
 }
 
+; defalut type
+arrType := "std::string"
+
 if (declareAvarNOvalue = 1)
 {
 nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
 
 
-cppCode .= "OneIndexedArray " . nameOfVar1  . Chr(59) . "`n"
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . Chr(59) . "`n"
 }
 else
 {
@@ -697,7 +1113,7 @@ cppCode .= nameOfVar1  . ".add(" . nameOfVar222223 . ")" . Chr(59) . "`n"
 }
 else
 {
-cppCode .= "OneIndexedArray " . nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
 }
 
 
@@ -829,7 +1245,7 @@ cppCode .= "const char* " . charVar1 . " " . varAssignmentType . " " . charVar2 
 }
 
 }
-else if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = "int ") or (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "int8 ") or (SubStr(Trim(StrLower(A_LoopField)), 1, 6) = "int16 ") or (SubStr(Trim(StrLower(A_LoopField)), 1, 6) = "int32 ")
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = "int ") or (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "int8 ") or (SubStr(Trim(StrLower(A_LoopField)), 1, 6) = "int16 ") or (SubStr(Trim(StrLower(A_LoopField)), 1, 6) = "int32 ") or (SubStr(Trim(StrLower(A_LoopField)), 1, 6) = "int64 ")
 {
 lineDone := 1
 if (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "int8 ")
@@ -865,6 +1281,7 @@ else
 StringTrimLeft, strVar, A_LoopField, 6
 }
 strVar := Trim(strVar)
+
 
 declareAvarNOvalue := 0
 if (InStr(strVar, " := "))
@@ -911,6 +1328,11 @@ if (intType = "int_t")
 intType := "int"
 }
 
+if (intType = "int64_t")
+{
+intType := "long long"
+}
+
 cppCode .= intType . " " . charVar1 . Chr(59) . "`n"
 }
 else
@@ -926,6 +1348,11 @@ charVar2 := varTranspiler(charVar2, funcNames, allVarsChars, allVarsInts)
 if (intType = "int_t")
 {
 intType := "int"
+}
+
+if (intType = "int64_t")
+{
+intType := "long long"
 }
 
 cppCode .= intType . " " . charVar1 . " " . varAssignmentType . " " . charVar2 . Chr(59) . "`n"
@@ -1878,6 +2305,44 @@ StringTrimRight, cppCode, pyCodeOut1234565432, 1
 
 
 
+cppCodeOutOneLastFixFixFIX := ""
+Loop, Parse, cppCode, " "
+{
+
+sstr1 := A_LoopField
+
+sstr1 := StrReplace(sstr1, "A_TickCount", "BuildInVars(" . Chr(34) . "A_TickCount" . Chr(34) . ")")
+sstr1 := StrReplace(sstr1, "A_Now", "BuildInVars(" . Chr(34) . "A_Now" . Chr(34) . ")")
+sstr1 := StrReplace(sstr1, "A_YYYY", "BuildInVars(" . Chr(34) . "A_YYYY" . Chr(34) . ")")
+sstr1 := StrReplace(sstr1, "A_MMMM", "BuildInVars(" . Chr(34) . "A_MMMM" . Chr(34) . ")")
+sstr1 := StrReplace(sstr1, "A_MMM", "BuildInVars(" . Chr(34) . "A_MMM" . Chr(34) . ")")
+sstr1 := StrReplace(sstr1, "A_MM", "BuildInVars(" . Chr(34) . "A_MM" . Chr(34) . ")")
+sstr1 := StrReplace(sstr1, "A_DDDD", "BuildInVars(" . Chr(34) . "A_DDDD" . Chr(34) . ")")
+sstr1 := StrReplace(sstr1, "A_DDD", "BuildInVars(" . Chr(34) . "A_DDD" . Chr(34) . ")")
+sstr1 := StrReplace(sstr1, "A_DD", "BuildInVars(" . Chr(34) . "A_DD" . Chr(34) . ")")
+sstr1 := StrReplace(sstr1, "A_Hour", "BuildInVars(" . Chr(34) . "A_Hour" . Chr(34) . ")")
+sstr1 := StrReplace(sstr1, "A_Min", "BuildInVars(" . Chr(34) . "A_Min" . Chr(34) . ")")
+sstr1 := StrReplace(sstr1, "A_Sec", "BuildInVars(" . Chr(34) . "A_Sec" . Chr(34) . ")")
+sstr1 := StrReplace(sstr1, "A_Space", "BuildInVars(" . Chr(34) . "A_Space" . Chr(34) . ")")
+sstr1 := StrReplace(sstr1, "A_Tab", "BuildInVars(" . Chr(34) . "A_Tab" . Chr(34) . ")")
+
+
+sstr1 := StrReplace(sstr1, "BuildInVars(" . Chr(34) . "BuildInVars(" . Chr(34) . "A_DD" . Chr(34) . ")D" . Chr(34) . ")", "BuildInVars(" . Chr(34) . "A_DDD" . Chr(34) . ")")
+sstr1 := StrReplace(sstr1, "BuildInVars(" . Chr(34) . "BuildInVars(" . Chr(34) . "BuildInVars(" . Chr(34) . "A_DD" . Chr(34) . ")D" . Chr(34) . ")D" . Chr(34) . ")", "BuildInVars(" . Chr(34) . "A_DDDD" . Chr(34) . ")")
+
+
+sstr1 := StrReplace(sstr1, "BuildInVars(" . Chr(34) . "BuildInVars(" . Chr(34) . "A_DDD" . Chr(34) . ")D" . Chr(34) . ")", "BuildInVars(" . Chr(34) . "A_DDDD" . Chr(34) . ")")
+
+sstr1 := StrReplace(sstr1, "BuildInVars(" . Chr(34) . "BuildInVars(" . Chr(34) . "A_MM" . Chr(34) . ")M" . Chr(34) . ")", "BuildInVars(" . Chr(34) . "A_MMM" . Chr(34) . ")")
+sstr1 := StrReplace(sstr1, "BuildInVars(" . Chr(34) . "BuildInVars(" . Chr(34) . "BuildInVars(" . Chr(34) . "A_MM" . Chr(34) . ")M" . Chr(34) . ")M" . Chr(34) . ")", "BuildInVars(" . Chr(34) . "A_MMMM" . Chr(34) . ")")
+
+sstr1 := StrReplace(sstr1, "BuildInVars(" . Chr(34) . "BuildInVars(" . Chr(34) . "A_MMM" . Chr(34) . ")M" . Chr(34) . ")", "BuildInVars(" . Chr(34) . "A_MMMM" . Chr(34) . ")")
+
+cppCodeOutOneLastFixFixFIX .= sstr1 . " "
+
+}
+StringTrimRight, cppCode, cppCodeOutOneLastFixFixFIX, 1
+
 
 
 Loop, % theIdNumOfThe34
@@ -1904,140 +2369,432 @@ cppCodeFixCharRemoveStd .= A_LoopField . "`n"
 }
 StringTrimRight, cppCode, cppCodeFixCharRemoveStd, 1
 
+
+
+
+
+
+
+
+
+
 if (theMainFuncDec = 0)
 {
-upCode := "`nint main()`n{`n"
+upCode := "`nint main(int argc, char* argv[])`n{`n"
 }
 
-uperCode := "#include <iostream>`n#include <sstream>`n#include <vector>`n#include <unordered_map>`n#include <string>`n#include <any>`n#include <cstdint>`n#include <regex>`n#include <fstream>`n#include <filesystem>`n#include <cctype>`n#include <algorithm>`n#include <cmath>`n#include <limits>`n#include <chrono>`n`n// Define a map to store dynamic variables`n" . "// Create a map to hold variables`n    std::unordered_map<std::string, std::string> variables;`n"
+uperCode := ""
+uperCodeLibs := ""
 
 
-uperCode := uperCode . "`n// Convert std::string to int`nint INT(const std::string& str) {`n    std::istringstream iss(str);`n    int value;`n    iss >> value;`n    return value;`n}`n"
+uperCodeLibs .= "#include <iostream>`n#include <sstream>`n#include <string>`n"
 
+if (InStr(cppCode, "variables["))
+{
 
-uperCode := uperCode . "`n// Convert various types to std::string`nstd::string STR(int value) {`n    return std::to_string(value);`n}`n`nstd::string STR(float value) {`n    return std::to_string(value);`n}`n`nstd::string STR(double value) {`n    return std::to_string(value);`n}`n`nstd::string STR(size_t value) {`n    return std::to_string(value);`n}`n`nstd::string STR(bool value) {`n    return value ? " . Chr(34) . "1" . Chr(34) . " : " . Chr(34) . "0" . Chr(34) . ";`n}`n"
+uperCodeLibs .= "`n#include <unordered_map>`n#include <string>`n"
 
+uperCode := uperCode . "`n// Define a map to store dynamic variables`n    std::unordered_map<std::string, std::string> variables;`n"
+}
 
 
 if (haveWeEverUsedArrays = 1)
 {
-uperCode := uperCode . "`n// Define OneIndexedArray`n#define OneIndexedArray_DEFINED`n`n// One-indexed dynamic array class`nclass OneIndexedArray {`nprivate:`n    std::vector<std::string> internalArray;`n`npublic:`n    OneIndexedArray() {`n        internalArray.push_back(" . Chr(34) . "" . Chr(34) . "); // Placeholder for element count`n    }`n`n    void add(const std::string& newElement) {`n        internalArray.push_back(newElement);`n        internalArray[0] = std::to_string(internalArray.size() - 1);`n    }`n`n    void setArray(const std::vector<std::string>& newArray) {`n        internalArray.resize(newArray.size() + 1);`n        std::copy(newArray.begin(), newArray.end(), internalArray.begin() + 1);`n        internalArray[0] = std::to_string(newArray.size());`n    }`n`n    std::string& operator[](size_t index) {`n        if (index >= internalArray.size()) {`n            internalArray.resize(index + 1);`n            internalArray[0] = std::to_string(internalArray.size() - 1);`n        }`n        return internalArray[index];`n    }`n`n    const std::string& operator[](size_t index) const {`n        if (index >= internalArray.size()) {`n            throw std::out_of_range(" . Chr(34) . "Index out of range" . Chr(34) . ");`n        }`n        return internalArray[index];`n    }`n`n    size_t size() const {`n        return internalArray.size() - 1;`n    }`n};`n`n// Function to split text into words based on a delimiter`nstd::vector<std::string> split(const std::string& text, const std::string& delimiter) {`n    std::vector<std::string> words;`n    std::istringstream stream(text);`n    std::string word;`n    while (std::getline(stream, word, delimiter[0])) { // assuming single character delimiter`n        words.push_back(word);`n    }`n    return words;`n}`n`n// Function to split text into a OneIndexedArray`nOneIndexedArray arrSplit(const std::string& text, const std::string& delimiter) {`n    OneIndexedArray array;`n    std::vector<std::string> words = split(text, delimiter);`n    array.setArray(words);`n    return array;`n}`n"
+
+uperCodeLibs .= "`n#include <vector>`n#include <string>`n#include <sstream>`n#include <stdexcept>`n"
+
+uperCode := uperCode . "`n// Forward declare OneIndexedArray template`ntemplate <typename T>`nclass OneIndexedArray;`n`n#define OneIndexedArray_DEFINED`n`n// Helper function to set the internal array's size as a string`ntemplate <typename T>`nvoid setInternalArraySize(T& element, size_t size) {`n    element = static_cast<T>(size);`n}`n`n// Specialization for std::string`ntemplate <>`nvoid setInternalArraySize<std::string>(std::string& element, size_t size) {`n    element = std::to_string(size);`n}`n`n// One-indexed dynamic array class`ntemplate <typename T>`nclass OneIndexedArray {`nprivate:`n    std::vector<T> internalArray;`n`npublic:`n    OneIndexedArray() {`n        internalArray.push_back(T{}); // Placeholder for element count`n    }`n`n    void add(const T& newElement) {`n        internalArray.push_back(newElement);`n        setInternalArraySize(internalArray[0], internalArray.size() - 1);`n    }`n`n    void setArray(const std::vector<T>& newArray) {`n        internalArray.resize(newArray.size() + 1);`n        std::copy(newArray.begin(), newArray.end(), internalArray.begin() + 1);`n        setInternalArraySize(internalArray[0], newArray.size());`n    }`n`n    T& operator[](size_t index) {`n        if (index >= internalArray.size()) {`n            internalArray.resize(index + 1);`n            setInternalArraySize(internalArray[0], internalArray.size() - 1);`n        }`n        return internalArray[index];`n    }`n`n    const T& operator[](size_t index) const {`n        if (index >= internalArray.size()) {`n            throw std::out_of_range(" . Chr(34) . "Index out of range" . Chr(34) . ");`n        }`n        return internalArray[index];`n    }`n`n    size_t size() const {`n        return static_cast<size_t>(internalArray.size() - 1);`n    }`n};`n`n// Function to split text into words based on a delimiter`nstd::vector<std::string> split(const std::string& text, const std::string& delimiter) {`n    std::vector<std::string> words;`n    std::istringstream stream(text);`n    std::string word;`n    while (std::getline(stream, word, delimiter[0])) { // assuming single character delimiter`n        words.push_back(word);`n    }`n    return words;`n}`n`n// Function to split text into a OneIndexedArray`nOneIndexedArray<std::string> arrSplit(const std::string& text, const std::string& delimiter) {`n    OneIndexedArray<std::string> array;`n    std::vector<std::string> words = split(text, delimiter);`n    array.setArray(words);`n    return array;`n}`n"
+}
+
+if (InStr(cppCode, "INT(")) or (InStr(cppCode, "INT ("))
+{
+
+uperCodeLibs .= "`n#include <string>`n#include <sstream>`n"
+
+uperCode := uperCode . "`n// Convert std::string to int`nint INT(const std::string& str) {`n    std::istringstream iss(str);`n    int value;`n    iss >> value;`n    return value;`n}`n"
+}
+
+if (InStr(cppCode, "STR(")) or (InStr(cppCode, "STR ("))
+{
+
+uperCodeLibs .= "`n#include <string>`n#include <string>`n"
+
+uperCode := uperCode . "`n// Convert various types to std::string`nstd::string STR(int value) {`n    return std::to_string(value);`n}`n`nstd::string STR(float value) {`n    return std::to_string(value);`n}`n`nstd::string STR(double value) {`n    return std::to_string(value);`n}`n`nstd::string STR(size_t value) {`n    return std::to_string(value);`n}`n`nstd::string STR(bool value) {`n    return value ? " . Chr(34) . "1" . Chr(34) . " : " . Chr(34) . "0" . Chr(34) . ";`n}`n"
 }
 
 if (InStr(cppCode, "FLOAT(")) or (InStr(cppCode, "FLOAT ("))
 {
+
+uperCodeLibs .= "`n#include <string>`n#include <sstream>`n"
+
 uperCode := uperCode . "`n// Convert std::string to float`nfloat FLOAT(const std::string& str) {`n    std::istringstream iss(str);`n    float value;`n    iss >> value;`n    return value;`n}`n"
 }
 
-
 if (InStr(cppCode, "InStr(")) or (InStr(cppCode, "InStr ("))
 {
+
+uperCodeLibs .= "`n#include <string>`n"
+
 uperCode := uperCode . "`n// Function to check if needle exists in haystack (std::string overload)`nbool InStr(const std::string& haystack, const std::string& needle) {`n    return haystack.find(needle) != std::string::npos;`n}`n"
 }
 
-if (InStr(cppCode, "LoopParseFunc("))
+if (InStr(cppCode, "Random(")) or (InStr(cppCode, "Random ("))
 {
-uperCode := uperCode . "`n// Function to escape special characters for regex`nstd::string escapeRegex(const std::string& str) {`n    static const std::regex specialChars{R" . Chr(34) . "([-[\]{}()*+?.,\^$|#\s])" . Chr(34) . "};`n    return std::regex_replace(str, specialChars, R" . Chr(34) . "(\$&)" . Chr(34) . ");`n}`n`n// Function to split a string based on delimiters`nstd::vector<std::string> LoopParseFunc(const std::string& var, const std::string& delimiter1 = " . Chr(34) . "" . Chr(34) . ", const std::string& delimiter2 = " . Chr(34) . "" . Chr(34) . ") {`n    std::vector<std::string> items;`n    if (delimiter1.empty() && delimiter2.empty()) {`n        // If no delimiters are provided, return a list of characters`n        for (char c : var) {`n            items.push_back(std::string(1, c));`n        }`n    } else {`n        // Escape delimiters for regex`n        std::string escapedDelimiters = escapeRegex(delimiter1 + delimiter2);`n        // Construct the regular expression pattern for splitting the string`n        std::string pattern = " . Chr(34) . "[" . Chr(34) . " + escapedDelimiters + " . Chr(34) . "]+" . Chr(34) . ";`n        std::regex regexPattern(pattern);`n        std::sregex_token_iterator iter(var.begin(), var.end(), regexPattern, -1);`n        std::sregex_token_iterator end;`n        while (iter != end) {`n            items.push_back(*iter++);`n        }`n    }`n    return items;`n}`n"
+
+uperCodeLibs .= "`n#include <cstdlib>`n#include <ctime>`n"
+
+uperCode := uperCode . "`n// Function to generate a random integer within a specified range [min, max]`nint Random(int min, int max) {`n    // Seed the random number generator with the current time`n    std::srand(std::time(0));`n    `n    // Generate a random number within the specified range`n    int range = max - min + 1;`n    int randomNumber = std::rand() % range + min;`n    `n    return randomNumber;`n}`n`n"
+}
+
+if (InStr(cppCode, "Sleep(")) or (InStr(cppCode, "Sleep ("))
+{
+
+uperCodeLibs .= "`n#include <thread>`n#include <chrono>`n"
+
+uperCode := uperCode . "`n// Function to sleep for a specified number of milliseconds`nvoid Sleep(int milliseconds) {`n    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));`n}`n`n"
+}
+
+if (InStr(cppCode, "input(")) or (InStr(cppCode, "input ("))
+{
+
+uperCodeLibs .= "`n#include <iostream>`n#include <string>`n"
+
+uperCode := uperCode . "`n// Function to get input from the user, similar to Python's input() function`nstd::string input(const std::string& prompt) {`n    std::string userInput;`n    std::cout << prompt; // Display the prompt to the user`n    std::getline(std::cin, userInput); // Get the entire line of input`n    return userInput;`n}`n`n"
+}
+
+if (InStr(cppCode, "LoopParseFunc(")) or (InStr(cppCode, "LoopParseFunc ("))
+{
+
+uperCodeLibs .= "`n#include <vector>`n#include <string>`n#include <regex>`n"
+
+uperCode := uperCode . "`n// Function to escape special characters for regex`nstd::string escapeRegex(const std::string& str) {`n    static const std::regex specialChars{R" . Chr(34) . "([-[" . Chr(92) . "]{}()*+?.," . Chr(92) . "^$|#" . Chr(92) . "s])" . Chr(34) . "};`n    return std::regex_replace(str, specialChars, R" . Chr(34) . "(" . Chr(92) . "$&)" . Chr(34) . ");`n}`n`n// Function to split a string based on delimiters`nstd::vector<std::string> LoopParseFunc(const std::string& var, const std::string& delimiter1 = " . Chr(34) . "" . Chr(34) . ", const std::string& delimiter2 = " . Chr(34) . "" . Chr(34) . ") {`n    std::vector<std::string> items;`n    if (delimiter1.empty() && delimiter2.empty()) {`n        // If no delimiters are provided, return a list of characters`n        for (char c : var) {`n            items.push_back(std::string(1, c));`n        }`n    } else {`n        // Escape delimiters for regex`n        std::string escapedDelimiters = escapeRegex(delimiter1 + delimiter2);`n        // Construct the regular expression pattern for splitting the string`n        std::string pattern = " . Chr(34) . "[" . Chr(34) . " + escapedDelimiters + " . Chr(34) . "]+" . Chr(34) . ";`n        std::regex regexPattern(pattern);`n        std::sregex_token_iterator iter(var.begin(), var.end(), regexPattern, -1);`n        std::sregex_token_iterator end;`n        while (iter != end) {`n            items.push_back(*iter++);`n        }`n    }`n    return items;`n}`n"
 }
 
 if (InStr(cppCode, "print(")) or (InStr(cppCode, "print ("))
 {
-uperCode := uperCode . "`n// Print function that converts all types to string if needed`ntemplate <typename T>`nvoid print(const T& value) {`n    if constexpr (std::is_same_v<T, std::string>) {`n        std::cout << value << std::endl;`n    } else if constexpr (std::is_same_v<T, int>) {`n        std::cout << std::to_string(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, float>) {`n        std::cout << std::to_string(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, double>) {`n        std::cout << std::to_string(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, size_t>) {`n        std::cout << std::to_string(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, bool>) {`n        std::cout << (value ? " . Chr(34) . "1" . Chr(34) . " : " . Chr(34) . "0" . Chr(34) . ") << std::endl;`n    }`n    #ifdef OneIndexedArray_DEFINED`n    else if constexpr (std::is_same_v<T, OneIndexedArray>) {`n        for (size_t i = 1; i <= value.size(); ++i) {`n            std::cout << value[i] << std::endl;`n        }`n    }`n    #endif`n    else {`n        std::cout << " . Chr(34) . "Unsupported type" . Chr(34) . " << std::endl;`n    }`n}`n"
+
+uperCodeLibs .= "`n#include <iostream>`n#include <string>`n#include <type_traits>`n"
+
+uperCode := uperCode . "`n// Print function that converts all types to string if needed`ntemplate <typename T>`nvoid print(const T& value) {`n    if constexpr (std::is_same_v<T, std::string>) {`n        std::cout << value << std::endl;`n    } else if constexpr (std::is_same_v<T, int>) {`n        std::cout << std::to_string(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, float>) {`n        std::cout << std::to_string(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, double>) {`n        std::cout << std::to_string(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, size_t>) {`n        std::cout << std::to_string(value) << std::endl;`n    } else if constexpr (std::is_same_v<T, bool>) {`n        std::cout << (value ? " . Chr(34) . "1" . Chr(34) . " : " . Chr(34) . "0" . Chr(34) . ") << std::endl;`n    } `n    #ifdef OneIndexedArray_DEFINED`n    else if constexpr (std::is_base_of_v<OneIndexedArray<std::string>, T>) {`n        for (size_t i = 1; i <= value.size(); ++i) {`n            std::cout << value[i] << std::endl;`n        }`n    } else if constexpr (std::is_base_of_v<OneIndexedArray<int>, T>) {`n        for (size_t i = 1; i <= value.size(); ++i) {`n            std::cout << std::to_string(value[i]) << std::endl;`n        }`n    } else if constexpr (std::is_base_of_v<OneIndexedArray<float>, T>) {`n        for (size_t i = 1; i <= value.size(); ++i) {`n            std::cout << std::to_string(value[i]) << std::endl;`n        }`n    } else if constexpr (std::is_base_of_v<OneIndexedArray<double>, T>) {`n        for (size_t i = 1; i <= value.size(); ++i) {`n            std::cout << std::to_string(value[i]) << std::endl;`n        }`n    }`n    #endif`n    else {`n        std::cout << " . Chr(34) . "Unsupported type" . Chr(34) . " << std::endl;`n    }`n}`n"
 }
-
-
 
 if (InStr(cppCode, "FileRead(")) or (InStr(cppCode, "FileRead ("))
 {
+
+uperCodeLibs .= "`n#include <fstream>`n#include <string>`n#include <filesystem>`n#include <stdexcept>`n"
+
 uperCode := uperCode . "`nstd::string FileRead(const std::string& path) {`n    std::ifstream file;`n    std::filesystem::path full_path;`n`n    // Check if the file path is an absolute path`n    if (std::filesystem::path(path).is_absolute()) {`n        full_path = path;`n    } else {`n        // If it's not a full path, prepend the current working directory`n        full_path = std::filesystem::current_path() / path;`n    }`n`n    // Open the file`n    file.open(full_path);`n    if (!file.is_open()) {`n        throw std::runtime_error(" . Chr(34) . "Error: Could not open the file." . Chr(34) . ");`n    }`n`n    // Read the file content into a string`n    std::string content;`n    std::string line;`n    while (std::getline(file, line)) {`n        content += line + '" . Chr(92) . "n';`n    }`n`n    file.close();`n    return content;`n}`n"
 }
 
-
-
 if (InStr(cppCode, "FileAppend(")) or (InStr(cppCode, "FileAppend ("))
 {
-uperCode := uperCode . "`nbool FileAppend(const std::string& content, const std::string& path) {`n    std::ofstream file;`n`n    // Open the file in append mode`n    file.open(path, std::ios::app);`n`n    if (!file.is_open()) {`n        std::cerr << " . Chr(34) . "Error: Could not open the file for appending." . Chr(34) . " << std::endl;`n        return false;`n    }`n`n    // Append the content to the file`n    file << content;`n`n    // Close the file`n    file.close();`n`n    return true;`n}`n"
+
+uperCodeLibs .= "`n#include <fstream>`n#include <iostream>`n#include <string>`n"
+
+uperCode := uperCode . "`nbool FileAppend(const std::string& content, const std::string& path) {`n    std::ofstream file;`n`n    // Open the file in append mode`n    file.open(path, std::ios::app);`n`n    if (!file.is_open()) {`n        std::cerr << " . Chr(34) . "Error: Could not open the file for appending." . Chr(34) . " << std::endl;`n        return false;`n    }`n`n    // Append the content to the file`n    file << content;`n`n    // Close the file`n    file.close();`n`n    return true;`n}`n`n"
 }
-
-
 
 if (InStr(cppCode, "FileDelete(")) or (InStr(cppCode, "FileDelete ("))
 {
+
+uperCodeLibs .= "`n#include <filesystem>`n#include <iostream>`n#include <string>`n"
+
 uperCode := uperCode . "`nbool FileDelete(const std::string& path) {`n    std::filesystem::path file_path(path);`n`n    // Check if the file exists`n    if (!std::filesystem::exists(file_path)) {`n        std::cerr << " . Chr(34) . "Error: File does not exist." . Chr(34) . " << std::endl;`n        return false;`n    }`n`n    // Attempt to remove the file`n    if (!std::filesystem::remove(file_path)) {`n        std::cerr << " . Chr(34) . "Error: Failed to delete the file." . Chr(34) . " << std::endl;`n        return false;`n    }`n`n    return true;`n}`n"
 }
 
-;;;;;;;;;;;;;;;
+if (InStr(cppCode, "StrLen(")) or (InStr(cppCode, "StrLen ("))
+{
+
+uperCodeLibs .= "`n#include <string>`n"
+
+uperCode := uperCode . "`nsize_t StrLen(const std::string& str) {`n    return str.length();`n}`n"
+}
+
+if (InStr(cppCode, "Asc(")) or (InStr(cppCode, "Asc ("))
+{
+
+uperCodeLibs .= "`n#include <string>`n"
+
+uperCode := uperCode . "`nint Asc(const std::string& str) {`n    if (!str.empty()) {`n        return static_cast<int>(str[0]);`n    }`n    return -1; // Return -1 if the string is empty`n}`n"
+}
+
+if (InStr(cppCode, "Abs(")) or (InStr(cppCode, "Abs ("))
+{
+
+uperCodeLibs .= "`n#include <cmath>`n"
+
+uperCode := uperCode . "`ndouble Abs(double value) {`n    return std::fabs(value);`n}`n`n"
+}
+
+if (InStr(cppCode, "ACos(")) or (InStr(cppCode, "ACos ("))
+{
+
+uperCodeLibs .= "`n#include <cmath>`n"
+
+uperCode := uperCode . "`ndouble ACos(double value) {`n    return std::acos(value);`n}`n"
+}
+
+if (InStr(cppCode, "ATan(")) or (InStr(cppCode, "ATan ("))
+{
+
+uperCodeLibs .= "`n#include <cmath>`n"
+
+uperCode := uperCode . "`ndouble ATan(double value) {`n    return std::atan(value);`n}`n"
+}
+
+if (InStr(cppCode, "Ceil(")) or (InStr(cppCode, "Ceil ("))
+{
+
+uperCodeLibs .= "`n#include <cmath>`n"
+
+uperCode := uperCode . "`ndouble Ceil(double value) {`n    return std::ceil(value);`n}`n"
+}
+
+if (InStr(cppCode, "Cos(")) or (InStr(cppCode, "Cos ("))
+{
+
+uperCodeLibs .= "`n#include <cmath>`n"
+
+uperCode := uperCode . "`ndouble Cos(double angle) {`n    return std::cos(angle);`n}`n"
+}
+
+if (InStr(cppCode, "Exp(")) or (InStr(cppCode, "Exp ("))
+{
+
+uperCodeLibs .= "`n#include <cmath>`n"
+
+uperCode := uperCode . "`ndouble Exp(double value) {`n    return std::exp(value);`n}`n"
+}
+
+if (InStr(cppCode, "Ln(")) or (InStr(cppCode, "Ln ("))
+{
+
+uperCodeLibs .= "`n#include <cmath>`n"
+
+uperCode := uperCode . "`ndouble Ln(double value) {`n    return std::log(value);`n}`n"
+}
+
+if (InStr(cppCode, "Log(")) or (InStr(cppCode, "Log ("))
+{
+
+uperCodeLibs .= "`n#include <cmath>`n"
+
+uperCode := uperCode . "`ndouble Log(double value, double base) {`n    return std::log(value) / std::log(base);`n}`n"
+}
+
+if (InStr(cppCode, "Round(")) or (InStr(cppCode, "Round ("))
+{
+
+uperCodeLibs .= "`n#include <cmath>`n"
+
+uperCode := uperCode . "`ndouble Round(double value) {`n    return std::round(value);`n}`n"
+}
+
+if (InStr(cppCode, "Sin(")) or (InStr(cppCode, "Sin ("))
+{
+
+uperCodeLibs .= "`n#include <cmath>`n"
+
+uperCode := uperCode . "`ndouble Sin(double angle) {`n    return std::sin(angle);`n}`n"
+}
+
+if (InStr(cppCode, "Sqrt(")) or (InStr(cppCode, "Sqrt ("))
+{
+
+uperCodeLibs .= "`n#include <cmath>`n"
+
+uperCode := uperCode . "`ndouble Sqrt(double value) {`n    return std::sqrt(value);`n}`n"
+}
+
+if (InStr(cppCode, "Tan(")) or (InStr(cppCode, "Tan ("))
+{
+
+uperCodeLibs .= "`n#include <cmath>`n"
+
+uperCode := uperCode . "`ndouble Tan(double angle) {`n    return std::tan(angle);`n}`n"
+}
 
 if (InStr(cppCode, "SubStr(")) or (InStr(cppCode, "SubStr ("))
 {
-uperCode := uperCode . "`n// SubStr function to get a substring with optional length`nstd::string SubStr(const std::string& str, int startPos, int length = -1) {`n    std::string result;`n    size_t strLen = str.size();`n`n    // Handle negative starting positions`n    if (startPos < 0) {`n        startPos += strLen;`n        if (startPos < 0) startPos = 0;`n    } else {`n        if (startPos > static_cast<int>(strLen)) return " . Chr(34) . "" . Chr(34) . "; // Starting position beyond string length`n        startPos -= 1; // Convert to 0-based index`n    }`n`n    // Handle length`n    if (length < 0) {`n        length = strLen - startPos; // Length to end of string`n    } else if (startPos + length > static_cast<int>(strLen)) {`n        length = strLen - startPos; // Adjust length to fit within the string`n    }`n`n    // Extract substring`n    result = str.substr(startPos, length);`n    return result;`n}`n"
+
+uperCodeLibs .= "`n#include <string>`n"
+
+uperCode := uperCode . "`nstd::string SubStr(const std::string& str, int startPos, int length = -1) {`n    std::string result;`n    size_t strLen = str.size();`n`n    // Handle negative starting positions`n    if (startPos < 0) {`n        startPos += strLen;`n        if (startPos < 0) startPos = 0;`n    } else {`n        if (startPos > static_cast<int>(strLen)) return " . Chr(34) . "" . Chr(34) . "; // Starting position beyond string length`n        startPos -= 1; // Convert to 0-based index`n    }`n`n    // Handle length`n    if (length < 0) {`n        length = strLen - startPos; // Length to end of string`n    } else if (startPos + length > static_cast<int>(strLen)) {`n        length = strLen - startPos; // Adjust length to fit within the string`n    }`n`n    // Extract substring`n    result = str.substr(startPos, length);`n    return result;`n}`n"
 }
 
 if (InStr(cppCode, "Trim(")) or (InStr(cppCode, "Trim ("))
 {
-uperCode := uperCode . "`n// Function to trim leading and trailing whitespace from a string`nstd::string Trim(const std::string &inputString) {`n    if (inputString.empty()) return " . Chr(34) . "" . Chr(34) . ";`n`n    size_t start = inputString.find_first_not_of(" . Chr(34) . " " . Chr(92) . "t" . Chr(92) . "n" . Chr(92) . "r" . Chr(92) . "f" . Chr(92) . "v" . Chr(34) . ");`n    size_t end = inputString.find_last_not_of(" . Chr(34) . " " . Chr(92) . "t" . Chr(92) . "n" . Chr(92) . "r" . Chr(92) . "f" . Chr(92) . "v" . Chr(34) . ");`n`n    return (start == std::string::npos) ? " . Chr(34) . "" . Chr(34) . " : inputString.substr(start, end - start + 1);`n}`n"
+
+uperCodeLibs .= "`n#include <string>`n"
+
+uperCode := uperCode . "`nstd::string Trim(const std::string &inputString) {`n    if (inputString.empty()) return " . Chr(34) . "" . Chr(34) . ";`n`n    size_t start = inputString.find_first_not_of(" . Chr(34) . " " . Chr(92) . "t" . Chr(92) . "n" . Chr(92) . "r" . Chr(92) . "f" . Chr(92) . "v" . Chr(34) . ");`n    size_t end = inputString.find_last_not_of(" . Chr(34) . " " . Chr(92) . "t" . Chr(92) . "n" . Chr(92) . "r" . Chr(92) . "f" . Chr(92) . "v" . Chr(34) . ");`n`n    return (start == std::string::npos) ? " . Chr(34) . "" . Chr(34) . " : inputString.substr(start, end - start + 1);`n}`n"
 }
 
 if (InStr(cppCode, "StrReplace(")) or (InStr(cppCode, "StrReplace ("))
 {
-uperCode := uperCode . "`n// Function to replace all occurrences of a substring with another substring`nstd::string StrReplace(const std::string &originalString, const std::string &find, const std::string &replaceWith) {`n    std::string result = originalString;`n    size_t pos = 0;`n`n    while ((pos = result.find(find, pos)) != std::string::npos) {`n        result.replace(pos, find.length(), replaceWith);`n        pos += replaceWith.length();`n    }`n`n    return result;`n}`n"
+
+uperCodeLibs .= "`n#include <string>`n"
+
+uperCode := uperCode . "`nstd::string StrReplace(const std::string &originalString, const std::string &find, const std::string &replaceWith) {`n    std::string result = originalString;`n    size_t pos = 0;`n`n    while ((pos = result.find(find, pos)) != std::string::npos) {`n        result.replace(pos, find.length(), replaceWith);`n        pos += replaceWith.length();`n    }`n`n    return result;`n}`n"
 }
 
 if (InStr(cppCode, "StringTrimLeft(")) or (InStr(cppCode, "StringTrimLeft ("))
 {
-uperCode := uperCode . "`n// Function to trim characters from the left of the string`nstd::string StringTrimLeft(const std::string &input, int numChars) {`n    return (numChars <= input.length()) ? input.substr(numChars) : input;`n}`n"
+
+uperCodeLibs .= "`n#include <string>`n"
+
+uperCode := uperCode . "`nstd::string StringTrimLeft(const std::string &input, int numChars) {`n    return (numChars <= input.length()) ? input.substr(numChars) : input;`n}`n"
 }
 
 if (InStr(cppCode, "StringTrimRight(")) or (InStr(cppCode, "StringTrimRight ("))
 {
-uperCode := uperCode . "`n// Function to trim characters from the right of the string`nstd::string StringTrimRight(const std::string &input, int numChars) {`n    return (numChars <= input.length()) ? input.substr(0, input.length() - numChars) : input;`n}`n"
+
+uperCodeLibs .= "`n#include <string>`n"
+
+uperCode := uperCode . "`nstd::string StringTrimRight(const std::string &input, int numChars) {`n    return (numChars <= input.length()) ? input.substr(0, input.length() - numChars) : input;`n}`n"
 }
 
 if (InStr(cppCode, "StrLower(")) or (InStr(cppCode, "StrLower ("))
 {
-uperCode := uperCode . "`n// Function to convert a string to lowercase`nstd::string StrLower(const std::string &string) {`n    std::string result = string;`n    std::transform(result.begin(), result.end(), result.begin(), ::tolower);`n    return result;`n}`n"
+
+uperCodeLibs .= "`n#include <algorithm>`n#include <cctype>`n#include <string>`n"
+
+uperCode := uperCode . "`nstd::string StrLower(const std::string &string) {`n    std::string result = string;`n    std::transform(result.begin(), result.end(), result.begin(), ::tolower);`n    return result;`n}`n"
 }
 
 if (InStr(cppCode, "RegExReplace(")) or (InStr(cppCode, "RegExReplace ("))
 {
-uperCode := uperCode . "`n// Function to perform a regex replacement`nstd::string RegExReplace(const std::string &inputStr, const std::string &regexPattern, const std::string &replacement) {`n    std::regex regex(regexPattern);`n    return std::regex_replace(inputStr, regex, replacement);`n}`n"
+
+uperCodeLibs .= "`n#include <regex>`n#include <string>`n"
+
+uperCode := uperCode . "`nstd::string RegExReplace(const std::string &inputStr, const std::string &regexPattern, const std::string &replacement) {`n    std::regex regex(regexPattern);`n    return std::regex_replace(inputStr, regex, replacement);`n}`n"
 }
+
+
 
 if (InStr(cppCode, "StrSplit(")) or (InStr(cppCode, "StrSplit ("))
 {
-uperCode := uperCode . "`n// Function to split a string by a delimiter and return the nth part`nstd::string StrSplit(const std::string &inputStr, const std::string &delimiter, int num) {`n    size_t start = 0, end = 0, count = 0;`n`n    while ((end = inputStr.find(delimiter, start)) != std::string::npos) {`n        if (++count == num) {`n            return inputStr.substr(start, end - start);`n        }`n        start = end + delimiter.length();`n    }`n`n    if (count + 1 == num) {`n        return inputStr.substr(start);`n    }`n`n    return " . Chr(34) . "" . Chr(34) . ";`n}`n"
+
+uperCodeLibs .= "`n#include <string>`n"
+
+uperCode := uperCode . "`nstd::string StrSplit(const std::string &inputStr, const std::string &delimiter, int num) {`n    size_t start = 0, end = 0, count = 0;`n`n    while ((end = inputStr.find(delimiter, start)) != std::string::npos) {`n        if (++count == num) {`n            return inputStr.substr(start, end - start);`n        }`n        start = end + delimiter.length();`n    }`n`n    if (count + 1 == num) {`n        return inputStr.substr(start);`n    }`n`n    return " . Chr(34) . "" . Chr(34) . ";`n}`n"
 }
 
 if (InStr(cppCode, "Chr(")) or (InStr(cppCode, "Chr ("))
 {
-uperCode := uperCode . "`n// Function to convert a number to a character`nstd::string Chr(int number) {`n    return (number >= 0 && number <= 0x10FFFF) ? std::string(1, static_cast<char>(number)) : " . Chr(34) . "" . Chr(34) . ";`n}`n"
+
+uperCodeLibs .= "`n#include <string>`n"
+
+uperCode := uperCode . "`nstd::string Chr(int number) {`n    return (number >= 0 && number <= 0x10FFFF) ? std::string(1, static_cast<char>(number)) : " . Chr(34) . "" . Chr(34) . ";`n}`n`n"
 }
 
 if (InStr(cppCode, "Mod(")) or (InStr(cppCode, "Mod ("))
 {
-uperCode := uperCode . "`n// Custom Mod function`nint Mod(int dividend, int divisor) {`n    return dividend % divisor;`n}`n"
+
+uperCodeLibs .= "`n#include <string>`n"
+
+uperCode := uperCode . "`nint Mod(int dividend, int divisor) {`n    return dividend % divisor;`n}`n"
 }
 
 if (InStr(cppCode, "Floor(")) or (InStr(cppCode, "Floor ("))
 {
+
+uperCodeLibs .= "`n#include <cmath>`n#include <limits>`n"
+
 uperCode := uperCode . "`ndouble Floor(double num) {`n    if (std::isnan(num)) {`n        return std::numeric_limits<double>::quiet_NaN();`n    }`n    return std::floor(num);`n}`n"
 }
 
-
-if (InStr(cppCode, "A_TickCount(")) or (InStr(cppCode, "A_TickCount ("))
+if (InStr(cppCode, "getDataFromJSON(")) or (InStr(cppCode, "getDataFromJSON ("))
 {
-uperCode := uperCode . "`nauto start_timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();`n`n// Function to calculate tick count in milliseconds`nstd::string A_TickCount() {`n    auto current_timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();`n    return std::to_string(current_timestamp - start_timestamp);`n}`n"
+
+uperCodeLibs .= "`n#include <string>`n#include <vector>`n#include <map>`n#include <sstream>`n#include <iomanip>`n#include <stdexcept>`n#include <cctype>`n#include <chrono>`n"
+
+uperCode := uperCode . "`nstd::string trim(const std::string& str) {`n    auto start = str.begin();`n    while (start != str.end() && std::isspace(*start)) {`n        start++;`n    }`n    auto end = str.end();`n    do {`n        end--;`n    } while (std::distance(start, end) > 0 && std::isspace(*end));`n    return std::string(start, end + 1);`n}`n`nclass JSONValue {`npublic:`n    enum Type { Null, Boolean, Number, String, Array, Object };`n`n    JSONValue() : type(Null) {}`n    JSONValue(bool b) : type(Boolean), boolean_value(b) {}`n    JSONValue(double n) : type(Number), number_value(n) {}`n    JSONValue(const std::string& s) : type(String), string_value(s) {}`n    JSONValue(const std::vector<JSONValue>& a) : type(Array), array_value(a) {}`n    JSONValue(const std::map<std::string, JSONValue>& o) : type(Object), object_value(o) {}`n`n    Type getType() const { return type; }`n    bool isNull() const { return type == Null; }`n    bool isBoolean() const { return type == Boolean; }`n    bool isNumber() const { return type == Number; }`n    bool isString() const { return type == String; }`n    bool isArray() const { return type == Array; }`n    bool isObject() const { return type == Object; }`n`n    bool asBoolean() const { return boolean_value; }`n    double asNumber() const { return number_value; }`n    const std::string& asString() const { return string_value; }`n    const std::vector<JSONValue>& asArray() const { return array_value; }`n    const std::map<std::string, JSONValue>& asObject() const { return object_value; }`n`nprivate:`n    Type type;`n    bool boolean_value;`n    double number_value;`n    std::string string_value;`n    std::vector<JSONValue> array_value;`n    std::map<std::string, JSONValue> object_value;`n};`n`nclass JSONParser {`npublic:`n    static JSONValue parse(const std::string& json) {`n        size_t index = 0;`n        return parseValue(json, index);`n    }`n`nprivate:`n    static JSONValue parseValue(const std::string& json, size_t& index) {`n        skipWhitespace(json, index);`n        char c = json[index];`n        if (c == '{') {`n            return parseObject(json, index);`n        } else if (c == '[') {`n            return parseArray(json, index);`n        } else if (c == '" . Chr(34) . "') {`n            return parseString(json, index);`n        } else if (std::isdigit(c) || c == '-') {`n            return parseNumber(json, index);`n        } else if (c == 't' || c == 'f') {`n            return parseBoolean(json, index);`n        } else if (c == 'n') {`n            return parseNull(json, index);`n        }`n        throw std::runtime_error(" . Chr(34) . "Invalid JSON" . Chr(34) . ");`n    }`n`n    static JSONValue parseObject(const std::string& json, size_t& index) {`n        std::map<std::string, JSONValue> object;`n        index++; // Skip '{'`n        skipWhitespace(json, index);`n        if (json[index] == '}') {`n            index++;`n            return JSONValue(object);`n        }`n        while (true) {`n            std::string key = parseString(json, index).asString();`n            skipWhitespace(json, index);`n            if (json[index] != ':') throw std::runtime_error(" . Chr(34) . "Expected ':'" . Chr(34) . ");`n            index++;`n            JSONValue value = parseValue(json, index);`n            object[key] = value;`n            skipWhitespace(json, index);`n            if (json[index] == '}') {`n                index++;`n                return JSONValue(object);`n            }`n            if (json[index] != ',') throw std::runtime_error(" . Chr(34) . "Expected ',' or '}'" . Chr(34) . ");`n            index++;`n            skipWhitespace(json, index);`n        }`n    }`n`n    static JSONValue parseArray(const std::string& json, size_t& index) {`n        std::vector<JSONValue> array;`n        index++; // Skip '['`n        skipWhitespace(json, index);`n        if (json[index] == ']') {`n            index++;`n            return JSONValue(array);`n        }`n        while (true) {`n            array.push_back(parseValue(json, index));`n            skipWhitespace(json, index);`n            if (json[index] == ']') {`n                index++;`n                return JSONValue(array);`n            }`n            if (json[index] != ',') throw std::runtime_error(" . Chr(34) . "Expected ',' or ']'" . Chr(34) . ");`n            index++;`n            skipWhitespace(json, index);`n        }`n    }`n`n    static JSONValue parseString(const std::string& json, size_t& index) {`n        index++; // Skip opening quote`n        std::string result;`n        while (json[index] != '" . Chr(34) . "') {`n            if (json[index] == '" . Chr(92) . "" . Chr(92) . "') {`n                index++;`n                switch (json[index]) {`n                    case '" . Chr(34) . "': result += '" . Chr(34) . "'; break;`n                    case '" . Chr(92) . "" . Chr(92) . "': result += '" . Chr(92) . "" . Chr(92) . "'; break;`n                    case '/': result += '/'; break;`n                    case 'b': result += '" . Chr(92) . "b'; break;`n                    case 'f': result += '" . Chr(92) . "f'; break;`n                    case 'n': result += '" . Chr(92) . "n'; break;`n                    case 'r': result += '" . Chr(92) . "r'; break;`n                    case 't': result += '" . Chr(92) . "t'; break;`n                    default: throw std::runtime_error(" . Chr(34) . "Invalid escape sequence" . Chr(34) . ");`n                }`n            } else {`n                result += json[index];`n            }`n            index++;`n        }`n        index++; // Skip closing quote`n        return JSONValue(result);`n    }`n`n    static JSONValue parseNumber(const std::string& json, size_t& index) {`n        size_t start = index;`n        while (std::isdigit(json[index]) || json[index] == '-' || json[index] == '.' || json[index] == 'e' || json[index] == 'E') {`n            index++;`n        }`n        return JSONValue(std::stod(json.substr(start, index - start)));`n    }`n`n    static JSONValue parseBoolean(const std::string& json, size_t& index) {`n        if (json.substr(index, 4) == " . Chr(34) . "true" . Chr(34) . ") {`n            index += 4;`n            return JSONValue(true);`n        } else if (json.substr(index, 5) == " . Chr(34) . "false" . Chr(34) . ") {`n            index += 5;`n            return JSONValue(false);`n        }`n        throw std::runtime_error(" . Chr(34) . "Invalid boolean value" . Chr(34) . ");`n    }`n`n    static JSONValue parseNull(const std::string& json, size_t& index) {`n        if (json.substr(index, 4) == " . Chr(34) . "null" . Chr(34) . ") {`n            index += 4;`n            return JSONValue();`n        }`n        throw std::runtime_error(" . Chr(34) . "Invalid null value" . Chr(34) . ");`n    }`n`n    static void skipWhitespace(const std::string& json, size_t& index) {`n        while (index < json.length() && std::isspace(json[index])) {`n            index++;`n        }`n    }`n};`n`nstd::string getDataFromJSON(const std::string& json_data, const std::string& json_path) {`n    JSONValue root = JSONParser::parse(json_data);`n    std::istringstream path_stream(json_path);`n    std::string segment;`n    JSONValue current = root;`n`n    while (std::getline(path_stream, segment, '.')) {`n        segment = trim(segment);`n        `n        size_t bracket_pos = segment.find('[');`n        if (bracket_pos != std::string::npos) {`n            std::string key = segment.substr(0, bracket_pos);`n            size_t index = std::stoi(segment.substr(bracket_pos + 1, segment.find(']') - bracket_pos - 1));`n            `n            if (current.isObject() && current.asObject().find(key) != current.asObject().end()) {`n                current = current.asObject().at(key);`n                if (current.isArray() && index < current.asArray().size()) {`n                    current = current.asArray()[index];`n                } else {`n                    return " . Chr(34) . "Array index out of bounds" . Chr(34) . ";`n                }`n            } else {`n                return " . Chr(34) . "Key not found: " . Chr(34) . " + key;`n            }`n        } else if (current.isObject() && current.asObject().find(segment) != current.asObject().end()) {`n            current = current.asObject().at(segment);`n        } else {`n            return " . Chr(34) . "Key not found: " . Chr(34) . " + segment;`n        }`n    }`n`n    if (current.isString()) return current.asString();`n    if (current.isNumber()) {`n        double num = current.asNumber();`n        if (num == std::floor(num)) {`n            // It's an integer`n            return std::to_string(static_cast<long long>(num));`n        } else {`n            // It's a floating-point number`n            return std::to_string(num);`n        }`n    }`n    if (current.isBoolean()) return current.asBoolean() ? " . Chr(34) . "true" . Chr(34) . " : " . Chr(34) . "false" . Chr(34) . ";`n    if (current.isNull()) return " . Chr(34) . "null" . Chr(34) . ";`n    `n    return " . Chr(34) . "Unsupported value type" . Chr(34) . ";`n}`n"
+}
+
+if (InStr(cppCode, "GetParams(")) or (InStr(cppCode, "GetParams ("))
+{
+
+uperCodeLibs .= "`n#include <string>`n#include <vector>`n#include <filesystem>`n"
+
+uperCode := uperCode . "`n// Function to get command-line parameters`nstd::string GetParams() {`n    std::vector<std::string> params;`n    for (int i = 1; i < __argc; ++i) {`n        std::string arg = __argv[i];`n        if (std::filesystem::exists(arg)) {`n            arg = std::filesystem::absolute(arg).string();`n        }`n        params.push_back(arg);`n    }`n    std::string result;`n    for (const auto& param : params) {`n        result += param + " . Chr(34) . "" . Chr(92) . "n" . Chr(34) . ";`n    }`n    return result;`n}`n"
+}
+
+if (InStr(cppCode, "BuildInVars(")) or (InStr(cppCode, "BuildInVars ("))
+{
+
+uperCodeLibs .= "`n#include <iostream>`n#include <chrono>`n#include <ctime>`n#include <sstream>`n#include <iomanip>`n#include <string>`n#include <limits>`n"
+
+uperCode := uperCode . "`n// Store the start time as a global variable`nstd::chrono::time_point<std::chrono::steady_clock> programStartTime = std::chrono::steady_clock::now();`n`n// Function to get built-in variables`nstd::string BuildInVars(const std::string& varName) {`n    auto now = std::chrono::system_clock::now();`n    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);`n    std::tm* localTime = std::localtime(&currentTime);`n`n    std::ostringstream oss;`n`n    if (varName == " . Chr(34) . "A_TickCount" . Chr(34) . ") {`n        // Calculate milliseconds since program start`n        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - programStartTime).count();`n        if (duration > std::numeric_limits<int>::max()) {`n            // Handle overflow case`n            return " . Chr(34) . "Value too large" . Chr(34) . ";`n        } else {`n            return std::to_string(static_cast<int>(duration));`n        }`n    } else if (varName == " . Chr(34) . "A_Now" . Chr(34) . ") {`n        oss << std::put_time(localTime, " . Chr(34) . "%Y-%m-%d %H:%M:%S" . Chr(34) . ");`n    } else if (varName == " . Chr(34) . "A_YYYY" . Chr(34) . ") {`n        oss << std::put_time(localTime, " . Chr(34) . "%Y" . Chr(34) . ");`n    } else if (varName == " . Chr(34) . "A_MM" . Chr(34) . ") {`n        oss << std::put_time(localTime, " . Chr(34) . "%m" . Chr(34) . ");`n    } else if (varName == " . Chr(34) . "A_DD" . Chr(34) . ") {`n        oss << std::put_time(localTime, " . Chr(34) . "%d" . Chr(34) . ");`n    } else if (varName == " . Chr(34) . "A_MMMM" . Chr(34) . ") {`n        oss << std::put_time(localTime, " . Chr(34) . "%B" . Chr(34) . ");`n    } else if (varName == " . Chr(34) . "A_MMM" . Chr(34) . ") {`n        oss << std::put_time(localTime, " . Chr(34) . "%b" . Chr(34) . ");`n    } else if (varName == " . Chr(34) . "A_DDDD" . Chr(34) . ") {`n        oss << std::put_time(localTime, " . Chr(34) . "%A" . Chr(34) . ");`n    } else if (varName == " . Chr(34) . "A_DDD" . Chr(34) . ") {`n        oss << std::put_time(localTime, " . Chr(34) . "%a" . Chr(34) . ");`n    } else if (varName == " . Chr(34) . "A_Hour" . Chr(34) . ") {`n        oss << std::put_time(localTime, " . Chr(34) . "%H" . Chr(34) . ");`n    } else if (varName == " . Chr(34) . "A_Min" . Chr(34) . ") {`n        oss << std::put_time(localTime, " . Chr(34) . "%M" . Chr(34) . ");`n    } else if (varName == " . Chr(34) . "A_Sec" . Chr(34) . ") {`n        oss << std::put_time(localTime, " . Chr(34) . "%S" . Chr(34) . ");`n    } else if (varName == " . Chr(34) . "A_Space" . Chr(34) . ") {`n        return " . Chr(34) . " " . Chr(34) . ";`n    } else if (varName == " . Chr(34) . "A_Tab" . Chr(34) . ") {`n        return " . Chr(34) . "" . Chr(92) . "t" . Chr(34) . ";`n    } else {`n        return " . Chr(34) . "" . Chr(34) . ";`n    }`n    return oss.str();`n}`n"
+}
+
+if (InStr(cppCode, "RegExReplace(")) or (InStr(cppCode, "RegExReplace ("))
+{
+
+uperCodeLibs .= "`n#include <string>`n#include <regex>`n#include <iostream>`n"
+
+uperCode := uperCode . "`n// Function to perform regex replacement`nstd::string RegExReplace(const std::string& inputStr, const std::string& regexPattern, const std::string& replacement) {`n    std::regex re(regexPattern, std::regex_constants::ECMAScript | std::regex_constants::multiline);`n    return std::regex_replace(inputStr, re, replacement);`n}`n"
+}
+
+if (InStr(cppCode, "RunCMD(")) or (InStr(cppCode, "RunCMD ("))
+{
+
+uperCodeLibs .= "`n#include <string>`n#include <array>`n#include <memory>`n#include <stdexcept>`n#include <cstdio>`n"
+
+uperCode := uperCode . "`n// Function to run a system command`nstd::string RunCMD(const std::string& command) {`n    std::array<char, 128> buffer;`n    std::string result;`n#if defined(_WIN32)`n    std::unique_ptr<FILE, decltype(&_pclose)> pipe(_popen(command.c_str(), " . Chr(34) . "r" . Chr(34) . "), _pclose);`n#else`n    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command.c_str(), " . Chr(34) . "r" . Chr(34) . "), pclose);`n#endif`n    if (!pipe) {`n        throw std::runtime_error(" . Chr(34) . "popen() failed!" . Chr(34) . ");`n    }`n    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {`n        result += buffer.data();`n    }`n    return result;`n}`n"
+}
+
+if (InStr(cppCode, "RegExMatch(")) or (InStr(cppCode, "RegExMatch ("))
+{
+
+uperCodeLibs .= "`n#include <iostream>`n#include <string>`n#include <regex>`n"
+
+uperCode := uperCode . "`n// Function to perform regex matching and return the match position`nint RegExMatch(const std::string& haystack, const std::string& needleRegEx, std::string* outputVar = nullptr, int startingPos = 0) {`n    if (haystack.empty() || needleRegEx.empty()) {`n        return 0;`n    }`n`n    std::regex re(needleRegEx);`n    std::smatch match;`n`n    if (std::regex_search(haystack.begin() + startingPos, haystack.end(), match, re)) {`n        if (outputVar != nullptr) {`n            *outputVar = match.str(0);`n        }`n        return match.position(0) + 1; // To make it 1-based index`n    }`n`n    return 0;`n}`n"
+}
+
+
+if (InStr(cppCode, "ExitApp(")) or (InStr(cppCode, "ExitApp ("))
+{
+
+uperCodeLibs .= "`n#include <iostream>`n#include <cstdlib>`n"
+
+uperCode := uperCode . "`nvoid ExitApp() {`n    std::cout << " . Chr(34) . "Exiting application..." . Chr(34) . " << std::endl;`n    std::exit(0);`n}`n"
+}
+
+
+if (InStr(cppCode, "SetTimer(")) or (InStr(cppCode, "SetTimer ("))
+{
+
+uperCodeLibs .= "`n#include <iostream>`n#include <map>`n#include <functional>`n#include <chrono>`n#include <mutex>`n#include <string>`n#include <sstream>`n#include <atomic>`n#include <thread>`n"
+
+uperCode := uperCode . "`n// Structure to store timer information`nstruct TimerInfo {`n    std::function<void()> func;`n    int interval_ms;`n    bool active;`n    std::chrono::steady_clock::time_point last_execution;`n};`n`n// Maps to store the timers and their states`nstd::map<std::string, TimerInfo> timers;`nstd::mutex mtx; // Mutex for synchronizing access to shared data`nstd::atomic<bool> should_exit(false); // Flag to signal the application to exit`n`nvoid TimerManager() {`n    while (!should_exit) {`n        auto now = std::chrono::steady_clock::now();`n        {`n            std::lock_guard<std::mutex> lock(mtx);`n            bool any_active_timers = false;`n            for (auto& [name, timer] : timers) {`n                if (timer.active) {`n                    any_active_timers = true;`n                    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - timer.last_execution);`n                    if (elapsed.count() >= timer.interval_ms) {`n                        timer.func();`n                        timer.last_execution = now;`n                    }`n                }`n            }`n            if (!any_active_timers) {`n                should_exit = true;`n            }`n        }`n        std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Sleep for a short period to reduce CPU usage`n    }`n}`n`n// Global counter for unique timer names`nstatic int timer_counter = 0;`n`nvoid SetTimer(const std::function<void()>& func, const std::string& timeOrOnOff) {`n    std::lock_guard<std::mutex> lock(mtx); // Lock for safe access to shared data`n`n    // Create a unique identifier for the timer`n    std::string name = " . Chr(34) . "timer_" . Chr(34) . " + std::to_string(timer_counter++);`n`n    if (timeOrOnOff == " . Chr(34) . "On" . Chr(34) . ") {`n        timers[name] = {func, 10, true, std::chrono::steady_clock::now()};`n    } else if (timeOrOnOff == " . Chr(34) . "Off" . Chr(34) . ") {`n        // Find the timer with the matching function and turn it off`n        for (auto& [timer_name, timer] : timers) {`n            if (timer.func.target_type() == func.target_type() && timer.active) {`n                timer.active = false;`n                break;`n            }`n        }`n    } else {`n        try {`n            int interval_ms = std::stoi(timeOrOnOff);`n            timers[name] = {func, interval_ms, true, std::chrono::steady_clock::now()};`n        } catch (const std::invalid_argument&) {`n            std::cerr << " . Chr(34) . "Invalid interval value: " . Chr(34) . " << timeOrOnOff << std::endl;`n        }`n    }`n}`n"
+}
+
+if (InStr(cppCode, "getDataFromAPI(")) or (InStr(cppCode, "getDataFromAPI ("))
+{
+
+uperCodeLibs .= "`n#include <string>`n#include <array>`n#include <memory>`n#include <stdexcept>`n#include <cstdio>`n"
+
+uperCode := uperCode . "`n// Function to run a system command`nstd::string getDataFromAPIRunCMD(const std::string& command) {`n    std::array<char, 128> buffer;`n    std::string result;`n#if defined(_WIN32)`n    std::unique_ptr<FILE, decltype(&_pclose)> pipe(_popen(command.c_str(), " . Chr(34) . "r" . Chr(34) . "), _pclose);`n#else`n    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command.c_str(), " . Chr(34) . "r" . Chr(34) . "), pclose);`n#endif`n    if (!pipe) {`n        throw std::runtime_error(" . Chr(34) . "popen() failed!" . Chr(34) . ");`n    }`n    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {`n        result += buffer.data();`n    }`n    return result;`n}`n`n`n// Function to fetch data from API`nstd::string getDataFromAPI(const std::string& url) {`n    std::string command = " . Chr(34) . "curl -s " . Chr(34) . " + url;`n    return getDataFromAPIRunCMD(command);`n}`n"
+}
+
+if (InStr(cppCode, "SortLikeAHK(")) or (InStr(cppCode, "SortLikeAHK ("))
+{
+
+uperCodeLibs .= "`n#include <string>`n#include <vector>`n#include <algorithm>`n#include <sstream>`n#include <unordered_set>`n#include <cctype>`n"
+
+uperCode := uperCode . "`n// Helper function to trim whitespace from both ends of a string`nstd::string trim(const std::string& str) {`n    const std::string whitespace = " . Chr(34) . " " . Chr(92) . "t" . Chr(92) . "n" . Chr(92) . "r" . Chr(92) . "f" . Chr(92) . "v" . Chr(34) . ";`n    size_t start = str.find_first_not_of(whitespace);`n    if (start == std::string::npos) return " . Chr(34) . "" . Chr(34) . ";`n    size_t end = str.find_last_not_of(whitespace);`n    return str.substr(start, end - start + 1);`n}`n`n// Helper function to convert string to lowercase`nstd::string toLower(const std::string& str) {`n    std::string lowerStr = str;`n    std::transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(), ::tolower);`n    return lowerStr;`n}`n`n// Function to sort case-insensitively but ensure lowercase items come last`nbool customSortCompare(const std::string& a, const std::string& b) {`n    std::string lowerA = toLower(a);`n    std::string lowerB = toLower(b);`n    if (lowerA == lowerB) {`n        // If case-insensitive equivalent, ensure lowercase items come last`n        if (std::islower(a[0]) && std::isupper(b[0])) {`n            return false; // a should come after b`n        } else if (std::isupper(a[0]) && std::islower(b[0])) {`n            return true; // a should come before b`n        }`n        return a < b; // Otherwise, sort lexicographically`n    }`n    return lowerA < lowerB;`n}`n`n// Function to remove exact duplicates (case-sensitive)`nstd::vector<std::string> removeExactDuplicates(const std::vector<std::string>& items) {`n    std::unordered_set<std::string> seen;`n    std::vector<std::string> uniqueItems;`n    for (const auto& item : items) {`n        if (seen.find(item) == seen.end()) {`n            seen.insert(item);`n            uniqueItems.push_back(item);`n        }`n    }`n    return uniqueItems;`n}`n`n// Main sorting function`nstd::string SortLikeAHK(const std::string& input, const std::string& options) {`n    std::string delimiter = " . Chr(34) . "" . Chr(92) . "n" . Chr(34) . ";`n    bool caseInsensitive = options.find('C') != std::string::npos;`n    bool unique = options.find('U') != std::string::npos;`n    bool reverse = options.find('R') != std::string::npos;`n    bool random = options.find(" . Chr(34) . "Random" . Chr(34) . ") != std::string::npos;`n    bool numeric = options.find('N') != std::string::npos;`n`n    // Custom delimiter`n    if (options.find('D') != std::string::npos) {`n        size_t delimiterPos = options.find('D') + 1;`n        if (delimiterPos < options.size()) {`n            delimiter = options.substr(delimiterPos, 1);`n        }`n    }`n`n    // Split input by delimiter`n    std::vector<std::string> items;`n    std::stringstream ss(input);`n    std::string item;`n    while (std::getline(ss, item, delimiter[0])) {`n        item = trim(item);  // Trim whitespace from each item`n        if (!item.empty()) {`n            items.push_back(item);`n        }`n    }`n`n    // Sort items`n    if (numeric) {`n        std::sort(items.begin(), items.end(), [](const std::string& a, const std::string& b) {`n            return std::stoi(a) < std::stoi(b);`n        });`n    } else {`n        std::sort(items.begin(), items.end(), customSortCompare);`n    }`n`n    // Remove exact duplicates if needed`n    if (unique) {`n        items = removeExactDuplicates(items);`n    }`n`n    // Apply reverse order if needed`n    if (reverse) {`n        std::reverse(items.begin(), items.end());`n    }`n`n    // Separate uppercase and lowercase items`n    std::vector<std::string> uppercaseItems;`n    std::vector<std::string> lowercaseItems;`n    `n    for (const auto& item : items) {`n        if (std::isupper(item[0])) {`n            uppercaseItems.push_back(item);`n        } else {`n            lowercaseItems.push_back(item);`n        }`n    }`n`n    // Combine sorted uppercase items with sorted lowercase items`n    std::string result;`n    for (const auto& item : uppercaseItems) {`n        result += item;`n        result += delimiter;`n    }`n    for (const auto& item : lowercaseItems) {`n        result += item;`n        if (&item != &lowercaseItems.back()) {`n            result += delimiter;`n        }`n    }`n`n    // Remove trailing delimiter if necessary`n    if (!result.empty() && result.back() == delimiter[0]) {`n        result.pop_back();`n    }`n`n    return result;`n}`n"
 }
 
 
 
-
+Sort, uperCodeLibs, U
 
 
 
 downCode := "`nreturn 0;`n}"
 
-cppCode := uperCode . upCode . cppCode . downCode
+cppCode := uperCodeLibs . "`n" . uperCode . "`n" . upCode . cppCode . downCode
 
 cppCode := StrReplace(cppCode, "std::string()", "")
 

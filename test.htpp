@@ -1,140 +1,37 @@
-func str removeRepeatingWords(str text)
-{
-str out
+; declare the variable MyVar as a string
+str MyVar
 
-arr words := arrSplit(text, " ")
+; Example 1: Sort alphabetically (default) with linefeed delimiter
+MyVar := "apple`norange`nbanana`ngrape`napple`nbanana"
+Sort, MyVar
+MsgBox, % "Sorted Alphabetically:`n" . MyVar
 
-arr words .= " "
+; Example 2: Sort alphabetically case-insensitively with removal of duplicates
+MyVar := "Apple`nOrange`nbanana`nGRAPE`nApple`nBanana"
+Sort, MyVar, CU
+MsgBox, % "Sorted Case-Insensitive with Unique:`n" . MyVar
 
-Loop, Parse, text, " "
-{
+; Example 3: Sort numerically
+MyVar := "10`n2`n30`n4`n25`n1"
+Sort, MyVar, N
+MsgBox, % "Sorted Numerically:`n" . MyVar
 
-if (A_LoopField != words[A_Index + 1])
-{
-out .= A_LoopField . " "
-}
-}
-StringTrimRight, out, out, 1
+; Example 4: Sort in reverse alphabetical order
+MyVar := "apple`norange`nbanana`ngrape"
+Sort, MyVar, R
+MsgBox, % "Sorted Reverse Alphabetically:`n" . MyVar
 
+; Example 5: Sort alphabetically with a custom delimiter (comma)
+MyVar := "apple,orange,banana,grape"
+Sort, MyVar, D,
+MsgBox, % "Sorted with Custom Delimiter (comma):`n" . MyVar
 
-return out
-}
-main:
+; Example 6: Sort randomly and remove duplicates case-insensitively
+MyVar := "apple`norange`nbanana`norange`napple`ngrape"
+Sort, MyVar, Random
+MsgBox, % "Sorted Randomly with Unique:`n" . MyVar
 
-str text := "hello hello hello man man whats up up today today how are you you doing"
-MsgBox, % removeRepeatingWords(text)
-
-; how to use arrays in HT++
-
-; declare the array
-arr MyArray123
-
-; add an element to the array
-arr MyArray123 .= "6"
-
-; add an element to the array
-arr MyArray123 .= "6"
-
-; concatenate an element to the second element of the array array
-MyArray123[2] .= "9"
-
-; add an element to the array
-arr MyArray123 .= "6"
-
-; reassign an element in the array
-MyArray123[3] := "7"
-
-MsgBox, % "the number of elements in the array MyArray123 is: " . MyArray123[0]
-MsgBox, Here are all the elements in the array MyArray123
-MsgBox, % MyArray123
-
-; we can also do this
-
-; declare a new array
-str var123Text := "some text whit spacses"
-
-; split the string var123Text into an array using space as a delimiter
-arr MyArray123456789 := arrSplit(var123Text, " ")
-
-MsgBox, % "the number of elements in the array MyArray123456789 is: " . MyArray123456789[0]
-MsgBox, Here are all the elements in the array MyArray123456789
-MsgBox, % MyArray123456789
-
-
-
-str var1 := "aersdgfw esrdtg wesvn"
-
-Loop, Parse, var1, " "
-{
-
-MsgBox, % A_LoopField
-}
-
-int num := 5
-char vasdf := "s"
-cat var%num% := [var] + "10"
-var1 := "aesdfgdsawsdsfsagss"
-[var1] := "ssdvdvds"
-
-int va2r
-int var13 := 69
-va2r := var13
-
-; can only do one letter char
-char var5 := "s"
-int var := INT(var%num%)
-
-int sadsfdx := 5
-sadsfdx++
-
-[wasedsa] := "5"
-int sads := INT([wasedsa])
-
-[num] := "5"
-cat var%[num]% := "hello"
-MsgBox, % [var5]
-
-
-str filepath := "testText.txt"
-str text1234 := "dzsfddz jskd jd cakjs a jsv`nsal sajvas"
-FileAppend, %text1234%, %filepath%
-FileRead, text12346, testText.txt
-FileDelete, %filepath%
-
-
-Loop
-{
-if (A_Index = 5)
-{
-break
-}
-else
-{
-MsgBox, % A_Index
-}
-}
-
-int numLoop := 10
-Loop, % numLoop
-{
-if (A_Index = 5)
-{
-break
-}
-else
-{
-MsgBox, % A_Index
-}
-}
-
-Loop, 5
-{
-if (A_Index = 5)
-{
-break
-}
-else
-{
-MsgBox, % A_Index
-}
-}
+; Example 7: Sort numerically in reverse order with case-sensitive removal of duplicates
+MyVar := "10`n2`n30`n2`n25`n1"
+Sort, MyVar, NRUC
+MsgBox, % "Sorted Numerically in Reverse with Unique and Case-Sensitive:`n" . MyVar
