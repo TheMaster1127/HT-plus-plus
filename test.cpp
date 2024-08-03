@@ -1,12 +1,68 @@
-#include <array>
 #include <cstdint>
-#include <cstdio>
+#include <cstdlib>
+#include <ctime>
 #include <iostream>
-#include <memory>
+#include <random>
 #include <sstream>
-#include <stdexcept>
 #include <string>
 #include <type_traits>
+
+// Convert std::string to int
+int INT(const std::string& str) {
+    std::istringstream iss(str);
+    int value;
+    iss >> value;
+    return value;
+}
+
+// Convert various types to std::string
+std::string STR(int value) {
+    return std::to_string(value);
+}
+
+// Convert various types to std::string
+std::string STR(long long value) {
+    return std::to_string(value);
+}
+
+std::string STR(float value) {
+    return std::to_string(value);
+}
+
+std::string STR(double value) {
+    return std::to_string(value);
+}
+
+std::string STR(size_t value) {
+    return std::to_string(value);
+}
+
+std::string STR(bool value) {
+    return value ? "1" : "0";
+}
+
+int Random(int min, int max) {
+    // Create a random device to seed the generator
+    std::random_device rd;
+    
+    // Create a generator seeded with the random device
+    std::mt19937 gen(rd());
+    
+    // Define a distribution within the specified range
+    std::uniform_int_distribution<> dis(min, max);
+    
+    // Generate and return a random number within the specified range
+    return dis(gen);
+}
+
+// Function to get input from the user, similar to Python's input() function
+std::string input(const std::string& prompt) {
+    std::string userInput;
+    std::cout << prompt; // Display the prompt to the user
+    std::getline(std::cin, userInput); // Get the entire line of input
+    return userInput;
+}
+
 
 // Print function that converts all types to string if needed
 template <typename T>
@@ -48,27 +104,29 @@ void print(const T& value) {
     }
 }
 
-// Function to run a system command
-std::string RunCMD(const std::string& command) {
-    std::array<char, 128> buffer;
-    std::string result;
-#if defined(_WIN32)
-    std::unique_ptr<FILE, decltype(&_pclose)> pipe(_popen(command.c_str(), "r"), _pclose);
-#else
-    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command.c_str(), "r"), pclose);
-#endif
-    if (!pipe) {
-        throw std::runtime_error("popen() failed!");
-    }
-    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
-        result += buffer.data();
-    }
-    return result;
-}
-
 
 int main(int argc, char* argv[])
 {
-print(RunCMD ( std::string("echo waedsdf") ) );
+
+int ran = Random(1, 100);
+std::string outUser;
+for (int A_Index1 = 1;; A_Index1++)
+{
+outUser = input ( std::string("Eneter a number bettwen 1-100: ") ) ;
+if (INT (outUser) > ran) 
+{
+print(std::string("Try lower!"));
+}
+else if (INT (outUser) < ran) 
+{
+print(std::string("Try higher!"));
+}
+else
+{
+print(std::string("You win in ") + STR ( A_Index1 ) + std::string(" tries!"));
+break;
+}
+}
+
 return 0;
 }
