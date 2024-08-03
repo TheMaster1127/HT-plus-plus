@@ -2915,9 +2915,9 @@ uperCode := uperCode . "`n// Function to perform regex replacement`nstd::string 
 if (InStr(cppCode, "RunCMD(")) or (InStr(cppCode, "RunCMD ("))
 {
 
-uperCodeLibs .= "`n#include <string>`n#include <array>`n#include <memory>`n#include <stdexcept>`n#include <cstdio>`n"
+uperCodeLibs .= "`n#include <iostream>`n#include <stdexcept>`n#include <string>`n#include <array>`n#include <memory>`n#include <cstdio>`n"
 
-uperCode := uperCode . "`n// Function to run a system command`nstd::string RunCMD(const std::string& command) {`n    std::array<char, 128> buffer;`n    std::string result;`n#if defined(_WIN32)`n    std::unique_ptr<FILE, decltype(&_pclose)> pipe(_popen(command.c_str(), " . Chr(34) . "r" . Chr(34) . "), _pclose);`n#else`n    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command.c_str(), " . Chr(34) . "r" . Chr(34) . "), pclose);`n#endif`n    if (!pipe) {`n        throw std::runtime_error(" . Chr(34) . "popen() failed!" . Chr(34) . ");`n    }`n    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {`n        result += buffer.data();`n    }`n    return result;`n}`n"
+uperCode := uperCode . "`n// Define a type alias for the deleter`nusing Deleter = void (*)(FILE*);`n`n// Function to run a system command`nstd::string RunCMD(const std::string& command) {`n    std::array<char, 128> buffer;`n    std::string result;`n#if defined(_WIN32)`n    std::unique_ptr<FILE, Deleter> pipe(_popen(command.c_str(), " . Chr(34) . "r" . Chr(34) . "), _pclose);`n#else`n    std::unique_ptr<FILE, Deleter> pipe(popen(command.c_str(), " . Chr(34) . "r" . Chr(34) . "), pclose);`n#endif`n    if (!pipe) {`n        throw std::runtime_error(" . Chr(34) . "popen() failed!" . Chr(34) . ");`n    }`n    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {`n        result += buffer.data();`n    }`n    return result;`n}`n`nint main(int argc, char* argv[]) {`n    try {`n        std::string output = RunCMD(" . Chr(34) . "echo foo" . Chr(34) . ");`n        std::cout << output;`n    } catch (const std::exception& e) {`n        std::cerr << " . Chr(34) . "Error: " . Chr(34) . " << e.what() << std::endl;`n    }`n    return 0;`n}`n"
 }
 
 if (InStr(cppCode, "RegExMatch(")) or (InStr(cppCode, "RegExMatch ("))
