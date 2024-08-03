@@ -335,9 +335,10 @@ if (A_Index = 1)
 {
 MsgBox, % A_LoopField
 filePathOfCode := A_LoopField
+;MsgBox, % filePathOfCode
 ;code := FileRead(filePathOfCode)
 FileRead, code, %filePathOfCode%
-
+;MsgBox, % code
 }
 if (A_Index = 2)
 {
@@ -421,7 +422,7 @@ theIdNumOfThe34theVar%A_Index% .= Chr(34)
 haveWeEverUsedArrays := 0
 allVarsChars := ""
 allVarsInts := ""
-funcNames := "std::string|INT|STR|FLOAT|arrSplit|LoopParseFunc|InStr|Random|Sleep|input|print|FileRead|StrLower|FileAppend|FileDelete|StrLen|Asc|Abs|ACos|ATan|Ceil|Cos|Exp|Ln|Log|Round|Sin|Sqrt|Tan|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|StrSplit|Chr|Mod|Floor|getDataFromJSON|GetParams|BuildInVars|RegExReplace|RegExMatch|RunCMD|SetTimer|ExitApp|getDataFromAPI|SortLikeAHK"
+funcNames := "std::string|INT|STR|FLOAT|arrSplit|LoopParseFunc|InStr|Random|Sleep|input|print|FileRead|StrLower|FileAppend|FileDelete|StrLen|Asc|Abs|ACos|ASin|ATan|Ceil|Cos|Exp|Ln|Log|Round|Sin|Sqrt|Tan|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|StrSplit|Chr|Mod|Floor|getDataFromJSON|GetParams|BuildInVars|RegExReplace|RegExMatch|RunCMD|SetTimer|ExitApp|getDataFromAPI|SortLikeAHK"
 
 ;"std::string|INT|STR|FLOAT|arrSplit|LoopParseFunc|InStr|Random|Sleep|input|print|FileRead|FileAppend|FileDelete|StrLen|Asc|Abs|ACos|ATan|Ceil|Cos|Exp|Ln|Log|Round|Sin|Sqrt|Tan|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|RegExReplace|StrSplit|Chr|Mod|Floor|getDataFromJSON|GetParams|BuildInVars|RegExReplace|RegExMatch|RunCMD|SetTimer|getDataFromAPI|SortLikeAHK"
 
@@ -2616,6 +2617,8 @@ if (InStr(cppCode, "Random(")) or (InStr(cppCode, "Random ("))
 uperCodeLibs .= "`n#include <cstdlib>`n#include <ctime>`n#include <random>`n"
 
 uperCode := uperCode . "`nint Random(int min, int max) {`n    // Create a random device to seed the generator`n    std::random_device rd;`n    `n    // Create a generator seeded with the random device`n    std::mt19937 gen(rd());`n    `n    // Define a distribution within the specified range`n    std::uniform_int_distribution<> dis(min, max);`n    `n    // Generate and return a random number within the specified range`n    return dis(gen);`n}`n"
+}
+
 
 if (InStr(cppCode, "Sleep(")) or (InStr(cppCode, "Sleep ("))
 {
@@ -2704,6 +2707,17 @@ uperCodeLibs .= "`n#include <cmath>`n"
 
 uperCode := uperCode . "`ndouble ACos(double value) {`n    return std::acos(value);`n}`n"
 }
+
+
+if (InStr(cppCode, "ASin(")) or (InStr(cppCode, "ASin ("))
+{
+
+uperCodeLibs .= "`n#include <cmath>`n"
+
+uperCode := uperCode . "`n// Define your custom ASin function`ndouble ASin(double value) {`n    // Ensure the value is within the valid range for asin`n    if (value < -1.0 || value > 1.0) {`n        std::cerr << " . Chr(34) . "Error: Value out of range for arcsine function." . Chr(34) . " << std::endl;`n        return NAN;  // Return 'Not-a-Number' to indicate an error`n    }`n`n    return asin(value);  // Call the standard asin function`n}`n"
+}
+
+
 
 if (InStr(cppCode, "ATan(")) or (InStr(cppCode, "ATan ("))
 {
@@ -2951,7 +2965,6 @@ uperCode := uperCode . "`n// Helper function to trim whitespace from both ends o
 
 
 Sort, uperCodeLibs, U
-
 
 
 downCode := "`nreturn 0;`n}"

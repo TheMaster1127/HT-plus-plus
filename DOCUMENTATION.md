@@ -1563,6 +1563,8 @@ Variables play a crucial role in storing and manipulating data within HeavenToC+
 
 ### Arrays <a id="arrays"></a>
 
+[Go back](#features)
+
 In HT++ arrays are versatile data structures that can store multiple values under a single name. Arrays allow you to group related data together and perform operations on that data efficiently. Here’s what you need to know about arrays in HT++:
 
 - **1-Indexed Arrays**: In HT++, arrays are 1-indexed, meaning the first element is accessed using index `1`. The 0th element is used to store the number of elements in the array by default.
@@ -2573,7 +2575,7 @@ result := INT(value)
 ```ahk
 str numberAsString := "42"
 int intValue := INT(numberAsString)
-MsgBox, % "The integer value of " . STR(numberAsString) . " is " . STR(intValue)
+MsgBox, % "The integer value of " . numberAsString . " is " . STR(intValue)
 ```
 
 #### Explanation:

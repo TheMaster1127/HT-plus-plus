@@ -1,18 +1,13 @@
-; Generate a random number between 1 and 100
-Random, randomNumber, 1, 100
-
-; Display the generated random number
-MsgBox, % "Random number: " . STR(randomNumber)
-
-
-; test
-; test
-; test
-; test
-; test
-; test
-; test
-; test
-; test
-; test
-; test
+MsgBox, % "Current local time: " . A_Now
+MsgBox, % "Current year: " . A_YYYY
+MsgBox, % "Current month: " . A_MM
+MsgBox, % "Current day: " . A_DD
+MsgBox, % "Full name of current month: " . A_MMMM
+MsgBox, % "Abbreviated name of current month: " . A_MMM
+MsgBox, % "Full name of current day: " . A_DDDD
+MsgBox, % "Abbreviated name of current day: " . A_DDD
+MsgBox, % "Current hour: " . A_Hour
+MsgBox, % "Current minute: " . A_Min
+MsgBox, % "Current second: " . A_Sec
+MsgBox, % "Hello" . A_Space . "man"
+MsgBox, % "|" . A_Tab . "Hello man|"

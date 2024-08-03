@@ -1,51 +1,12 @@
+#include <chrono>
 #include <cstdint>
-#include <cstdlib>
 #include <ctime>
+#include <iomanip>
 #include <iostream>
-#include <random>
+#include <limits>
 #include <sstream>
 #include <string>
 #include <type_traits>
-
-// Convert various types to std::string
-std::string STR(int value) {
-    return std::to_string(value);
-}
-
-// Convert various types to std::string
-std::string STR(long long value) {
-    return std::to_string(value);
-}
-
-std::string STR(float value) {
-    return std::to_string(value);
-}
-
-std::string STR(double value) {
-    return std::to_string(value);
-}
-
-std::string STR(size_t value) {
-    return std::to_string(value);
-}
-
-std::string STR(bool value) {
-    return value ? "1" : "0";
-}
-
-int Random(int min, int max) {
-    // Create a random device to seed the generator
-    std::random_device rd;
-
-    // Create a generator seeded with the random device
-    std::mt19937 gen(rd());
-
-    // Define a distribution within the specified range
-    std::uniform_int_distribution<> dis(min, max);
-
-    // Generate and return a random number within the specified range
-    return dis(gen);
-}
 
 // Print function that converts all types to string if needed
 template <typename T>
@@ -62,7 +23,7 @@ void print(const T& value) {
         std::cout << std::to_string(value) << std::endl;
     } else if constexpr (std::is_same_v<T, bool>) {
         std::cout << (value ? "1" : "0") << std::endl;
-    }
+    } 
     #ifdef OneIndexedArray_DEFINED
     else if constexpr (std::is_base_of_v<OneIndexedArray<std::string>, T>) {
         for (size_t i = 1; i <= value.size(); ++i) {
@@ -87,12 +48,73 @@ void print(const T& value) {
     }
 }
 
+// Store the start time as a global variable
+std::chrono::time_point<std::chrono::steady_clock> programStartTime = std::chrono::steady_clock::now();
+
+// Function to get built-in variables
+std::string BuildInVars(const std::string& varName) {
+    auto now = std::chrono::system_clock::now();
+    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+    std::tm* localTime = std::localtime(&currentTime);
+
+    std::ostringstream oss;
+
+    if (varName == "A_TickCount") {
+        // Calculate milliseconds since program start
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - programStartTime).count();
+        if (duration > std::numeric_limits<int>::max()) {
+            // Handle overflow case
+            return "Value too large";
+        } else {
+            return std::to_string(static_cast<int>(duration));
+        }
+    } else if (varName == "A_Now") {
+        oss << std::put_time(localTime, "%Y-%m-%d %H:%M:%S");
+    } else if (varName == "A_YYYY") {
+        oss << std::put_time(localTime, "%Y");
+    } else if (varName == "A_MM") {
+        oss << std::put_time(localTime, "%m");
+    } else if (varName == "A_DD") {
+        oss << std::put_time(localTime, "%d");
+    } else if (varName == "A_MMMM") {
+        oss << std::put_time(localTime, "%B");
+    } else if (varName == "A_MMM") {
+        oss << std::put_time(localTime, "%b");
+    } else if (varName == "A_DDDD") {
+        oss << std::put_time(localTime, "%A");
+    } else if (varName == "A_DDD") {
+        oss << std::put_time(localTime, "%a");
+    } else if (varName == "A_Hour") {
+        oss << std::put_time(localTime, "%H");
+    } else if (varName == "A_Min") {
+        oss << std::put_time(localTime, "%M");
+    } else if (varName == "A_Sec") {
+        oss << std::put_time(localTime, "%S");
+    } else if (varName == "A_Space") {
+        return " ";
+    } else if (varName == "A_Tab") {
+        return "\t";
+    } else {
+        return "";
+    }
+    return oss.str();
+}
+
 
 int main(int argc, char* argv[])
 {
-// Generate a random number between 1 and 100
-int randomNumber = Random(1, 100);
-// Display the generated random number
-print(std::string("Random number: ") + STR ( randomNumber ) );
+print(std::string("Current local time: ") + BuildInVars("A_Now"));
+print(std::string("Current year: ") + BuildInVars("A_YYYY"));
+print(std::string("Current month: ") + BuildInVars("A_MM"));
+print(std::string("Current day: ") + BuildInVars("A_DD"));
+print(std::string("Full name of current month: ") + BuildInVars("A_MMMM"));
+print(std::string("Abbreviated name of current month: ") + BuildInVars("A_MMM"));
+print(std::string("Full name of current day: ") + BuildInVars("A_DDDD"));
+print(std::string("Abbreviated name of current day: ") + BuildInVars("A_DDD"));
+print(std::string("Current hour: ") + BuildInVars("A_Hour"));
+print(std::string("Current minute: ") + BuildInVars("A_Min"));
+print(std::string("Current second: ") + BuildInVars("A_Sec"));
+print(std::string("Hello") + BuildInVars("A_Space") + std::string("man"));
+print(std::string("|") + BuildInVars("A_Tab") + std::string("Hello man|"));
 return 0;
 }
