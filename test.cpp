@@ -107,12 +107,12 @@ void print(const T& value) {
 
 int main(int argc, char* argv[])
 {
-
-int ran = Random(1, 100);
+int ran;
+ ran = Random(1, 100);
 std::string outUser;
 for (int A_Index1 = 1;; A_Index1++)
 {
-outUser = input ( std::string("Eneter a number bettwen 1-100: ") ) ;
+outUser = input ( std::string("Enter a number between 1-100: ") ) ;
 if (INT (outUser) > ran) 
 {
 print(std::string("Try lower!"));

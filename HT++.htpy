@@ -727,8 +727,6 @@ varr1 := StrReplace(varr1, "%", "")
 varr2 := StrReplace(varr2, "%", "")
 varr3 := StrReplace(varr3, "%", "")
 
-varr1 := "int " . varr1
-
 varr1 := StrReplace(varr1, "  ", " ")
 
 outt2 := Trim(varTranspiler(varr2, funcNames, allVarsChars, allVarsInts))

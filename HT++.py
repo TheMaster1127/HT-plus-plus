@@ -623,7 +623,6 @@ for A_Index18, A_LoopField18 in enumerate(items, start=1):
         variables['varr1'] = StrReplace(variables['varr1'] , "%" , "")
         variables['varr2'] = StrReplace(variables['varr2'] , "%" , "")
         variables['varr3'] = StrReplace(variables['varr3'] , "%" , "")
-        variables['varr1'] = "int " + variables['varr1']
         variables['varr1'] = StrReplace(variables['varr1'] , "  " , " ")
         variables['outt2'] = Trim(varTranspiler(variables['varr2'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts']))
         variables['outt3'] = Trim(varTranspiler(variables['varr3'] , variables['funcNames'] , variables['allVarsChars'] , variables['allVarsInts']))

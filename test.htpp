@@ -1,24 +1,20 @@
-
-
+int ran
 Random, ran, 1, 100
 str outUser
 Loop
 {
-outUser := input("Eneter a number bettwen 1-100: ")
-if (INT(outUser) > ran)
-{
-MsgBox, Try lower!
+    outUser := input("Enter a number between 1-100: ")
+    if (INT(outUser) > ran)
+    {
+        MsgBox, Try lower!
+    }
+    else if (INT(outUser) < ran)
+    {
+        MsgBox, Try higher!
+    }
+    else
+    {
+        MsgBox, % "You win in " . STR(A_Index) . " tries!"
+        break
+    }
 }
-else if (INT(outUser) < ran)
-{
-MsgBox, Try higher!
-}
-else
-{
-MsgBox, % "You win in " . STR(A_Index) . " tries!"
-break
-}
-
-}
-
-
