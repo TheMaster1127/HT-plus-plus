@@ -421,7 +421,7 @@ theIdNumOfThe34theVar%A_Index% .= Chr(34)
 haveWeEverUsedArrays := 0
 allVarsChars := ""
 allVarsInts := ""
-funcNames := "std::string|INT|STR|FLOAT|arrSplit|LoopParseFunc|InStr|Random|Sleep|input|print|FileRead|StrLower|FileAppend|FileDelete|StrLen|Asc|Abs|ACos|ATan|Ceil|Cos|Exp|Ln|Log|Round|Sin|Sqrt|Tan|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|RegExReplace|StrSplit|Chr|Mod|Floor|getDataFromJSON|GetParams|BuildInVars|RegExReplace|RegExMatch|RunCMD|SetTimer|ExitApp|getDataFromAPI|SortLikeAHK"
+funcNames := "std::string|INT|STR|FLOAT|arrSplit|LoopParseFunc|InStr|Random|Sleep|input|print|FileRead|StrLower|FileAppend|FileDelete|StrLen|Asc|Abs|ACos|ATan|Ceil|Cos|Exp|Ln|Log|Round|Sin|Sqrt|Tan|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|StrSplit|Chr|Mod|Floor|getDataFromJSON|GetParams|BuildInVars|RegExReplace|RegExMatch|RunCMD|SetTimer|ExitApp|getDataFromAPI|SortLikeAHK"
 
 ;"std::string|INT|STR|FLOAT|arrSplit|LoopParseFunc|InStr|Random|Sleep|input|print|FileRead|FileAppend|FileDelete|StrLen|Asc|Abs|ACos|ATan|Ceil|Cos|Exp|Ln|Log|Round|Sin|Sqrt|Tan|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|RegExReplace|StrSplit|Chr|Mod|Floor|getDataFromJSON|GetParams|BuildInVars|RegExReplace|RegExMatch|RunCMD|SetTimer|getDataFromAPI|SortLikeAHK"
 
@@ -654,7 +654,7 @@ else
 filereadCommand2path := StrReplace(filereadCommand2path, "%", "")
 }
 
-cppCode .= "std::string " . filereadCommand1varname . " = FileRead(" . filereadCommand2path . ");`n"
+cppCode .= filereadCommand1varname . " = FileRead(" . filereadCommand2path . ");`n"
 lineDone := 1
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 12) = "fileappend, ")
@@ -1361,6 +1361,158 @@ cppCode .= intType . " " . charVar1 . " " . varAssignmentType . " " . charVar2 .
 
 
 }
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 6) = "float ")
+{
+lineDone := 1
+
+StringTrimLeft, varName123Temp, A_LoopField, 6
+
+
+varName := StrSplit(varName123Temp, " ", 1)
+
+StringTrimLeft, strVar, A_LoopField, 6
+
+strVar := Trim(strVar)
+
+
+declareAvarNOvalue := 0
+if (InStr(strVar, " := "))
+{
+varAssignmentType := "="
+}
+else if (InStr(strVar, " += "))
+{
+varAssignmentType := "+="
+}
+else if (InStr(strVar, " .= "))
+{
+varAssignmentType := "+="
+}
+else if (InStr(strVar, " -= "))
+{
+varAssignmentType := "-="
+}
+else if (InStr(strVar, " *= "))
+{
+varAssignmentType := "*="
+}
+else if (InStr(strVar, " /= "))
+{
+varAssignmentType := "/="
+}
+else
+{
+declareAvarNOvalue := 1
+}
+
+if (declareAvarNOvalue = 1)
+{
+charVar1 := Trim(StrSplit(strVar, varAssignmentType, 1))
+charVar2 := Trim(StrSplit(strVar, varAssignmentType, 2))
+charVar1 := StrSplit(charVar1, " ", 1)
+
+
+charVar2 := varTranspiler(charVar2, funcNames, allVarsChars, allVarsInts)
+;MsgBox, % intType
+
+
+
+cppCode .= "float" . " " . charVar1 . Chr(59) . "`n"
+}
+else
+{
+charVar1 := Trim(StrSplit(strVar, varAssignmentType, 1))
+charVar2 := Trim(StrSplit(strVar, varAssignmentType, 2))
+charVar1 := StrSplit(charVar1, " ", 1)
+
+
+charVar2 := varTranspiler(charVar2, funcNames, allVarsChars, allVarsInts)
+;MsgBox, % intType
+
+
+
+cppCode .= "float" . " " . charVar1 . " " . varAssignmentType . " " . charVar2 . Chr(59) . "`n"
+}
+
+
+
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 5) = "bool ")
+{
+lineDone := 1
+
+StringTrimLeft, varName123Temp, A_LoopField, 5
+
+
+varName := StrSplit(varName123Temp, " ", 1)
+
+StringTrimLeft, strVar, A_LoopField, 5
+
+strVar := Trim(strVar)
+
+
+declareAvarNOvalue := 0
+if (InStr(strVar, " := "))
+{
+varAssignmentType := "="
+}
+else if (InStr(strVar, " += "))
+{
+varAssignmentType := "+="
+}
+else if (InStr(strVar, " .= "))
+{
+varAssignmentType := "+="
+}
+else if (InStr(strVar, " -= "))
+{
+varAssignmentType := "-="
+}
+else if (InStr(strVar, " *= "))
+{
+varAssignmentType := "*="
+}
+else if (InStr(strVar, " /= "))
+{
+varAssignmentType := "/="
+}
+else
+{
+declareAvarNOvalue := 1
+}
+
+if (declareAvarNOvalue = 1)
+{
+charVar1 := Trim(StrSplit(strVar, varAssignmentType, 1))
+charVar2 := Trim(StrSplit(strVar, varAssignmentType, 2))
+charVar1 := StrSplit(charVar1, " ", 1)
+
+
+charVar2 := varTranspiler(charVar2, funcNames, allVarsChars, allVarsInts)
+;MsgBox, % intType
+
+
+
+cppCode .= "bool" . " " . charVar1 . Chr(59) . "`n"
+}
+else
+{
+charVar1 := Trim(StrSplit(strVar, varAssignmentType, 1))
+charVar2 := Trim(StrSplit(strVar, varAssignmentType, 2))
+charVar1 := StrSplit(charVar1, " ", 1)
+
+
+charVar2 := varTranspiler(charVar2, funcNames, allVarsChars, allVarsInts)
+;MsgBox, % intType
+
+
+
+cppCode .= "bool" . " " . charVar1 . " " . varAssignmentType . " " . charVar2 . Chr(59) . "`n"
+}
+
+
+
+}
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 4) = "cat ")
 {
 lineDone := 1
@@ -1752,6 +1904,24 @@ nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 
 cppCode .= nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
 
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 0) = Chr(41)) && (lineDone = 0)
+{
+str123 := A_LoopField
+FuncNameWhatIsIt := StrSplit(str123, "(", 1)
+
+Loop, Parse, FuncNameWhatIsIt
+{
+StringTrimLeft, str123, str123, 1
+}
+
+outVarTransiled := varTranspiler(str123, funcNames, allVarsChars, allVarsInts)
+
+
+
+out := FuncNameWhatIsIt . outVarTransiled
+lineDone := 1
+cppCode .= out . ";`n"
 }
 else
 {
@@ -2350,6 +2520,8 @@ Loop, % theIdNumOfThe34
 cppCode := StrReplace(cppCode, "ihuiuuhuuhtheidFor--asas-theuhturtyphoutr-" . Chr(65) . Chr(65) . str(A_Index) . Chr(65) . Chr(65), "std::string(" . theIdNumOfThe34theVar%A_Index% . ")")
 }
 
+
+
 cppCodeFixCharRemoveStd := ""
 Loop, Parse, cppCode, `n, `r
 {
@@ -2387,7 +2559,7 @@ uperCode := ""
 uperCodeLibs := ""
 
 
-uperCodeLibs .= "#include <iostream>`n#include <sstream>`n#include <string>`n"
+uperCodeLibs .= "#include <iostream>`n#include <sstream>`n#include <string>`n#include <cstdint>`n"
 
 if (InStr(cppCode, "variables["))
 {
@@ -2419,7 +2591,7 @@ if (InStr(cppCode, "STR(")) or (InStr(cppCode, "STR ("))
 
 uperCodeLibs .= "`n#include <string>`n#include <string>`n"
 
-uperCode := uperCode . "`n// Convert various types to std::string`nstd::string STR(int value) {`n    return std::to_string(value);`n}`n`nstd::string STR(float value) {`n    return std::to_string(value);`n}`n`nstd::string STR(double value) {`n    return std::to_string(value);`n}`n`nstd::string STR(size_t value) {`n    return std::to_string(value);`n}`n`nstd::string STR(bool value) {`n    return value ? " . Chr(34) . "1" . Chr(34) . " : " . Chr(34) . "0" . Chr(34) . ";`n}`n"
+uperCode := uperCode . "`n// Convert various types to std::string`nstd::string STR(int value) {`n    return std::to_string(value);`n}`n`n// Convert various types to std::string`nstd::string STR(long long value) {`n    return std::to_string(value);`n}`n`nstd::string STR(float value) {`n    return std::to_string(value);`n}`n`nstd::string STR(double value) {`n    return std::to_string(value);`n}`n`nstd::string STR(size_t value) {`n    return std::to_string(value);`n}`n`nstd::string STR(bool value) {`n    return value ? " . Chr(34) . "1" . Chr(34) . " : " . Chr(34) . "0" . Chr(34) . ";`n}`n"
 }
 
 if (InStr(cppCode, "FLOAT(")) or (InStr(cppCode, "FLOAT ("))
@@ -2441,10 +2613,9 @@ uperCode := uperCode . "`n// Function to check if needle exists in haystack (std
 if (InStr(cppCode, "Random(")) or (InStr(cppCode, "Random ("))
 {
 
-uperCodeLibs .= "`n#include <cstdlib>`n#include <ctime>`n"
+uperCodeLibs .= "`n#include <cstdlib>`n#include <ctime>`n#include <random>`n"
 
-uperCode := uperCode . "`n// Function to generate a random integer within a specified range [min, max]`nint Random(int min, int max) {`n    // Seed the random number generator with the current time`n    std::srand(std::time(0));`n    `n    // Generate a random number within the specified range`n    int range = max - min + 1;`n    int randomNumber = std::rand() % range + min;`n    `n    return randomNumber;`n}`n`n"
-}
+uperCode := uperCode . "`nint Random(int min, int max) {`n    // Create a random device to seed the generator`n    std::random_device rd;`n    `n    // Create a generator seeded with the random device`n    std::mt19937 gen(rd());`n    `n    // Define a distribution within the specified range`n    std::uniform_int_distribution<> dis(min, max);`n    `n    // Generate and return a random number within the specified range`n    return dis(gen);`n}`n"
 
 if (InStr(cppCode, "Sleep(")) or (InStr(cppCode, "Sleep ("))
 {
@@ -2579,7 +2750,7 @@ if (InStr(cppCode, "Log(")) or (InStr(cppCode, "Log ("))
 
 uperCodeLibs .= "`n#include <cmath>`n"
 
-uperCode := uperCode . "`ndouble Log(double value, double base) {`n    return std::log(value) / std::log(base);`n}`n"
+uperCode := uperCode . "`n// Function that computes the logarithm with base 10`ndouble Log(double value) {`n    return std::log10(value);`n}`n"
 }
 
 if (InStr(cppCode, "Round(")) or (InStr(cppCode, "Round ("))
@@ -2662,15 +2833,6 @@ uperCodeLibs .= "`n#include <algorithm>`n#include <cctype>`n#include <string>`n"
 uperCode := uperCode . "`nstd::string StrLower(const std::string &string) {`n    std::string result = string;`n    std::transform(result.begin(), result.end(), result.begin(), ::tolower);`n    return result;`n}`n"
 }
 
-if (InStr(cppCode, "RegExReplace(")) or (InStr(cppCode, "RegExReplace ("))
-{
-
-uperCodeLibs .= "`n#include <regex>`n#include <string>`n"
-
-uperCode := uperCode . "`nstd::string RegExReplace(const std::string &inputStr, const std::string &regexPattern, const std::string &replacement) {`n    std::regex regex(regexPattern);`n    return std::regex_replace(inputStr, regex, replacement);`n}`n"
-}
-
-
 
 if (InStr(cppCode, "StrSplit(")) or (InStr(cppCode, "StrSplit ("))
 {
@@ -2707,9 +2869,9 @@ uperCode := uperCode . "`ndouble Floor(double num) {`n    if (std::isnan(num)) {
 if (InStr(cppCode, "getDataFromJSON(")) or (InStr(cppCode, "getDataFromJSON ("))
 {
 
-uperCodeLibs .= "`n#include <string>`n#include <vector>`n#include <map>`n#include <sstream>`n#include <iomanip>`n#include <stdexcept>`n#include <cctype>`n#include <chrono>`n"
+uperCodeLibs .= "`n#include <string>`n#include <vector>`n#include <map>`n#include <sstream>`n#include <iomanip>`n#include <stdexcept>`n#include <cctype>`n#include <chrono>`n#include <cmath>`n"
 
-uperCode := uperCode . "`nstd::string trim(const std::string& str) {`n    auto start = str.begin();`n    while (start != str.end() && std::isspace(*start)) {`n        start++;`n    }`n    auto end = str.end();`n    do {`n        end--;`n    } while (std::distance(start, end) > 0 && std::isspace(*end));`n    return std::string(start, end + 1);`n}`n`nclass JSONValue {`npublic:`n    enum Type { Null, Boolean, Number, String, Array, Object };`n`n    JSONValue() : type(Null) {}`n    JSONValue(bool b) : type(Boolean), boolean_value(b) {}`n    JSONValue(double n) : type(Number), number_value(n) {}`n    JSONValue(const std::string& s) : type(String), string_value(s) {}`n    JSONValue(const std::vector<JSONValue>& a) : type(Array), array_value(a) {}`n    JSONValue(const std::map<std::string, JSONValue>& o) : type(Object), object_value(o) {}`n`n    Type getType() const { return type; }`n    bool isNull() const { return type == Null; }`n    bool isBoolean() const { return type == Boolean; }`n    bool isNumber() const { return type == Number; }`n    bool isString() const { return type == String; }`n    bool isArray() const { return type == Array; }`n    bool isObject() const { return type == Object; }`n`n    bool asBoolean() const { return boolean_value; }`n    double asNumber() const { return number_value; }`n    const std::string& asString() const { return string_value; }`n    const std::vector<JSONValue>& asArray() const { return array_value; }`n    const std::map<std::string, JSONValue>& asObject() const { return object_value; }`n`nprivate:`n    Type type;`n    bool boolean_value;`n    double number_value;`n    std::string string_value;`n    std::vector<JSONValue> array_value;`n    std::map<std::string, JSONValue> object_value;`n};`n`nclass JSONParser {`npublic:`n    static JSONValue parse(const std::string& json) {`n        size_t index = 0;`n        return parseValue(json, index);`n    }`n`nprivate:`n    static JSONValue parseValue(const std::string& json, size_t& index) {`n        skipWhitespace(json, index);`n        char c = json[index];`n        if (c == '{') {`n            return parseObject(json, index);`n        } else if (c == '[') {`n            return parseArray(json, index);`n        } else if (c == '" . Chr(34) . "') {`n            return parseString(json, index);`n        } else if (std::isdigit(c) || c == '-') {`n            return parseNumber(json, index);`n        } else if (c == 't' || c == 'f') {`n            return parseBoolean(json, index);`n        } else if (c == 'n') {`n            return parseNull(json, index);`n        }`n        throw std::runtime_error(" . Chr(34) . "Invalid JSON" . Chr(34) . ");`n    }`n`n    static JSONValue parseObject(const std::string& json, size_t& index) {`n        std::map<std::string, JSONValue> object;`n        index++; // Skip '{'`n        skipWhitespace(json, index);`n        if (json[index] == '}') {`n            index++;`n            return JSONValue(object);`n        }`n        while (true) {`n            std::string key = parseString(json, index).asString();`n            skipWhitespace(json, index);`n            if (json[index] != ':') throw std::runtime_error(" . Chr(34) . "Expected ':'" . Chr(34) . ");`n            index++;`n            JSONValue value = parseValue(json, index);`n            object[key] = value;`n            skipWhitespace(json, index);`n            if (json[index] == '}') {`n                index++;`n                return JSONValue(object);`n            }`n            if (json[index] != ',') throw std::runtime_error(" . Chr(34) . "Expected ',' or '}'" . Chr(34) . ");`n            index++;`n            skipWhitespace(json, index);`n        }`n    }`n`n    static JSONValue parseArray(const std::string& json, size_t& index) {`n        std::vector<JSONValue> array;`n        index++; // Skip '['`n        skipWhitespace(json, index);`n        if (json[index] == ']') {`n            index++;`n            return JSONValue(array);`n        }`n        while (true) {`n            array.push_back(parseValue(json, index));`n            skipWhitespace(json, index);`n            if (json[index] == ']') {`n                index++;`n                return JSONValue(array);`n            }`n            if (json[index] != ',') throw std::runtime_error(" . Chr(34) . "Expected ',' or ']'" . Chr(34) . ");`n            index++;`n            skipWhitespace(json, index);`n        }`n    }`n`n    static JSONValue parseString(const std::string& json, size_t& index) {`n        index++; // Skip opening quote`n        std::string result;`n        while (json[index] != '" . Chr(34) . "') {`n            if (json[index] == '" . Chr(92) . "" . Chr(92) . "') {`n                index++;`n                switch (json[index]) {`n                    case '" . Chr(34) . "': result += '" . Chr(34) . "'; break;`n                    case '" . Chr(92) . "" . Chr(92) . "': result += '" . Chr(92) . "" . Chr(92) . "'; break;`n                    case '/': result += '/'; break;`n                    case 'b': result += '" . Chr(92) . "b'; break;`n                    case 'f': result += '" . Chr(92) . "f'; break;`n                    case 'n': result += '" . Chr(92) . "n'; break;`n                    case 'r': result += '" . Chr(92) . "r'; break;`n                    case 't': result += '" . Chr(92) . "t'; break;`n                    default: throw std::runtime_error(" . Chr(34) . "Invalid escape sequence" . Chr(34) . ");`n                }`n            } else {`n                result += json[index];`n            }`n            index++;`n        }`n        index++; // Skip closing quote`n        return JSONValue(result);`n    }`n`n    static JSONValue parseNumber(const std::string& json, size_t& index) {`n        size_t start = index;`n        while (std::isdigit(json[index]) || json[index] == '-' || json[index] == '.' || json[index] == 'e' || json[index] == 'E') {`n            index++;`n        }`n        return JSONValue(std::stod(json.substr(start, index - start)));`n    }`n`n    static JSONValue parseBoolean(const std::string& json, size_t& index) {`n        if (json.substr(index, 4) == " . Chr(34) . "true" . Chr(34) . ") {`n            index += 4;`n            return JSONValue(true);`n        } else if (json.substr(index, 5) == " . Chr(34) . "false" . Chr(34) . ") {`n            index += 5;`n            return JSONValue(false);`n        }`n        throw std::runtime_error(" . Chr(34) . "Invalid boolean value" . Chr(34) . ");`n    }`n`n    static JSONValue parseNull(const std::string& json, size_t& index) {`n        if (json.substr(index, 4) == " . Chr(34) . "null" . Chr(34) . ") {`n            index += 4;`n            return JSONValue();`n        }`n        throw std::runtime_error(" . Chr(34) . "Invalid null value" . Chr(34) . ");`n    }`n`n    static void skipWhitespace(const std::string& json, size_t& index) {`n        while (index < json.length() && std::isspace(json[index])) {`n            index++;`n        }`n    }`n};`n`nstd::string getDataFromJSON(const std::string& json_data, const std::string& json_path) {`n    JSONValue root = JSONParser::parse(json_data);`n    std::istringstream path_stream(json_path);`n    std::string segment;`n    JSONValue current = root;`n`n    while (std::getline(path_stream, segment, '.')) {`n        segment = trim(segment);`n        `n        size_t bracket_pos = segment.find('[');`n        if (bracket_pos != std::string::npos) {`n            std::string key = segment.substr(0, bracket_pos);`n            size_t index = std::stoi(segment.substr(bracket_pos + 1, segment.find(']') - bracket_pos - 1));`n            `n            if (current.isObject() && current.asObject().find(key) != current.asObject().end()) {`n                current = current.asObject().at(key);`n                if (current.isArray() && index < current.asArray().size()) {`n                    current = current.asArray()[index];`n                } else {`n                    return " . Chr(34) . "Array index out of bounds" . Chr(34) . ";`n                }`n            } else {`n                return " . Chr(34) . "Key not found: " . Chr(34) . " + key;`n            }`n        } else if (current.isObject() && current.asObject().find(segment) != current.asObject().end()) {`n            current = current.asObject().at(segment);`n        } else {`n            return " . Chr(34) . "Key not found: " . Chr(34) . " + segment;`n        }`n    }`n`n    if (current.isString()) return current.asString();`n    if (current.isNumber()) {`n        double num = current.asNumber();`n        if (num == std::floor(num)) {`n            // It's an integer`n            return std::to_string(static_cast<long long>(num));`n        } else {`n            // It's a floating-point number`n            return std::to_string(num);`n        }`n    }`n    if (current.isBoolean()) return current.asBoolean() ? " . Chr(34) . "true" . Chr(34) . " : " . Chr(34) . "false" . Chr(34) . ";`n    if (current.isNull()) return " . Chr(34) . "null" . Chr(34) . ";`n    `n    return " . Chr(34) . "Unsupported value type" . Chr(34) . ";`n}`n"
+uperCode := uperCode . "`nstd::string trim(const std::string& str) {`n    auto start = str.begin();`n    while (start != str.end() && std::isspace(*start)) {`n        start++;`n    }`n    auto end = str.end();`n    do {`n        end--;`n    } while (std::distance(start, end) > 0 && std::isspace(*end));`n    return std::string(start, end + 1);`n}`n`nclass JSONValue {`npublic:`n    enum Type { Null, Boolean, Number, String, Array, Object };`n`n    JSONValue() : type(Null) {}`n    JSONValue(bool b) : type(Boolean), boolean_value(b) {}`n    JSONValue(double n) : type(Number), number_value(n) {}`n    JSONValue(const std::string& s) : type(String), string_value(s) {}`n    JSONValue(const std::vector<JSONValue>& a) : type(Array), array_value(a) {}`n    JSONValue(const std::map<std::string, JSONValue>& o) : type(Object), object_value(o) {}`n`n    Type getType() const { return type; }`n    bool isNull() const { return type == Null; }`n    bool isBoolean() const { return type == Boolean; }`n    bool isNumber() const { return type == Number; }`n    bool isString() const { return type == String; }`n    bool isArray() const { return type == Array; }`n    bool isObject() const { return type == Object; }`n`n    bool asBoolean() const { return boolean_value; }`n    double asNumber() const { return number_value; }`n    const std::string& asString() const { return string_value; }`n    const std::vector<JSONValue>& asArray() const { return array_value; }`n    const std::map<std::string, JSONValue>& asObject() const { return object_value; }`n`nprivate:`n    Type type;`n    bool boolean_value;`n    double number_value;`n    std::string string_value;`n    std::vector<JSONValue> array_value;`n    std::map<std::string, JSONValue> object_value;`n};`n`nclass JSONParser {`npublic:`n    static JSONValue parse(const std::string& json) {`n        size_t index = 0;`n        return parseValue(json, index);`n    }`n`nprivate:`n    static JSONValue parseValue(const std::string& json, size_t& index) {`n        skipWhitespace(json, index);`n        char c = json[index];`n        if (c == '{') {`n            return parseObject(json, index);`n        } else if (c == '[') {`n            return parseArray(json, index);`n        } else if (c == '" . Chr(34) . "') {`n            return parseString(json, index);`n        } else if (std::isdigit(c) || c == '-') {`n            return parseNumber(json, index);`n        } else if (c == 't' || c == 'f') {`n            return parseBoolean(json, index);`n        } else if (c == 'n') {`n            return parseNull(json, index);`n        }`n        throw std::runtime_error(" . Chr(34) . "Invalid JSON" . Chr(34) . ");`n    }`n`n    static JSONValue parseObject(const std::string& json, size_t& index) {`n        std::map<std::string, JSONValue> object;`n        index++; // Skip '{'`n        skipWhitespace(json, index);`n        if (json[index] == '}') {`n            index++;`n            return JSONValue(object);`n        }`n        while (true) {`n            std::string key = parseString(json, index).asString();`n            skipWhitespace(json, index);`n            if (json[index] != ':') throw std::runtime_error(" . Chr(34) . "Expected ':'" . Chr(34) . ");`n            index++;`n            JSONValue value = parseValue(json, index);`n            object[key] = value;`n            skipWhitespace(json, index);`n            if (json[index] == '}') {`n                index++;`n                return JSONValue(object);`n            }`n            if (json[index] != ',') throw std::runtime_error(" . Chr(34) . "Expected ',' or '}'" . Chr(34) . ");`n            index++;`n            skipWhitespace(json, index);`n        }`n    }`n`n    static JSONValue parseArray(const std::string& json, size_t& index) {`n        std::vector<JSONValue> array;`n        index++; // Skip '['`n        skipWhitespace(json, index);`n        if (json[index] == ']') {`n            index++;`n            return JSONValue(array);`n        }`n        while (true) {`n            array.push_back(parseValue(json, index));`n            skipWhitespace(json, index);`n            if (json[index] == ']') {`n                index++;`n                return JSONValue(array);`n            }`n            if (json[index] != ',') throw std::runtime_error(" . Chr(34) . "Expected ',' or ']'" . Chr(34) . ");`n            index++;`n            skipWhitespace(json, index);`n        }`n    }`n`n    static JSONValue parseString(const std::string& json, size_t& index) {`n        index++; // Skip opening quote`n        std::string result;`n        while (json[index] != '" . Chr(34) . "') {`n            if (json[index] == '" . Chr(92) . "" . Chr(92) . "') {`n                index++;`n                switch (json[index]) {`n                    case '" . Chr(34) . "': result += '" . Chr(34) . "'; break;`n                    case '" . Chr(92) . "" . Chr(92) . "': result += '" . Chr(92) . "" . Chr(92) . "'; break;`n                    case '/': result += '/'; break;`n                    case 'b': result += '" . Chr(92) . "b'; break;`n                    case 'f': result += '" . Chr(92) . "f'; break;`n                    case 'n': result += '" . Chr(92) . "n'; break;`n                    case 'r': result += '" . Chr(92) . "r'; break;`n                    case 't': result += '" . Chr(92) . "t'; break;`n                    default: throw std::runtime_error(" . Chr(34) . "Invalid escape sequence" . Chr(34) . ");`n                }`n            } else {`n                result += json[index];`n            }`n            index++;`n        }`n        index++; // Skip closing quote`n        return JSONValue(result);`n    }`n`n    static JSONValue parseNumber(const std::string& json, size_t& index) {`n        size_t start = index;`n        while (std::isdigit(json[index]) || json[index] == '-' || json[index] == '.' || json[index] == 'e' || json[index] == 'E') {`n            index++;`n        }`n        return JSONValue(std::stod(json.substr(start, index - start)));`n    }`n`n    static JSONValue parseBoolean(const std::string& json, size_t& index) {`n        if (json.substr(index, 4) == " . Chr(34) . "true" . Chr(34) . ") {`n            index += 4;`n            return JSONValue(true);`n        } else if (json.substr(index, 5) == " . Chr(34) . "false" . Chr(34) . ") {`n            index += 5;`n            return JSONValue(false);`n        }`n        throw std::runtime_error(" . Chr(34) . "Invalid boolean value" . Chr(34) . ");`n    }`n`n    static JSONValue parseNull(const std::string& json, size_t& index) {`n        if (json.substr(index, 4) == " . Chr(34) . "null" . Chr(34) . ") {`n            index += 4;`n            return JSONValue();`n        }`n        throw std::runtime_error(" . Chr(34) . "Invalid null value" . Chr(34) . ");`n    }`n`n    static void skipWhitespace(const std::string& json, size_t& index) {`n        while (index < json.length() && std::isspace(json[index])) {`n            index++;`n        }`n    }`n};`n`nstd::string getDataFromJSON(const std::string& json_data, const std::string& json_path) {`n    JSONValue root = JSONParser::parse(json_data);`n    std::istringstream path_stream(json_path);`n    std::string segment;`n    JSONValue current = root;`n`n    while (std::getline(path_stream, segment, '.')) {`n        segment = trim(segment);`n`n        size_t bracket_pos = segment.find('[');`n        if (bracket_pos != std::string::npos) {`n            std::string key = segment.substr(0, bracket_pos);`n            size_t index = std::stoi(segment.substr(bracket_pos + 1, segment.find(']') - bracket_pos - 1));`n`n            if (key.empty()) {`n                // This is a direct array access`n                if (current.isArray() && index < current.asArray().size()) {`n                    current = current.asArray()[index];`n                } else {`n                    return " . Chr(34) . "Array index out of bounds" . Chr(34) . ";`n                }`n            } else {`n                // This is an object access followed by array access`n                if (current.isObject() && current.asObject().find(key) != current.asObject().end()) {`n                    current = current.asObject().at(key);`n                    if (current.isArray() && index < current.asArray().size()) {`n                        current = current.asArray()[index];`n                    } else {`n                        return " . Chr(34) . "Array index out of bounds" . Chr(34) . ";`n                    }`n                } else {`n                    return " . Chr(34) . "Key not found: " . Chr(34) . " + key;`n                }`n            }`n        } else if (current.isObject() && current.asObject().find(segment) != current.asObject().end()) {`n            current = current.asObject().at(segment);`n        } else {`n            return " . Chr(34) . "Key not found: " . Chr(34) . " + segment;`n        }`n    }`n`n    if (current.isString()) return current.asString();`n    if (current.isNumber()) {`n        double num = current.asNumber();`n        if (num == floor(num)) {`n            return std::to_string(static_cast<long long>(num));`n        } else {`n            return std::to_string(num);`n        }`n    }`n    if (current.isBoolean()) return current.asBoolean() ? " . Chr(34) . "true" . Chr(34) . " : " . Chr(34) . "false" . Chr(34) . ";`n    if (current.isNull()) return " . Chr(34) . "null" . Chr(34) . ";`n`n    return " . Chr(34) . "Unsupported value type" . Chr(34) . ";`n}`n"
 }
 
 if (InStr(cppCode, "GetParams(")) or (InStr(cppCode, "GetParams ("))

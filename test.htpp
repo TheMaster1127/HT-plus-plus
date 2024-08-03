@@ -1,37 +1,18 @@
-; declare the variable MyVar as a string
-str MyVar
+; Generate a random number between 1 and 100
+Random, randomNumber, 1, 100
 
-; Example 1: Sort alphabetically (default) with linefeed delimiter
-MyVar := "apple`norange`nbanana`ngrape`napple`nbanana"
-Sort, MyVar
-MsgBox, % "Sorted Alphabetically:`n" . MyVar
+; Display the generated random number
+MsgBox, % "Random number: " . STR(randomNumber)
 
-; Example 2: Sort alphabetically case-insensitively with removal of duplicates
-MyVar := "Apple`nOrange`nbanana`nGRAPE`nApple`nBanana"
-Sort, MyVar, CU
-MsgBox, % "Sorted Case-Insensitive with Unique:`n" . MyVar
 
-; Example 3: Sort numerically
-MyVar := "10`n2`n30`n4`n25`n1"
-Sort, MyVar, N
-MsgBox, % "Sorted Numerically:`n" . MyVar
-
-; Example 4: Sort in reverse alphabetical order
-MyVar := "apple`norange`nbanana`ngrape"
-Sort, MyVar, R
-MsgBox, % "Sorted Reverse Alphabetically:`n" . MyVar
-
-; Example 5: Sort alphabetically with a custom delimiter (comma)
-MyVar := "apple,orange,banana,grape"
-Sort, MyVar, D,
-MsgBox, % "Sorted with Custom Delimiter (comma):`n" . MyVar
-
-; Example 6: Sort randomly and remove duplicates case-insensitively
-MyVar := "apple`norange`nbanana`norange`napple`ngrape"
-Sort, MyVar, Random
-MsgBox, % "Sorted Randomly with Unique:`n" . MyVar
-
-; Example 7: Sort numerically in reverse order with case-sensitive removal of duplicates
-MyVar := "10`n2`n30`n2`n25`n1"
-Sort, MyVar, NRUC
-MsgBox, % "Sorted Numerically in Reverse with Unique and Case-Sensitive:`n" . MyVar
+; test
+; test
+; test
+; test
+; test
+; test
+; test
+; test
+; test
+; test
+; test
