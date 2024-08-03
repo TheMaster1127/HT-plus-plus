@@ -2478,17 +2478,18 @@ A collection of Build-in Function available in HT++.
 1. [str](#str)
 2. [int](#int)
 3. [float](#float)
-4. [Chr](#chr)
-5. [InStr](#instr)
-6. [RegExMatch](#regexmatch)
-7. [RegExReplace](#regexreplace)
-8. [StrLen](#strlen)
-9. [SubStr](#substr)
-10. [Trim](#trim)
-11. [StrReplace](#strreplace)
-12. [Mod](#mod)
-13. [Asc](#asc)
-14. [StrLower](#strlower)
+4. [input](#input)
+5. [Chr](#chr)
+6. [InStr](#instr)
+7. [RegExMatch](#regexmatch)
+8. [RegExReplace](#regexreplace)
+9. [StrLen](#strlen)
+10. [SubStr](#substr)
+11. [Trim](#trim)
+12. [StrReplace](#strreplace)
+13. [Mod](#mod)
+14. [Asc](#asc)
+15. [StrLower](#strlower)
 
 ---
 
@@ -2621,6 +2622,62 @@ MsgBox, % "The floating-point value of " . stringFloat . " is " . STR(floatValue
 ```
 
 This function is essential for converting integer values, string representations of numbers, or other non-floating-point values into floating-point numbers when performing calculations, handling decimal data, or storing numeric data in variables in HT++.
+
+---
+
+### input <a id="input"></a>
+
+[Go back](#build-in-functions)
+
+**input**: Prompts the user for input and returns the user's response.
+
+#### Syntax:
+
+```ahk
+str userInput = input(prompt)
+```
+
+#### Parameters:
+
+- _prompt_: The text message to display to the user when asking for input.
+
+#### Return Value:
+
+- Returns the text entered by the user as a string.
+
+#### Example 1:
+
+```ahk
+str userName := input("Please enter your name: ")
+MsgBox, % "Hello, " . userName . "!"
+```
+
+#### Explanation:
+
+The `input` function displays a prompt to the user and captures their input as a string. This is useful for gathering user input in a script, such as names, preferences, or other data.
+
+In Example 1:
+
+- `input("Please enter your name: ")` shows a prompt asking the user to enter their name.
+- The variable `userName` captures the user's input.
+- `MsgBox` then displays a greeting message: "Hello, [userName]!"
+
+#### Example 2:
+
+```ahk
+str userAge := input("Enter your age: ")
+MsgBox, % "You are " . userAge . " years old."
+```
+
+#### Explanation:
+
+In Example 2:
+
+- `input("Enter your age: ")` prompts the user to enter their age.
+- The variable `userAge` stores the input as a string.
+- `MsgBox` displays a message: "You are [userAge] years old."
+
+The `input` function is essential for creating interactive scripts that require user feedback or data. It enables the script to capture and use user-provided information in various applications.
 
 ---
 
