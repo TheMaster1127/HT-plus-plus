@@ -424,6 +424,45 @@ float resultFloat := divide(7.5, 2.5)
 MsgBox, % "Result of divide(7.5, 2.5): " . STR(resultFloat)
 ```
 
+Functions with arrays as the param:
+
+```ahk
+func void testIntArray(arr int intArray, str secondParam)
+{
+MsgBox, % intArray
+MsgBox, % "the secondParam is: " . secondParam
+}
+
+func void testStrArray(arr str strArray, str secondParam)
+{
+MsgBox, % strArray
+MsgBox, % "the secondParam is: " . secondParam
+}
+
+func void testFloatArray(arr float floatArray, str secondParam)
+{
+MsgBox, % floatArray
+MsgBox, % "the secondParam is: " . secondParam
+}
+
+; Simply label the main function since before we used other functions
+main:
+
+arr int intArray
+arr str strArray
+arr float floatArray
+
+arr intArray .= 5
+arr strArray .= "hello"
+arr floatArray .= 3.14
+
+str secondParam := "this is the secondParam"
+
+testIntArray(intArray, secondParam)
+testStrArray(strArray, secondParam)
+testFloatArray(floatArray, secondParam)
+```
+
 Functions in HT++ empower developers to structure code effectively and promote code reuse. By following the Allman Style convention and leveraging global function scope, developers can create well-organized and maintainable scripts in HeavenToC++.
 
 ---
@@ -3407,6 +3446,6 @@ Check out the best editor for HT++ at https://github.com/TheMaster1127/SciTE4HTH
 
 View a showcase of programs created using the HT++ programming language, demonstrating its capabilities.
 
-Check HTH v2 written in HT++ at https://github.com/TheMaster1127/HTH/blob/main/HTH.htpp
+Check some code written in HT++ at https://github.com/TheMaster1127/HT-plus-plus/blob/main/test.htpp
 
 ---
