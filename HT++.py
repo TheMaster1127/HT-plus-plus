@@ -653,6 +653,9 @@ for A_Index18, A_LoopField18 in enumerate(items, start=1):
     elif (SubStr(Trim(StrLower(variables['A_LoopField18'])), 1 , 5)== "func "):
         variables['funcName123'] = StringTrimLeft(variables['A_LoopField18'], 5)
         variables['removeNextCurlyBraceCpp'] = 1
+        variables['funcName123'] = StrReplace(variables['funcName123'] , "arr int" , "OneIndexedArray<int>")
+        variables['funcName123'] = StrReplace(variables['funcName123'] , "arr str" , "OneIndexedArray<std::string>")
+        variables['funcName123'] = StrReplace(variables['funcName123'] , "arr float" , "OneIndexedArray<float>")
         variables['funcName123'] = StrReplace(variables['funcName123'] , " str " , " std::string ")
         variables['funcName123'] = StrReplace(variables['funcName123'] , "str " , "std::string ")
         variables['funcName123'] = StrReplace(variables['funcName123'] , "(str " , "(std::string ")

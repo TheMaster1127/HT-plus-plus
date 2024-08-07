@@ -1,68 +1,89 @@
 #include <cstdint>
-#include <cstdlib>
-#include <ctime>
 #include <iostream>
-#include <random>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <vector>
 
-// Convert std::string to int
-int INT(const std::string& str) {
-    std::istringstream iss(str);
-    int value;
-    iss >> value;
-    return value;
+// Forward declare OneIndexedArray template
+template <typename T>
+class OneIndexedArray;
+
+#define OneIndexedArray_DEFINED
+
+// Helper function to set the internal array's size as a string
+template <typename T>
+void setInternalArraySize(T& element, size_t size) {
+    element = static_cast<T>(size);
 }
 
-// Convert various types to std::string
-std::string STR(int value) {
-    return std::to_string(value);
+// Specialization for std::string
+template <>
+void setInternalArraySize<std::string>(std::string& element, size_t size) {
+    element = std::to_string(size);
 }
 
-// Convert various types to std::string
-std::string STR(long long value) {
-    return std::to_string(value);
+// One-indexed dynamic array class
+template <typename T>
+class OneIndexedArray {
+private:
+    std::vector<T> internalArray;
+
+public:
+    OneIndexedArray() {
+        internalArray.push_back(T{}); // Placeholder for element count
+    }
+
+    void add(const T& newElement) {
+        internalArray.push_back(newElement);
+        setInternalArraySize(internalArray[0], internalArray.size() - 1);
+    }
+
+    void setArray(const std::vector<T>& newArray) {
+        internalArray.resize(newArray.size() + 1);
+        std::copy(newArray.begin(), newArray.end(), internalArray.begin() + 1);
+        setInternalArraySize(internalArray[0], newArray.size());
+    }
+
+    T& operator[](size_t index) {
+        if (index >= internalArray.size()) {
+            internalArray.resize(index + 1);
+            setInternalArraySize(internalArray[0], internalArray.size() - 1);
+        }
+        return internalArray[index];
+    }
+
+    const T& operator[](size_t index) const {
+        if (index >= internalArray.size()) {
+            throw std::out_of_range("Index out of range");
+        }
+        return internalArray[index];
+    }
+
+    size_t size() const {
+        return static_cast<size_t>(internalArray.size() - 1);
+    }
+};
+
+// Function to split text into words based on a delimiter
+std::vector<std::string> split(const std::string& text, const std::string& delimiter) {
+    std::vector<std::string> words;
+    std::istringstream stream(text);
+    std::string word;
+    while (std::getline(stream, word, delimiter[0])) { // assuming single character delimiter
+        words.push_back(word);
+    }
+    return words;
 }
 
-std::string STR(float value) {
-    return std::to_string(value);
+// Function to split text into a OneIndexedArray
+OneIndexedArray<std::string> arrSplit(const std::string& text, const std::string& delimiter) {
+    OneIndexedArray<std::string> array;
+    std::vector<std::string> words = split(text, delimiter);
+    array.setArray(words);
+    return array;
 }
-
-std::string STR(double value) {
-    return std::to_string(value);
-}
-
-std::string STR(size_t value) {
-    return std::to_string(value);
-}
-
-std::string STR(bool value) {
-    return value ? "1" : "0";
-}
-
-int Random(int min, int max) {
-    // Create a random device to seed the generator
-    std::random_device rd;
-    
-    // Create a generator seeded with the random device
-    std::mt19937 gen(rd());
-    
-    // Define a distribution within the specified range
-    std::uniform_int_distribution<> dis(min, max);
-    
-    // Generate and return a random number within the specified range
-    return dis(gen);
-}
-
-// Function to get input from the user, similar to Python's input() function
-std::string input(const std::string& prompt) {
-    std::string userInput;
-    std::cout << prompt; // Display the prompt to the user
-    std::getline(std::cin, userInput); // Get the entire line of input
-    return userInput;
-}
-
 
 // Print function that converts all types to string if needed
 template <typename T>
@@ -105,28 +126,33 @@ void print(const T& value) {
 }
 
 
+void testIntArray(OneIndexedArray<int> intArray, std::string secondParam)
+{
+print(intArray);
+print(std::string("the secondParam is: ") + secondParam);
+}
+void testStrArray(OneIndexedArray<std::string> strArray, std::string secondParam)
+{
+print(strArray);
+print(std::string("the secondParam is: ") + secondParam);
+}
+void testFloatArray(OneIndexedArray<float> floatArray, std::string secondParam)
+{
+print(floatArray);
+print(std::string("the secondParam is: ") + secondParam);
+}
 int main(int argc, char* argv[])
 {
-int ran;
- ran = Random(1, 100);
-std::string outUser;
-for (int A_Index1 = 1;; A_Index1++)
-{
-outUser = input ( std::string("Enter a number between 1-100: ") ) ;
-if (INT (outUser) > ran) 
-{
-print(std::string("Try lower!"));
-}
-else if (INT (outUser) < ran) 
-{
-print(std::string("Try higher!"));
-}
-else
-{
-print(std::string("You win in ") + STR ( A_Index1 ) + std::string(" tries!"));
-break;
-}
-}
+OneIndexedArray<int> intArray;
+OneIndexedArray<std::string> strArray;
+OneIndexedArray<float> floatArray;
+intArray.add(5);
+strArray.add(std::string("hello"));
+floatArray.add(3.14);
+std::string secondParam = std::string("this is the secondParam");
+testIntArray ( intArray , secondParam ) ;
+testStrArray ( strArray , secondParam ) ;
+testFloatArray ( floatArray , secondParam ) ;
 
 return 0;
 }

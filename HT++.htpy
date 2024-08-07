@@ -778,9 +778,16 @@ StringTrimLeft, funcName123, A_LoopField, 5
 
 
 removeNextCurlyBraceCpp := 1
+
+funcName123 := StrReplace(funcName123, "arr int", "OneIndexedArray<int>")
+funcName123 := StrReplace(funcName123, "arr str", "OneIndexedArray<std::string>")
+funcName123 := StrReplace(funcName123, "arr float", "OneIndexedArray<float>")
+
 funcName123 := StrReplace(funcName123, " str ", " std::string ")
 funcName123 := StrReplace(funcName123, "str ", "std::string ")
 funcName123 := StrReplace(funcName123, "(str ", "(std::string ")
+
+
 cppCode .= funcName123 . "`n{`n"
 lineDone := 1
 }

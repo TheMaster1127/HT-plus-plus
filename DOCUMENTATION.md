@@ -169,6 +169,45 @@ float resultFloat := divide(7.5, 2.5)
 MsgBox, % "Result of divide(7.5, 2.5): " . STR(resultFloat)
 ```
 
+Functions with arrays as the param:
+
+```ahk
+func void testIntArray(arr int intArray, str secondParam)
+{
+MsgBox, % intArray
+MsgBox, % "the secondParam is: " . secondParam
+}
+
+func void testStrArray(arr str strArray, str secondParam)
+{
+MsgBox, % strArray
+MsgBox, % "the secondParam is: " . secondParam
+}
+
+func void testFloatArray(arr float floatArray, str secondParam)
+{
+MsgBox, % floatArray
+MsgBox, % "the secondParam is: " . secondParam
+}
+
+; Simply label the main function since before we used other functions
+main:
+
+arr int intArray
+arr str strArray
+arr float floatArray
+
+arr intArray .= 5
+arr strArray .= "hello"
+arr floatArray .= 3.14
+
+str secondParam := "this is the secondParam"
+
+testIntArray(intArray, secondParam)
+testStrArray(strArray, secondParam)
+testFloatArray(floatArray, secondParam)
+```
+
 Functions in HT++ must be declared at the top of the script following the rules of C++.
 
 #### Comments
