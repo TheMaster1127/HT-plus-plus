@@ -666,8 +666,7 @@ The `Sleep` function in HeavenToC++ (HT++) provides a simple yet effective way t
 
 [Go back](#features)
 
-The `MsgBox` function in HeavenToC++ (HT++) displays a small window containing text and one or more buttons, allowing developers to interact with users and present information effectively.
-
+The `MsgBox` function in HeavenToC++ (HT++) prints the text in the console. IT DOSE NOT MAKE A MSGBOX WINDOW EVEN IF THE NAME SUGGESTS IT.
 #### Syntax:
 
 ```ahk
@@ -676,12 +675,11 @@ MsgBox, Text
 
 #### Parameters:
 
-- `Text`: The text displayed inside the message box to instruct the user or present information.
+- `Text`: The text printed in the console.
 
 #### Note:
 
-- The `MsgBox` function allows developers to create informative and interactive message boxes, providing users with necessary instructions or information.
-
+- The `MsgBox` function allows developers to prints the text in the console.
 #### Examples:
 
 ```ahk
@@ -708,9 +706,7 @@ MsgBox, % "hello man" . " " . var1
 MsgBox, You can simply add text here
 ```
 
-By combining values from these groups, developers can customize the appearance and behavior of message boxes to suit their specific requirements.
-
-The `MsgBox` function in HeavenToC++ (HT++) provides developers with a versatile tool for creating informative and interactive message boxes, enhancing user experience and facilitating communication between the script and the user. The `MsgBox` function offers flexibility and convenience in implementing various messaging scenarios within HT++ scripts.
+The `MsgBox` function in HeavenToC++ (HT++) provides developers with a versatile tool for creating informative and interactive ways to print to the console, enhancing user experience and facilitating communication between the script and the user. The `MsgBox` function offers flexibility and convenience in implementing various printing scenarios within HT++ scripts.
 
 ---
 
