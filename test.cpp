@@ -125,7 +125,6 @@ void print(const T& value) {
     }
 }
 
-
 void testIntArray(OneIndexedArray<int> intArray, std::string secondParam)
 {
 print(intArray);
@@ -141,6 +140,7 @@ void testFloatArray(OneIndexedArray<float> floatArray, std::string secondParam)
 print(floatArray);
 print(std::string("the secondParam is: ") + secondParam);
 }
+// Simply label the main function since before we used other functions
 int main(int argc, char* argv[])
 {
 OneIndexedArray<int> intArray;
@@ -153,6 +153,5 @@ std::string secondParam = std::string("this is the secondParam");
 testIntArray ( intArray , secondParam ) ;
 testStrArray ( strArray , secondParam ) ;
 testFloatArray ( floatArray , secondParam ) ;
-
 return 0;
 }

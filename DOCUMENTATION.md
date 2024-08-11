@@ -439,7 +439,7 @@ MsgBox, % strArray
 MsgBox, % "the secondParam is: " . secondParam
 }
 
-func void testFloatArray(arr float floatArray, str secondParam)
+func void testFloatArray(arr float floatArray, str secondParam) 
 {
 MsgBox, % floatArray
 MsgBox, % "the secondParam is: " . secondParam

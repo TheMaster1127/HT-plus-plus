@@ -16,7 +16,7 @@ MsgBox, % floatArray
 MsgBox, % "the secondParam is: " . secondParam
 }
 
-;
+; Simply label the main function since before we used other functions
 main:
 
 arr int intArray
