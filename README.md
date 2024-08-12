@@ -49,7 +49,10 @@ HT++ currently supports a subset of commands similar to AutoHotkey:
 - RunCMD and ExitApp
 - Comments
 - Sort
-- getDataFromAPI and getDataFromJSON 
+- getDataFromAPI and getDataFromJSON
+- FileCreateDir and FileRemoveDir
+- FileExist
+- isWindows
 - Math Functions
 - Build-in Functions
 - Build-in Variables
