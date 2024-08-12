@@ -292,9 +292,12 @@ Explore the various features offered by the HT++ programming language in this se
 17. [Comments](#htpp-comments)
 18. [Sort](#sort)
 19. [getDataFromAPI and getDataFromJSON](#getdatafromapi-and-getdatafromjson)
-20. [Math Functions](#math-functions)
-21. [Build-in Functions](#build-in-functions)
-22. [Build-in Variables](#build-in-variables)
+20. [FileCreateDir and FileRemoveDir](#filecreatedir-and-fileremovedir)
+21. [FileExist](#fileexist)
+22. [isWindows](#iswindows)
+23. [Math Functions](#math-functions)
+24. [Build-in Functions](#build-in-functions)
+25. [Build-in Variables](#build-in-variables)
 
 ---
 
@@ -439,7 +442,7 @@ MsgBox, % strArray
 MsgBox, % "the secondParam is: " . secondParam
 }
 
-func void testFloatArray(arr float floatArray, str secondParam) 
+func void testFloatArray(arr float floatArray, str secondParam)
 {
 MsgBox, % floatArray
 MsgBox, % "the secondParam is: " . secondParam
@@ -667,6 +670,7 @@ The `Sleep` function in HeavenToC++ (HT++) provides a simple yet effective way t
 [Go back](#features)
 
 The `MsgBox` function in HeavenToC++ (HT++) prints the text in the console. IT DOSE NOT MAKE A MSGBOX WINDOW EVEN IF THE NAME SUGGESTS IT.
+
 #### Syntax:
 
 ```ahk
@@ -680,6 +684,7 @@ MsgBox, Text
 #### Note:
 
 - The `MsgBox` function allows developers to prints the text in the console.
+
 #### Examples:
 
 ```ahk
@@ -2109,6 +2114,178 @@ You can open the API URL in your web browser, then copy the JSON response from t
 
 - The `getDataFromJSON` function enables navigation through nested JSON objects using a path-like syntax.
 - This function simplifies data extraction from complex JSON responses retrieved from APIs or other sources.
+
+---
+
+### FileCreateDir and FileRemoveDir <a id="filecreatedir-and-fileremovedir"></a>
+
+[Go back](#features)
+
+1. [FileCreateDir](#filecreatedir)
+2. [FileRemoveDir](#fileremovedir)
+
+---
+
+### FileCreateDir <a id="filecreatedir"></a>
+
+[Go back](#filecreatedir-and-fileremovedir)
+
+The `FileCreateDir` command creates a directory at the specified path if it does not already exist.
+
+#### Syntax:
+
+```ahk
+FileCreateDir, Path
+```
+
+#### Parameters:
+
+- `Path`: The path of the directory to create. Can be a relative or absolute path.
+
+#### Example Usage:
+
+```ahk
+FileCreateDir, myDir
+FileCreateDir, myDir/hi
+```
+
+```ahk
+str dir1 := "myDir"
+str dir2 := "myDir/hi"
+FileCreateDir, %dir1%
+FileCreateDir, %dir2%
+```
+
+#### Notes:
+
+- If the directory already exists, no error is thrown and nothing is changed.
+
+---
+
+### FileRemoveDir <a id="fileremovedir"></a>
+
+[Go back](#filecreatedir-and-fileremovedir)
+
+The `FileRemoveDir` command removes the directory at the specified path if it exists. If the directory does not exist or cannot be removed, no action is taken.
+
+#### Syntax:
+
+```ahk
+FileRemoveDir, Path
+```
+
+#### Parameters:
+
+- `Path`: The path of the directory to remove. Can be a relative or absolute path.
+
+#### Example Usage:
+
+```ahk
+FileRemoveDir, myDir
+FileRemoveDir, myDir/hi
+```
+
+```ahk
+str dir1 := "myDir"
+str dir2 := "myDir/hi"
+FileRemoveDir, %dir1%
+FileRemoveDir, %dir2%
+```
+
+#### Notes:
+
+- If the directory does not exist, no error is thrown and nothing is changed.
+
+---
+
+### FileExist <a id="fileexist"></a>
+
+[Go back](#features)
+
+The `FileExist` command checks if a file or directory exists at the specified path.
+
+#### Syntax:
+
+```ahk
+Exist := FileExist(Path)
+```
+
+#### Parameters:
+
+- `Path`: The path of the file or directory to check. Can be a relative or absolute path.
+
+#### Returns:
+
+- `True` if the file or directory exists.
+- `False` if it does not exist.
+
+#### Example Usage:
+
+```ahk
+bool Exist := FileExist("myDir")
+if (Exist)
+{
+    ; Code to execute if 'myDir' exists.
+}
+```
+
+```ahk
+bool Exist := FileExist("myFile.txt")
+if (Exist)
+{
+    ; Code to execute if 'myFile.txt' exists.
+}
+```
+
+```ahk
+bool Exist := FileExist("myDir/myFile.txt")
+if (Exist)
+{
+    ; Code to execute if 'myDir/myFile.txt' exists.
+}
+```
+
+#### Notes:
+
+- Returns `False` if the path does not exist or if there is an error.
+
+---
+
+### isWindows <a id="iswindows"></a>
+
+[Go back](#features)
+
+The `isWindows` command determines if the current operating system is Windows.
+
+#### Syntax:
+
+```ahk
+Result := isWindows()
+```
+
+#### Returns:
+
+- `True` if the operating system is Windows.
+- `False` if the operating system is not Windows.
+
+#### Example Usage:
+
+```ahk
+if (isWindows())
+{
+    ; Code specific to Windows.
+    MsgBox, You are using Windows.
+}
+else
+{
+    ; Code for non-Windows operating systems.
+    MsgBox, You are not using Windows.
+}
+```
+
+#### Notes:
+
+- Placeholder for checking the OS type.
 
 ---
 

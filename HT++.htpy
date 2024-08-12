@@ -422,7 +422,7 @@ theIdNumOfThe34theVar%A_Index% .= Chr(34)
 haveWeEverUsedArrays := 0
 allVarsChars := ""
 allVarsInts := ""
-funcNames := "std::string|INT|STR|FLOAT|arrSplit|LoopParseFunc|InStr|Random|Sleep|input|print|FileRead|StrLower|FileAppend|FileDelete|StrLen|Asc|Abs|ACos|ASin|ATan|Ceil|Cos|Exp|Ln|Log|Round|Sin|Sqrt|Tan|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|StrSplit|Chr|Mod|Floor|getDataFromJSON|GetParams|BuildInVars|RegExReplace|RegExMatch|RunCMD|SetTimer|ExitApp|getDataFromAPI|SortLikeAHK"
+funcNames := "std::string|INT|STR|FLOAT|arrSplit|LoopParseFunc|InStr|Random|Sleep|input|print|FileRead|StrLower|FileAppend|FileDelete|StrLen|Asc|Abs|ACos|ASin|ATan|Ceil|Cos|Exp|Ln|Log|Round|Sin|Sqrt|Tan|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|StrSplit|Chr|Mod|Floor|getDataFromJSON|GetParams|BuildInVars|RegExReplace|RegExMatch|RunCMD|SetTimer|ExitApp|getDataFromAPI|SortLikeAHK|isWindows|FileCreateDir|FileRemoveDir|FileExist"
 
 ;"std::string|INT|STR|FLOAT|arrSplit|LoopParseFunc|InStr|Random|Sleep|input|print|FileRead|FileAppend|FileDelete|StrLen|Asc|Abs|ACos|ATan|Ceil|Cos|Exp|Ln|Log|Round|Sin|Sqrt|Tan|SubStr|Trim|StrReplace|StringTrimLeft|StringTrimRight|RegExReplace|StrSplit|Chr|Mod|Floor|getDataFromJSON|GetParams|BuildInVars|RegExReplace|RegExMatch|RunCMD|SetTimer|getDataFromAPI|SortLikeAHK"
 
@@ -699,6 +699,47 @@ fileDeleteCommand2path := StrReplace(fileDeleteCommand2path, "%", "")
 
 
 cppCode .= "FileDelete(" . fileDeleteCommand2path . ");`n"
+lineDone := 1
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 15) = "filecreatedir, ")
+{
+StringTrimLeft, FileCreateDirCommand, A_LoopField, 15
+
+FileCreateDirCommand2path := StrSplit(FileCreateDirCommand, ", ", 1)
+
+FileCreateDirCommand2path := StrReplace(FileCreateDirCommand2path, "\\", "\\\\")
+if (!(InStr(FileCreateDirCommand2path, "%")))
+{
+FileCreateDirCommand2path := Trim(transpileLowVariables(FileCreateDirCommand2path))
+}
+else
+{
+FileCreateDirCommand2path := StrReplace(FileCreateDirCommand2path, "%", "")
+}
+
+
+cppCode .= "FileCreateDir(" . FileCreateDirCommand2path . ");`n"
+lineDone := 1
+}
+else if (SubStr(Trim(StrLower(A_LoopField)), 1, 15) = "fileremovedir, ")
+{
+StringTrimLeft, FileRemoveDirCommand, A_LoopField, 15
+
+FileRemoveDirCommand2path := StrSplit(FileRemoveDirCommand, ", ", 1)
+
+FileRemoveDirCommand2path := StrReplace(FileRemoveDirCommand2path, "\\", "\\\\")
+if (!(InStr(FileRemoveDirCommand2path, "%")))
+{
+FileRemoveDirCommand2path := Trim(transpileLowVariables(FileRemoveDirCommand2path))
+}
+else
+{
+FileRemoveDirCommand2path := StrReplace(FileRemoveDirCommand2path, "%", "")
+}
+
+
+
+cppCode .= "FileRemoveDir(" . FileRemoveDirCommand2path . ");`n"
 lineDone := 1
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 1, 17) = StrLower("StringTrimRight, "))
@@ -2957,6 +2998,38 @@ if (InStr(cppCode, "getDataFromAPI(")) or (InStr(cppCode, "getDataFromAPI ("))
 uperCodeLibs .= "`n#include <string>`n#include <array>`n#include <memory>`n#include <stdexcept>`n#include <cstdio>`n"
 
 uperCode := uperCode . "`n// Function to run a system command`nstd::string getDataFromAPIRunCMD(const std::string& command) {`n    std::array<char, 128> buffer;`n    std::string result;`n#if defined(_WIN32)`n    std::unique_ptr<FILE, decltype(&_pclose)> pipe(_popen(command.c_str(), " . Chr(34) . "r" . Chr(34) . "), _pclose);`n#else`n    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command.c_str(), " . Chr(34) . "r" . Chr(34) . "), pclose);`n#endif`n    if (!pipe) {`n        throw std::runtime_error(" . Chr(34) . "popen() failed!" . Chr(34) . ");`n    }`n    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {`n        result += buffer.data();`n    }`n    return result;`n}`n`n`n// Function to fetch data from API`nstd::string getDataFromAPI(const std::string& url) {`n    std::string command = " . Chr(34) . "curl -s " . Chr(34) . " + url;`n    return getDataFromAPIRunCMD(command);`n}`n"
+}
+
+if (InStr(cppCode, "FileCreateDir(")) or (InStr(cppCode, "FileCreateDir ("))
+{
+
+uperCodeLibs .= "`n#include <filesystem>`n#include <system_error>`n"
+
+uperCode := uperCode . "`n// Creates a directory if it does not exist`nvoid FileCreateDir(const std::string& path) {`n    try {`n        // No need to handle existing directories; create_directory will not throw if it already exists`n        std::filesystem::create_directory(path);`n    } catch (const std::filesystem::filesystem_error&) {`n        // Handle errors silently; do nothing if the directory already exists or other errors occur`n    }`n}`n"
+}
+
+if (InStr(cppCode, "FileRemoveDir(")) or (InStr(cppCode, "FileRemoveDir ("))
+{
+
+uperCodeLibs .= "`n#include <filesystem>`n#include <system_error>`n"
+
+uperCode := uperCode . "`n// Removes a directory if it exists`nvoid FileRemoveDir(const std::string& path) {`n    try {`n        if (std::filesystem::exists(path) && std::filesystem::is_directory(path)) {`n            std::filesystem::remove_all(path);`n        }`n    } catch (const std::filesystem::filesystem_error&) {`n        // Handle errors silently; do nothing if the directory does not exist or other errors occur`n    }`n}`n"
+}
+
+if (InStr(cppCode, "FileExist(")) or (InStr(cppCode, "FileExist ("))
+{
+
+uperCodeLibs .= "`n#include <filesystem>`n#include <system_error>`n"
+
+uperCode := uperCode . "`n// Checks if a file or directory exists`nbool FileExist(const std::string& path) {`n    try {`n        return std::filesystem::exists(path);`n    } catch (const std::filesystem::filesystem_error&) {`n        // Handle errors silently; return false if an error occurs`n        return false;`n    }`n}`n"
+}
+
+if (InStr(cppCode, "isWindows(")) or (InStr(cppCode, "isWindows ("))
+{
+
+uperCodeLibs .= "`n#include <iostream>`n"
+
+uperCode := uperCode . "`n// Function to check if the operating system is Windows`nbool isWindows() {`n    #ifdef _WIN32`n        return true;`n    #else`n        return false;`n    #endif`n}`n"
 }
 
 if (InStr(cppCode, "SortLikeAHK(")) or (InStr(cppCode, "SortLikeAHK ("))
