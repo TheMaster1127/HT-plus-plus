@@ -1796,6 +1796,18 @@ MsgBox, % splitArray
 
 **Note:** If you don’t specify the type of the array, it defaults to `str`.
 
+#### **Example looping over each element**
+
+```ahk
+str var1 := "hello man whats up"
+arr str someArray := arrSplit(var1, " ")
+; In HT++ arrays are 1-indexed with the 0th index holding the number of elements
+Loop, % INT(someArray[0])
+{
+    MsgBox, % someArray[A_Index]
+}
+```
+
 #### **Example Function: Removing Repeating Words**
 
 ```ahk
