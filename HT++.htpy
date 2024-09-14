@@ -875,7 +875,7 @@ nameOfVarSplit := StrSplit(strVar, " ", 2)
 nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
 nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 
-cppCode .= "std::string " . nameOfVar1  . Chr(59) . "`n"
+cppCode .= "std::string " . nameOfVar1 . Chr(59) . "`n"
 }
 else
 {
@@ -884,7 +884,7 @@ nameOfVarSplit := StrSplit(strVar, " ", 2)
 nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
 nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 
-cppCode .= "std::string " . nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+cppCode .= "std::string " . nameOfVar1 . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
 }
 lineDone := 1
 
@@ -934,7 +934,7 @@ if (declareAvarNOvalue = 1)
 nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
 
 
-cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . Chr(59) . "`n"
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1 . Chr(59) . "`n"
 }
 else
 {
@@ -946,11 +946,11 @@ nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 
 if (varAssignmentType = "+=")
 {
-cppCode .= nameOfVar1  . ".add(" . nameOfVar222223 . ")" . Chr(59) . "`n"
+cppCode .= nameOfVar1 . ".add(" . nameOfVar222223 . ")" . Chr(59) . "`n"
 }
 else
 {
-cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1 . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
 }
 
 
@@ -1004,7 +1004,7 @@ if (declareAvarNOvalue = 1)
 nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
 
 
-cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . Chr(59) . "`n"
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1 . Chr(59) . "`n"
 }
 else
 {
@@ -1016,11 +1016,11 @@ nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 
 if (varAssignmentType = "+=")
 {
-cppCode .= nameOfVar1  . ".add(" . nameOfVar222223 . ")" . Chr(59) . "`n"
+cppCode .= nameOfVar1 . ".add(" . nameOfVar222223 . ")" . Chr(59) . "`n"
 }
 else
 {
-cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1 . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
 }
 
 
@@ -1074,7 +1074,7 @@ if (declareAvarNOvalue = 1)
 nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
 
 
-cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . Chr(59) . "`n"
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1 . Chr(59) . "`n"
 }
 else
 {
@@ -1086,11 +1086,11 @@ nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 
 if (varAssignmentType = "+=")
 {
-cppCode .= nameOfVar1  . ".add(" . nameOfVar222223 . ")" . Chr(59) . "`n"
+cppCode .= nameOfVar1 . ".add(" . nameOfVar222223 . ")" . Chr(59) . "`n"
 }
 else
 {
-cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1 . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
 }
 
 
@@ -1144,7 +1144,7 @@ if (declareAvarNOvalue = 1)
 nameOfVar1 := Trim(StrSplit(strVar, " ", 1))
 
 
-cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . Chr(59) . "`n"
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1 . Chr(59) . "`n"
 }
 else
 {
@@ -1156,11 +1156,11 @@ nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 
 if (varAssignmentType = "+=")
 {
-cppCode .= nameOfVar1  . ".add(" . nameOfVar222223 . ")" . Chr(59) . "`n"
+cppCode .= nameOfVar1 . ".add(" . nameOfVar222223 . ")" . Chr(59) . "`n"
 }
 else
 {
-cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+cppCode .= "OneIndexedArray<" . arrType . "> " . nameOfVar1 . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
 }
 
 
@@ -1949,7 +1949,7 @@ nameOfVarSplit := StrSplit(strVar, " ", 2)
 nameOfVar2 := Trim(StrSplit(strVar, str(nameOfVarSplit), 2))
 nameOfVar2 := varTranspiler(nameOfVar2, funcNames, allVarsChars, allVarsInts)
 
-cppCode .= nameOfVar1  . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
+cppCode .= nameOfVar1 . " " . varAssignmentType . " " . nameOfVar2 . Chr(59) . "`n"
 
 }
 else if (SubStr(Trim(StrLower(A_LoopField)), 0) = Chr(41)) && (lineDone = 0)
@@ -2564,7 +2564,7 @@ StringTrimRight, cppCode, cppCodeOutOneLastFixFixFIX, 1
 
 Loop, % theIdNumOfThe34
 {
-cppCode := StrReplace(cppCode, "ihuiuuhuuhtheidFor--asas-theuhturtyphoutr-" . Chr(65) . Chr(65) . str(A_Index) . Chr(65) . Chr(65), "std::string(" . theIdNumOfThe34theVar%A_Index% . ")")
+cppCode := StrReplace(cppCode, "ihuiuuhuuhtheidFor--asas-theuhturtyphoutr-" . Chr(65) . Chr(65) . str(A_Index) . Chr(65) . Chr(65), "" . theIdNumOfThe34theVar%A_Index% . "")
 }
 
 
@@ -2654,7 +2654,7 @@ if (InStr(cppCode, "InStr(")) or (InStr(cppCode, "InStr ("))
 
 uperCodeLibs .= "`n#include <string>`n"
 
-uperCode := uperCode . "`n// Function to check if needle exists in haystack (std::string overload)`nbool InStr(const std::string& haystack, const std::string& needle) {`n    return haystack.find(needle) != std::string::npos;`n}`n"
+uperCode := uperCode . "`n// Function to find the position of needle in haystack (std::string overload)`nint InStr(const std::string& haystack, const std::string& needle) {`n    size_t pos = haystack.find(needle);`n    return (pos != std::string::npos) ? static_cast<int>(pos) + 1 : 0;`n}`n"
 }
 
 if (InStr(cppCode, "Random(")) or (InStr(cppCode, "Random ("))
@@ -2937,9 +2937,9 @@ uperCode := uperCode . "`nstd::string trim(const std::string& str) {`n    auto s
 if (InStr(cppCode, "GetParams(")) or (InStr(cppCode, "GetParams ("))
 {
 
-uperCodeLibs .= "`n#include <string>`n#include <vector>`n#include <filesystem>`n"
+uperCodeLibs .= "`n#include <iostream>`n#include <vector>`n#include <string>`n#include <filesystem>`n"
 
-uperCode := uperCode . "`n// Function to get command-line parameters`nstd::string GetParams() {`n    std::vector<std::string> params;`n    for (int i = 1; i < __argc; ++i) {`n        std::string arg = __argv[i];`n        if (std::filesystem::exists(arg)) {`n            arg = std::filesystem::absolute(arg).string();`n        }`n        params.push_back(arg);`n    }`n    std::string result;`n    for (const auto& param : params) {`n        result += param + " . Chr(34) . "" . Chr(92) . "n" . Chr(34) . ";`n    }`n    return result;`n}`n"
+uperCode := uperCode . "`n// Platform-specific handling for command-line arguments`n#ifdef _WIN32`n    #define ARGC __argc`n    #define ARGV __argv`n#else`n    // On Linux/macOS, we need to declare these as extern variables.`n    extern char **environ; // Ensure the declaration of " . Chr(96) . "environ" . Chr(96) . "`n    int ARGC;`n    char** ARGV;`n`n    __attribute__((constructor)) void init_args(int argc, char* argv[], char* envp[]) {`n        ARGC = argc;`n        ARGV = argv;`n    }`n#endif`n`n// Function to get command-line parameters`nstd::string GetParams() {`n    std::vector<std::string> params;`n    for (int i = 1; i < ARGC; ++i) {`n        std::string arg = ARGV[i];`n        if (std::filesystem::exists(arg)) {`n            arg = std::filesystem::absolute(arg).string();`n        }`n        params.push_back(arg);`n    }`n    std::string result;`n    for (const auto& param : params) {`n        result += param + " . Chr(34) . "" . Chr(92) . "n" . Chr(34) . ";`n    }`n    return result;`n}`n"
 }
 
 if (InStr(cppCode, "BuildInVars(")) or (InStr(cppCode, "BuildInVars ("))
