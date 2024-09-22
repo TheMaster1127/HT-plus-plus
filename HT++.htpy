@@ -2719,7 +2719,7 @@ if (InStr(cppCode, "FileDelete(")) or (InStr(cppCode, "FileDelete ("))
 
 uperCodeLibs .= "`n#include <filesystem>`n#include <iostream>`n#include <string>`n"
 
-uperCode := uperCode . "`nbool FileDelete(const std::string& path) {`n    std::filesystem::path file_path(path);`n`n    // Check if the file exists`n    if (!std::filesystem::exists(file_path)) {`n        std::cerr << " . Chr(34) . "Error: File does not exist." . Chr(34) . " << std::endl;`n        return false;`n    }`n`n    // Attempt to remove the file`n    if (!std::filesystem::remove(file_path)) {`n        std::cerr << " . Chr(34) . "Error: Failed to delete the file." . Chr(34) . " << std::endl;`n        return false;`n    }`n`n    return true;`n}`n"
+uperCode := uperCode . "`nbool FileDelete(const std::string& path) {`n    std::filesystem::path file_path(path);`n`n    // Check if the file exists`n    if (!std::filesystem::exists(file_path)) {`n        return false;`n    }`n`n    // Attempt to remove the file`n    if (!std::filesystem::remove(file_path)) {`n        return false;`n    }`n`n    return true;`n}`n"
 }
 
 if (InStr(cppCode, "StrLen(")) or (InStr(cppCode, "StrLen ("))
@@ -2980,7 +2980,7 @@ if (InStr(cppCode, "ExitApp(")) or (InStr(cppCode, "ExitApp ("))
 
 uperCodeLibs .= "`n#include <iostream>`n#include <cstdlib>`n"
 
-uperCode := uperCode . "`nvoid ExitApp() {`n    std::cout << " . Chr(34) . "Exiting application..." . Chr(34) . " << std::endl;`n    std::exit(0);`n}`n"
+uperCode := uperCode . "`nvoid ExitApp() {`n    std::exit(0);`n}`n"
 }
 
 
