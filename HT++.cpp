@@ -233,13 +233,11 @@ bool FileDelete(const std::string& path) {
 
     // Check if the file exists
     if (!std::filesystem::exists(file_path)) {
-        std::cerr << "Error: File does not exist." << std::endl;
         return false;
     }
 
     // Attempt to remove the file
     if (!std::filesystem::remove(file_path)) {
-        std::cerr << "Error: Failed to delete the file." << std::endl;
         return false;
     }
 
@@ -647,11 +645,27 @@ std::string getDataFromJSON(const std::string& json_data, const std::string& jso
     return "Unsupported value type";
 }
 
+// Platform-specific handling for command-line arguments
+#ifdef _WIN32
+    #define ARGC __argc
+    #define ARGV __argv
+#else
+    // On Linux/macOS, we need to declare these as extern variables.
+    extern char **environ; // Ensure the declaration of `environ`
+    int ARGC;
+    char** ARGV;
+
+    __attribute__((constructor)) void init_args(int argc, char* argv[], char* envp[]) {
+        ARGC = argc;
+        ARGV = argv;
+    }
+#endif
+
 // Function to get command-line parameters
-std::string GetParams(int argc, char* argv[]) {
+std::string GetParams() {
     std::vector<std::string> params;
-    for (int i = 1; i < argc; ++i) {
-        std::string arg = argv[i];
+    for (int i = 1; i < ARGC; ++i) {
+        std::string arg = ARGV[i];
         if (std::filesystem::exists(arg)) {
             arg = std::filesystem::absolute(arg).string();
         }
@@ -760,7 +774,6 @@ int RegExMatch(const std::string& haystack, const std::string& needleRegEx, std:
 }
 
 void ExitApp() {
-    std::cout << "Exiting application..." << std::endl;
     std::exit(0);
 }
 
@@ -3043,7 +3056,7 @@ uperCode = uperCode + "\n// Define a map to store dynamic variables\n    std::un
 if (haveWeEverUsedArrays == 1) 
 {
 uperCodeLibs += "\n#include <vector>\n#include <string>\n#include <sstream>\n#include <stdexcept>\n";
-uperCode = uperCode + "\n// Forward declare OneIndexedArray template\ntemplate <typename T>\nclass OneIndexedArray;\n\n#define OneIndexedArray_DEFINED\n\n// Helper function to set the internal array's size as a string\ntemplate <typename T>\nvoid setInternalArraySize(T& element, size_t size) {\n    element = static_cast<T>(size);\n}\n\n// Specialization for std::string\ntemplate <>\nvoid setInternalArraySize<std::string>(std::string& element, size_t size) {\n    element = std::to_string(size);\n}\n\n// One-indexed dynamic array class\ntemplate <typename T>\nclass OneIndexedArray {\nprivate:\n    std::vector<T> internalArray;\n\npublic:\n    OneIndexedArray() {\n        internalArray.push_back(T{}); // Placeholder for element count\n    }\n\n    void add(const T& newElement) {\n        internalArray.push_back(newElement);\n        setInternalArraySize(internalArray[0], internalArray.size() - 1);\n    }\n\n    void setArray(const std::vector<T>& newArray) {\n        internalArray.resize(newArray.size() + 1);\n        std::copy(newArray.begin(), newArray.end(), internalArray.begin() + 1);\n        setInternalArraySize(internalArray[0], newArray.size());\n    }\n\n    T& operator[](size_t index) {\n        if (index >= internalArray.size()) {\n            internalArray.resize(index + 1);\n            setInternalArraySize(internalArray[0], internalArray.size() - 1);\n        }\n        return internalArray[index];\n    }\n\n    const T& operator[](size_t index) const {\n        if (index >= internalArray.size()) {\n            throw std::out_of_range(" + Chr ( 34 ) + "Index out of range" + Chr ( 34 ) + ");\n        }\n        return internalArray[index];\n    }\n\n    size_t size() const {\n        return static_cast<size_t>(internalArray.size() - 1);\n    }\n};\n\n// Function to split text into words based on a delimiter\nstd::vector<std::string> split(const std::string& text, const std::string& delimiter) {\n    std::vector<std::string> words;\n    std::istringstream stream(text);\n    std::string word;\n    while (std::getline(stream, word, delimiter[0])) { // assuming single character delimiter\n        words.push_back(word);\n    }\n    return words;\n}\n\n// Function to split text into a OneIndexedArray\nOneIndexedArray<std::string> arrSplit(const std::string& text, const std::string& delimiter) {\n    OneIndexedArray<std::string> array;\n    std::vector<std::string> words = split(text, delimiter);\n    array.setArray(words);\n    return array;\n}\n";
+uperCode = uperCode + "\n// Forward declare OneIndexedArray template\ntemplate <typename T>\nclass OneIndexedArray;\n\n#define OneIndexedArray_DEFINED\n\n// Helper function to set the internal array's size as a string\ntemplate <typename T>\nvoid setInternalArraySize(T& element, size_t size) {\n    element = static_cast<T>(size);\n}\n\n// Specialization for std::string\ntemplate <>\nvoid setInternalArraySize<std::string>(std::string& element, size_t size) {\n    element = std::to_string(size);\n}\n\n// One-indexed dynamic array class\ntemplate <typename T>\nclass OneIndexedArray {\nprivate:\n    std::vector<T> internalArray;\n\npublic:\n    OneIndexedArray() {\n        internalArray.push_back(T{}); // Placeholder for element count\n    }\n\n    void add(const T& newElement) {\n        internalArray.push_back(newElement);\n        setInternalArraySize(internalArray[0], internalArray.size() - 1);\n    }\n\n    void setArray(const std::vector<T>& newArray) {\n        internalArray.resize(newArray.size() + 1);\n        std::copy(newArray.begin(), newArray.end(), internalArray.begin() + 1);\n        setInternalArraySize(internalArray[0], newArray.size());\n    }\n\n    T& operator[](size_t index) {\n        if (index >= internalArray.size()) {\n            internalArray.resize(index + 1);\n            setInternalArraySize(internalArray[0], internalArray.size() - 1);\n        }\n        return internalArray[index];\n    }\n\n    const T& operator[](size_t index) const {\n        if (index >= internalArray.size()) {\n            throw std::out_of_range(" + Chr ( 34 ) + "Index out of range" + Chr ( 34 ) + ");\n        }\n        return internalArray[index];\n    }\n\n    size_t size() const {\n        return static_cast<size_t>(internalArray.size() - 1);\n    }\n    void pop_back() {\n        if (size() " + Chr ( 62 ) + " 0) {\n            internalArray.pop_back(); // Remove last element\n            setInternalArraySize(internalArray[0], internalArray.size() - 1); // Update size\n        }\n    }\n};\n\n// Function to split text into words based on a delimiter\nstd::vector<std::string> split(const std::string& text, const std::string& delimiter) {\n    std::vector<std::string> words;\n    std::istringstream stream(text);\n    std::string word;\n    while (std::getline(stream, word, delimiter[0])) { // assuming single character delimiter\n        words.push_back(word);\n    }\n    return words;\n}\n\n// Function to split text into a OneIndexedArray\nOneIndexedArray<std::string> arrSplit(const std::string& text, const std::string& delimiter) {\n    OneIndexedArray<std::string> array;\n    std::vector<std::string> words = split(text, delimiter);\n    array.setArray(words);\n    return array;\n}\n";
 }
 if (InStr (cppCode , "INT(") || InStr (cppCode , "INT (")) 
 {
@@ -3103,7 +3116,7 @@ uperCode = uperCode + "\nbool FileAppend(const std::string& content, const std::
 if (InStr (cppCode , "FileDelete(") || InStr (cppCode , "FileDelete (")) 
 {
 uperCodeLibs += "\n#include <filesystem>\n#include <iostream>\n#include <string>\n";
-uperCode = uperCode + "\nbool FileDelete(const std::string& path) {\n    std::filesystem::path file_path(path);\n\n    // Check if the file exists\n    if (!std::filesystem::exists(file_path)) {\n        std::cerr << " + Chr ( 34 ) + "Error: File does not exist." + Chr ( 34 ) + " << std::endl;\n        return false;\n    }\n\n    // Attempt to remove the file\n    if (!std::filesystem::remove(file_path)) {\n        std::cerr << " + Chr ( 34 ) + "Error: Failed to delete the file." + Chr ( 34 ) + " << std::endl;\n        return false;\n    }\n\n    return true;\n}\n";
+uperCode = uperCode + "\nbool FileDelete(const std::string& path) {\n    std::filesystem::path file_path(path);\n\n    // Check if the file exists\n    if (!std::filesystem::exists(file_path)) {\n        return false;\n    }\n\n    // Attempt to remove the file\n    if (!std::filesystem::remove(file_path)) {\n        return false;\n    }\n\n    return true;\n}\n";
 }
 if (InStr (cppCode , "StrLen(") || InStr (cppCode , "StrLen (")) 
 {
@@ -3238,7 +3251,7 @@ uperCode = uperCode + "\nstd::string trim(const std::string& str) {\n    auto st
 if (InStr (cppCode , "GetParams(") || InStr (cppCode , "GetParams (")) 
 {
 uperCodeLibs += "\n#include <iostream>\n#include <vector>\n#include <string>\n#include <filesystem>\n";
-uperCode = uperCode + "\n// Function to get command-line parameters\nstd::string GetParams(int argc, char* argv[]) {\n    std::vector<std::string> params;\n    for (int i = 1; i < argc; ++i) {\n        std::string arg = argv[i];\n        if (std::filesystem::exists(arg)) {\n            arg = std::filesystem::absolute(arg).string();\n        }\n        params.push_back(arg);\n    }\n    std::string result;\n    for (const auto& param : params) {\n        result += param + " + Chr ( 34 ) + "" + Chr ( 92 ) + "n" + Chr ( 34 ) + ";\n    }\n    return result;\n}\n";
+uperCode = uperCode + "\n// Platform-specific handling for command-line arguments\n#ifdef _WIN32\n    #define ARGC __argc\n    #define ARGV __argv\n#else\n    // On Linux/macOS, we need to declare these as extern variables.\n    extern char **environ; // Ensure the declaration of " + Chr ( 96 ) + "environ" + Chr ( 96 ) + "\n    int ARGC;\n    char** ARGV;\n\n    __attribute__((constructor)) void init_args(int argc, char* argv[], char* envp[]) {\n        ARGC = argc;\n        ARGV = argv;\n    }\n#endif\n\n// Function to get command-line parameters\nstd::string GetParams() {\n    std::vector<std::string> params;\n    for (int i = 1; i < ARGC; ++i) {\n        std::string arg = ARGV[i];\n        if (std::filesystem::exists(arg)) {\n            arg = std::filesystem::absolute(arg).string();\n        }\n        params.push_back(arg);\n    }\n    std::string result;\n    for (const auto& param : params) {\n        result += param + " + Chr ( 34 ) + "" + Chr ( 92 ) + "n" + Chr ( 34 ) + ";\n    }\n    return result;\n}\n";
 }
 if (InStr (cppCode , "BuildInVars(") || InStr (cppCode , "BuildInVars (")) 
 {
@@ -3263,7 +3276,7 @@ uperCode = uperCode + "\n// Function to perform regex matching and return the ma
 if (InStr (cppCode , "ExitApp(") || InStr (cppCode , "ExitApp (")) 
 {
 uperCodeLibs += "\n#include <iostream>\n#include <cstdlib>\n";
-uperCode = uperCode + "\nvoid ExitApp() {\n    std::cout << " + Chr ( 34 ) + "Exiting application..." + Chr ( 34 ) + " << std::endl;\n    std::exit(0);\n}\n";
+uperCode = uperCode + "\nvoid ExitApp() {\n    std::exit(0);\n}\n";
 }
 if (InStr (cppCode , "SetTimer(") || InStr (cppCode , "SetTimer (")) 
 {
